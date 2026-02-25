@@ -1,10 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import { useForm, Link } from '@inertiajs/react';
 
 export default function Scenarios({ scenarios = [] }) {
-    const [compareA, setCompareA] = useState(null);
-    const [compareB, setCompareB] = useState(null);
     const form = useForm({
         name: '',
         occupancy: '',
@@ -17,9 +14,6 @@ export default function Scenarios({ scenarios = [] }) {
         e.preventDefault();
         form.post(route('portal.scenarios.store'), { preserveScroll: true });
     };
-
-    const a = scenarios.find(s => s.id === compareA);
-    const b = scenarios.find(s => s.id === compareB);
 
     return (
         <AuthenticatedLayout>
@@ -41,24 +35,10 @@ export default function Scenarios({ scenarios = [] }) {
                         </section>
                         <section className="rounded-xl border border-slate-200 bg-white p-6">
                             <h2 className="text-lg font-semibold">Compare Scenarios</h2>
-                            <div className="mt-4 flex gap-4">
-                                <select value={compareA || ''} onChange={e => setCompareA(Number(e.target.value) || null)} className="rounded-md border-slate-300">
-                                    <option value="">Select A</option>
-                                    {scenarios.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                </select>
-                                <select value={compareB || ''} onChange={e => setCompareB(Number(e.target.value) || null)} className="rounded-md border-slate-300">
-                                    <option value="">Select B</option>
-                                    {scenarios.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                                </select>
-                            </div>
-                            {a && b && (
-                                <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-slate-500">Occupancy:</span> {a.occupancy}% vs {b.occupancy}%</div>
-                                    <div><span className="text-slate-500">Bed rate:</span> {a.bed_rate} vs {b.bed_rate}</div>
-                                    <div><span className="text-slate-500">OPEX cap:</span> {a.opex_cap} vs {b.opex_cap}</div>
-                                    <div><span className="text-slate-500">Land exit:</span> {a.land_exit_price} vs {b.land_exit_price}</div>
-                                </div>
-                            )}
+                            <p className="mt-1 text-sm text-slate-600">Compare two scenarios side by side.</p>
+                            <Link href={route('portal.scenarios.compare')} className="mt-4 inline-flex rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
+                                Open Compare Page
+                            </Link>
                         </section>
                     </div>
                     <div className="mt-8">
@@ -67,7 +47,12 @@ export default function Scenarios({ scenarios = [] }) {
                             {scenarios.map(s => (
                                 <div key={s.id} className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-4">
                                     <span>{s.name}</span>
-                                    <span className="text-sm text-slate-500">Occ: {s.occupancy}% | Bed: {s.bed_rate}</span>
+                                    <span className="text-sm text-slate-500">
+                                        {s.inputs?.occupancy != null && `Occ: ${s.inputs.occupancy}%`}
+                                        {s.inputs?.occupancy != null && s.inputs?.bed_rate != null && ' | '}
+                                        {s.inputs?.bed_rate != null && `Bed: ${s.inputs.bed_rate}`}
+                                        {!s.inputs?.occupancy && !s.inputs?.bed_rate && '—'}
+                                    </span>
                                 </div>
                             ))}
                             {scenarios.length === 0 && <p className="text-slate-500">No scenarios yet.</p>}

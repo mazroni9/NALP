@@ -1,7 +1,7 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 import { Link } from '@inertiajs/react';
 
-export default function ZonesOverview() {
+export default function AssetZonesOverview() {
     return (
         <PublicLayout title="Asset Zones - NALP">
             <div className="mx-auto max-w-7xl px-4 py-12">

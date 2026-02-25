@@ -20,7 +20,7 @@ export default function PublicLayout({ children, title = 'NALP' }) {
                                 <Link href="/contact" className="text-slate-600 hover:text-indigo-600">Contact</Link>
                                 {auth?.user ? (
                                     <>
-                                        <Link href="/portal" className="rounded-md bg-indigo-100 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200">Portal</Link>
+                                        <Link href={route('portal.dashboard')} className="rounded-md bg-indigo-100 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200">Portal</Link>
                                         <Link href="/studio" className="rounded-md bg-amber-100 px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-200">Design Studio</Link>
                                         <form method="POST" action={route('logout')} className="inline">
                                             <input type="hidden" name="_token" value={csrf_token} />

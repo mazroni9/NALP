@@ -1,6 +1,5 @@
-# Fly.io configuration for NALP
-# Deploy: fly deploy
-
+# Use apps/web/fly.toml for deploy. This file aligns with same app.
+# fly deploy . --config apps/web/fly.toml --app nalp-patient-frog-3104
 app = "nalp"
 
 [build]

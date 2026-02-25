@@ -21,5 +21,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Filament Admin panel - run: php artisan make:filament-panel admin
+        // Then register the panel provider in bootstrap/providers.php
     }
 }

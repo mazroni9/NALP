@@ -1,6 +1,6 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 
-export default function ZoneB() {
+export default function ZoneBAutoServices() {
     return (
         <PublicLayout title="Zone B - Auto Services">
             <div className="mx-auto max-w-4xl px-4 py-12">

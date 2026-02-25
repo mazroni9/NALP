@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Scenario extends Model
 {
     protected $fillable = [
-        'name', 'occupancy', 'bed_rate', 'opex_cap', 'land_exit_price', 'extra_params',
+        'name', 'inputs',
     ];
 
     protected $casts = [
-        'extra_params' => 'array',
+        'inputs' => 'array',
     ];
 
     public function user(): BelongsTo

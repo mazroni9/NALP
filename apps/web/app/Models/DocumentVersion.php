@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentVersion extends Model
 {
+    protected $fillable = ['document_id', 'version_number', 'file_path', 'file_name', 'file_size', 'mime_type'];
+
     public function document(): BelongsTo
     {
         return $this->belongsTo(Document::class);
@@ -15,6 +17,6 @@ class DocumentVersion extends Model
 
     public function getUrlAttribute(): string
     {
-        return Storage::disk('local')->url($this->file_path);
+        return Storage::disk('data-room')->url($this->file_path);
     }
 }

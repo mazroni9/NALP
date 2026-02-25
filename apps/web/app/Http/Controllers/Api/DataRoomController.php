@@ -33,11 +33,11 @@ class DataRoomController extends Controller
         }
 
         $path = $version->file_path;
-        if (! Storage::disk('local')->exists($path)) {
+        if (! Storage::disk('data-room')->exists($path)) {
             abort(404);
         }
 
-        return Storage::disk('local')->download(
+        return Storage::disk('data-room')->download(
             $path,
             $version->file_name
         );

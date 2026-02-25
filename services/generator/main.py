@@ -22,7 +22,7 @@ class LandInput(BaseModel):
     type: str = "rectangle"
     length: float | None = None
     width: float | None = None
-    points: list | None = None
+    points: list[list[float]] | None = None  # [[x,y], [x,y], ...] for polygon
 
 
 class GenerateRequest(BaseModel):
@@ -87,8 +87,7 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/api/generate")
-def generate(req: GenerateRequest):
+def _generate_response(req: GenerateRequest):
     run_id = req.run_id or str(uuid.uuid4())[:8]
     files = []
     glb_path = create_placeholder_glb(run_id)
@@ -96,9 +95,21 @@ def generate(req: GenerateRequest):
     for i in range(2):
         png_path = create_placeholder_png(run_id, i)
         files.append({"type": "png", "path": png_path})
+    pdf_summary = f"Concept summary for run {run_id}. Zone A: {req.zone_a_percent}%, Zone B: {req.zone_b_percent}%. Land type: {req.land.type}."
     return {
         "outputs": {
             "files": files,
             "run_id": run_id,
+            "pdf_summary": pdf_summary,
         },
     }
+
+
+@app.post("/api/generate")
+def generate(req: GenerateRequest):
+    return _generate_response(req)
+
+
+@app.post("/generate-concept")
+def generate_concept(req: GenerateRequest):
+    return _generate_response(req)

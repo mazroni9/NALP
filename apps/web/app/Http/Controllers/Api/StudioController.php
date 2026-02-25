@@ -23,6 +23,9 @@ class StudioController extends Controller
             'land.length' => 'nullable|numeric|min:1',
             'land.width' => 'nullable|numeric|min:1',
             'land.points' => 'nullable|array',
+            'land.points.*' => 'array',
+            'land.points.*.0' => 'numeric',
+            'land.points.*.1' => 'numeric',
             'zone_a_percent' => 'required|numeric|min:0|max:100',
             'zone_b_percent' => 'required|numeric|min:0|max:100',
         ]);

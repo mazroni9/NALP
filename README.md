@@ -1,148 +1,204 @@
 # NALP — Nabiyah Automotive & Logistics Park
 
-منصة ويب احترافية لمشروع Nabiyah Automotive & Logistics Park تجمع بين:
-- **موقع تسويقي** (Landing + Zones + Financials + Location + Contact)
-- **بوابة مستثمرين** (Data Room + Scenarios)
-- **Design Studio** (تصميم الأرض والمباني وعرض 3D)
-- **طبقة توليد 3D بالذكاء** (Generator service stub جاهز للتوسعة)
+Professional web platform combining:
+- **Public marketing site** (Landing, Asset Zones, Financials, Location, Contact)
+- **Investor portal** (Data Room, Scenarios compare)
+- **Design Studio** (land/building design, 3D preview)
+- **AI 3D generation** (Python generator stub ready for Blender integration)
 
-## البنية
+## Folder structure
 
 ```
 NALP/
-├── apps/web/              # Laravel + Inertia + React
-├── services/generator/    # Python FastAPI — توليد Concept (Stub)
-├── infra/                 # Docker Compose + Dockerfiles
-├── docs/                  # مستندات المشروع
+├── apps/
+│   └── web/                    # Laravel 12 + Inertia + React + Breeze
+│       ├── app/
+│       │   ├── Http/Controllers/
+│       │   ├── Jobs/
+│       │   ├── Models/
+│       │   └── Services/
+│       ├── database/migrations/
+│       ├── resources/js/Pages/
+│       └── routes/
+├── services/
+│   └── generator/               # Python FastAPI — design concept generator
+├── infra/                      # Docker Compose, Dockerfiles
+├── docs/
+│   └── DESIGN-DECISIONS.md
+├── Dockerfile                  # Root: build frontend + Laravel, port 8080
 └── README.md
 ```
 
-## التشغيل عبر Docker (موصى به)
+## Docker (recommended)
 
 ```bash
-# من جذر المشروع
+# From repo root
 cd infra
 docker compose up -d
 
-# تشغيل migrations و seed
+# Migrations and seed
 docker compose exec web php artisan migrate
 docker compose exec web php artisan db:seed
 docker compose exec web php artisan storage:link
 
-# إنشاء مستخدم admin
-docker compose exec web php artisan make:filament-user
-# أو يدوياً: أنشئ user ثم أضفه إلى role admin
+# Queue worker (processes design generation jobs)
+docker compose exec -d worker php artisan queue:work redis --tries=3 --timeout=300
 ```
 
-الخدمات:
-- **Web**: http://localhost:8000
+**Services:**
+- **Web**: http://localhost:8080
 - **Generator**: http://localhost:8001
 - **PostgreSQL**: localhost:5432
 - **Redis**: localhost:6379
 
-## التشغيل المحلي (بدون Docker)
+## Local development (without Docker)
 
-### المتطلبات
-- PHP 8.3+
+### Requirements
+
+- PHP 8.3+ (pdo, pdo_pgsql, pdo_sqlite, bcmath, zip, intl, redis)
 - Composer
 - Node.js 18+
-- PostgreSQL
-- Redis
+- PostgreSQL (or SQLite for quick testing)
+- Redis (or use `sync`/`database` for QUEUE_CONNECTION)
 
-### خطوات التشغيل
+### Setup
 
 ```bash
 cd apps/web
 
-# 1. التبعيات
 composer install
 npm install --legacy-peer-deps
 
-# 2. الإعداد
 cp .env.example .env
 php artisan key:generate
 
-# 3. قاعدة البيانات (عدّل .env لـ PostgreSQL)
+# Configure .env: DB_*, REDIS_*, GENERATOR_SERVICE_URL
 php artisan migrate
 php artisan db:seed
-
-# 4. Storage link
 php artisan storage:link
 
-# 5. تشغيل الخدمات (في نوافذ منفصلة)
+# Run (separate terminals)
 php artisan serve
 php artisan queue:work redis
 npm run dev
-
-# 6. Generator (في نافذة منفصلة)
-cd ../../services/generator
-pip install -r requirements.txt
-export GENERATOR_OUTPUT_DIR=../apps/web/storage/app/public/design-outputs
-uvicorn main:app --reload --port 8000
 ```
 
-## الصفحات والمسارات
-
-| المسار | الوصف |
-|--------|-------|
-| `/` | الصفحة الرئيسية |
-| `/asset/zones` | نظرة عامة على المناطق |
-| `/asset/zone-a` | Zone A: Workforce Housing |
-| `/asset/zone-b` | Zone B: Auto Services |
-| `/financials` | عرض مالي مبسط |
-| `/location` | الموقع |
-| `/contact` | نموذج تواصل + NDA + طلب Data Room |
-| `/portal` | Dashboard المستثمر |
-| `/portal/data-room` | Data Room |
-| `/portal/scenarios` | سيناريوهات افتراضات |
-| `/studio` | Design Studio |
-| `/admin` | Filament Admin |
-
-## API Endpoints
-
-| Method | Endpoint | الوصف |
-|--------|----------|-------|
-| POST | `/api/studio/generate` | إنشاء Design Run |
-| GET | `/api/studio/runs` | قائمة runs |
-| GET | `/api/studio/runs/{id}` | تفاصيل run |
-| GET | `/api/data-room/documents` | قائمة مستندات |
-| GET | `/api/data-room/documents/{id}/download` | تحميل |
-
-## أوامر مفيدة
+### Generator without Docker
 
 ```bash
-# Migrate
-php artisan migrate
-
-# Seed
-php artisan db:seed
-
-# Queue worker
-php artisan queue:work redis
-
-# Filament admin user
-php artisan make:filament-user
-
-# Lint
-./vendor/bin/pint
-
-# Tests
-php artisan test
+cd services/generator
+pip install -r requirements.txt
+# Output dir: Laravel storage or temp
+export GENERATOR_OUTPUT_DIR=/tmp/nalp-design-outputs
+uvicorn main:app --reload --port 8001
 ```
 
-## التنبيه القانوني
+Then set in Laravel `.env`:
 
-جميع مخرجات الذكاء الاصطناعي في Design Studio هي **Concept / Schematic Draft – Not for Construction** وتحتاج اعتماد مهندس مرخّص قبل أي تنفيذ.
+```
+GENERATOR_SERVICE_URL=http://localhost:8001
+```
 
-## Filament Admin
+Note: Design outputs use `design-outputs` volume in Docker. For local, configure the generator output dir to point to `storage/app/public/design-outputs` or similar, and ensure Laravel can serve those files.
 
-- لوحة الإدارة: `/admin`
-- إنشاء مستخدم Admin: `php artisan make:filament-user`
-- لإظهار لوحة الإدارة للمستخدم، أضفه إلى role `admin` (شغّل `php artisan db:seed` لإنشاء الأدوار)
+## Routes
 
-## نقاط مفتوحة للقرار
+| Path | Description |
+|------|-------------|
+| `/` | Home |
+| `/asset/zones` | Asset zones overview |
+| `/asset/zone-a` | Zone A: Workforce Housing |
+| `/asset/zone-b` | Zone B: Auto Services |
+| `/financials` | Financial overview |
+| `/location` | Location |
+| `/contact` | Unified contact form (contact / NDA / data room) |
+| `/portal/dashboard` | Investor dashboard |
+| `/portal/data-room` | Data Room |
+| `/portal/scenarios` | Scenarios |
+| `/portal/scenarios/compare` | Compare two scenarios |
+| `/studio` | Design Studio (auth required) |
+| `/admin/data-room` | Admin: upload Data Room documents |
 
-1. **PenguinUI**: الصفحات العامة تستخدم Tailwind مباشرة؛ لتفعيل PenguinUI الكامل يمكن إضافة Alpine.js للعناصر التفاعلية.
-2. **Generator**: الـ Stub الحالي يكتب ملفات placeholder؛ التكامل مع Blender جاهز في البنية.
-3. **Filament**: يستخدم v4 (متوافق مع Laravel 12). موارد CRUD إضافية يمكن إنشاؤها بـ `php artisan make:filament-resource Users --generate`.
-4. **PHP**: للتشغيل المحلي بدون Docker، تحتاج `pdo_sqlite` أو `pdo_pgsql` حسب إعدادك.
+## API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/studio/generate` | Create design run |
+| GET | `/api/studio/runs` | List runs |
+| GET | `/api/studio/runs/{id}` | Run details |
+| GET | `/api/data-room/documents` | List documents |
+| GET | `/api/data-room/documents/{id}/download` | Download |
+
+## Default admin user
+
+After `php artisan db:seed`:
+- **Email**: admin@nalp.local
+- **Password**: password
+
+Use this to access `/admin/data-room` (Data Room upload).
+
+## Commands
+
+```bash
+php artisan migrate
+php artisan db:seed
+php artisan queue:work redis
+php artisan storage:link
+php artisan test
+./vendor/bin/pint
+```
+
+## CI/CD Pipeline
+
+التدفق التلقائي: **GitHub → Actions (Tests) → Fly.io (Deploy)**
+
+| الحدث | الإجراء |
+|-------|---------|
+| `push` إلى `main` | تشغيل الاختبارات → عند النجاح، نشر تلقائي على Fly.io |
+| `pull_request` إلى `main` | تشغيل الاختبارات فقط (بدون نشر) |
+| `push` / `pull_request` إلى `develop` | تشغيل الاختبارات (workflow `ci.yml`) |
+
+### الملفات
+
+- **`.github/workflows/cd.yml`** — اختبارات + نشر على `main`
+- **`apps/web/fly.toml`** — إعداد Fly.io (Dockerfile من الجذر على port 8080)
+- **`Dockerfile`** (جذر الريبو) — بناء Laravel من `apps/web`
+
+### Secret المطلوب في GitHub
+
+1. المستودع → **Settings** → **Secrets and variables** → **Actions**
+2. **New repository secret**: `FLY_API_TOKEN`
+3. الحصول على الـ token: `fly tokens create org` (محلياً بعد تثبيت Fly CLI)
+
+### خطوة واحدة يدوية (أول مرة فقط)
+
+قبل أول `push` إلى `main`، أنشئ تطبيق Fly وضبط الـ secrets يدوياً:
+
+```powershell
+cd apps/web
+fly launch --name nalp --copy-config --no-deploy
+fly secrets set APP_KEY="base64:xxxx..." --app nalp
+```
+
+بعد ذلك، أي `push` ناجح إلى `main` ينشر تلقائياً.
+
+---
+
+## Fly.io deployment (يدوي)
+
+```bash
+cd apps/web
+fly launch    # أول مرة: اختر Region
+fly secrets set APP_KEY="base64:xxxx"   # من .env المحلي
+fly deploy
+```
+
+See [docs/FLY-DEPLOY.md](docs/FLY-DEPLOY.md) and [FLY_SETUP_STEPS.md](FLY_SETUP_STEPS.md). MVP uses SQLite; add Fly Postgres/Redis when needed.
+
+## Legal
+
+All AI-generated outputs in Design Studio are **conceptual drafts – not for construction**. Final engineering requires licensed professional approval.
+
+## Documentation
+
+See [docs/DESIGN-DECISIONS.md](docs/DESIGN-DECISIONS.md) for TODOs and architecture notes.

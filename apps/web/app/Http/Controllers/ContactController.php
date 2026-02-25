@@ -17,56 +17,38 @@ class ContactController extends Controller
 
     public function submit(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
-            'company' => 'nullable|string|max:255',
             'message' => 'nullable|string',
+            'request_nda' => 'boolean',
+            'request_type' => 'required|in:contact,nda,data_room',
         ]);
 
+        if (in_array($validated['request_type'], ['nda']) || ! empty($validated['request_nda'])) {
+            NdaRequest::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'company' => $request->input('company'),
+                'phone' => $request->input('phone'),
+                'purpose' => $validated['message'] ?? '',
+            ]);
+            return back()->with('success', 'NDA request submitted.');
+        }
+
+        $type = $validated['request_type'] === 'data_room' ? 'data_room_access' : 'contact';
         InvestorInquiry::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'company' => $request->company,
-            'message' => $request->message,
-            'type' => 'contact',
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'company' => $request->input('company'),
+            'message' => $validated['message'] ?? '',
+            'request_nda' => ! empty($validated['request_nda']),
+            'request_type' => $type,
         ]);
 
-        return back()->with('success', 'Message sent successfully.');
-    }
-
-    public function nda(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'company' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'purpose' => 'nullable|string',
-        ]);
-
-        NdaRequest::create($request->only(['name', 'email', 'company', 'phone', 'purpose']));
-
-        return back()->with('success', 'NDA request submitted.');
-    }
-
-    public function dataRoom(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'company' => 'nullable|string|max:255',
-            'message' => 'nullable|string',
-        ]);
-
-        InvestorInquiry::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'company' => $request->company,
-            'message' => $request->message,
-            'type' => 'data_room_access',
-        ]);
-
-        return back()->with('success', 'Data room access request submitted.');
+        return match ($type) {
+            'data_room_access' => back()->with('success', 'Data room access request submitted.'),
+            default => back()->with('success', 'Message sent successfully.'),
+        };
     }
 }

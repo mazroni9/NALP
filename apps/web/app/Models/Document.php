@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Document extends Model
 {
+    protected $fillable = ['name', 'description', 'category_id'];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(DataRoomCategory::class, 'category_id');

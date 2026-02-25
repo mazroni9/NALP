@@ -1,10 +1,10 @@
 services:
   web:
     build:
-      context: ../apps/web
+      context: ..
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8080:8080"
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -31,7 +31,7 @@ services:
 
   worker:
     build:
-      context: ../apps/web
+      context: ..
       dockerfile: Dockerfile
     command: php artisan queue:work redis --tries=3 --timeout=300
     environment:
@@ -60,7 +60,7 @@ services:
   generator:
     build:
       context: ../services/generator
-      dockerfile: Dockerfile.generator
+      dockerfile: Dockerfile
     ports:
       - "8001:8000"
     environment:

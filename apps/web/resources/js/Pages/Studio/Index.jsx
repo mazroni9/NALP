@@ -7,6 +7,26 @@ import axios from 'axios';
 const TARGET_AREA = 33000;
 const LEGAL_BANNER = 'All AI-generated outputs are conceptual drafts and are not for construction. Final engineering drawings require licensed professional approval.';
 
+function polygonArea(points) {
+    if (!points || points.length < 3) return 0;
+    let sum = 0;
+    for (let i = 0; i < points.length; i++) {
+        const j = (i + 1) % points.length;
+        sum += points[i][0] * points[j][1] - points[j][0] * points[i][1];
+    }
+    return Math.abs(sum) / 2;
+}
+
+function polygonPerimeter(points) {
+    if (!points || points.length < 2) return 0;
+    let p = 0;
+    for (let i = 0; i < points.length; i++) {
+        const j = (i + 1) % points.length;
+        p += Math.hypot(points[j][0] - points[i][0], points[j][1] - points[i][1]);
+    }
+    return p;
+}
+
 function Model({ url }) {
     const { scene } = useGLTF(url);
     return <primitive object={scene} />;
@@ -21,10 +41,13 @@ function PlaceholderModel() {
     );
 }
 
+const DEFAULT_POINTS = [[0, 0], [200, 0], [200, 165], [0, 165]];
+
 export default function StudioIndex() {
     const [landType, setLandType] = useState('rectangle');
     const [length, setLength] = useState(200);
     const [width, setWidth] = useState(165);
+    const [pointsStr, setPointsStr] = useState(DEFAULT_POINTS.map(([x, y]) => `${x},${y}`).join('; '));
     const [zoneAPercent, setZoneAPercent] = useState(50);
     const [zoneBPercent, setZoneBPercent] = useState(50);
     const [runs, setRuns] = useState([]);
@@ -32,8 +55,17 @@ export default function StudioIndex() {
     const [generating, setGenerating] = useState(false);
     const [glbUrl, setGlbUrl] = useState(null);
 
-    const area = landType === 'rectangle' ? length * width : 0;
-    const perimeter = landType === 'rectangle' ? 2 * (length + width) : 0;
+    const parsePoints = () => {
+        try {
+            const nums = pointsStr.split(/[;,\s]+/).filter(Boolean).map(Number);
+            const out = [];
+            for (let i = 0; i + 1 < nums.length; i += 2) out.push([nums[i], nums[i + 1]]);
+            return out;
+        } catch { return []; }
+    };
+    const points = landType === 'polygon' ? parsePoints() : null;
+    const area = landType === 'rectangle' ? length * width : (points && points.length >= 3 ? polygonArea(points) : 0);
+    const perimeter = landType === 'rectangle' ? 2 * (length + width) : (points && points.length >= 2 ? polygonPerimeter(points) : 0);
     const zoneAArea = area * (zoneAPercent / 100);
     const zoneBArea = area * (zoneBPercent / 100);
     const areaDiff = Math.abs(area - TARGET_AREA);
@@ -71,17 +103,21 @@ export default function StudioIndex() {
         return () => clearInterval(id);
     }, [selectedRun?.id, selectedRun?.status]);
 
+    const canGenerate = landType === 'rectangle' || (points && points.length >= 3);
+
     const handleGenerate = () => {
         setGenerating(true);
-        axios.post('/api/studio/generate', {
+        const payload = {
             land: {
                 type: landType,
                 length: landType === 'rectangle' ? length : null,
                 width: landType === 'rectangle' ? width : null,
+                points: landType === 'polygon' && points?.length >= 3 ? points : null,
             },
             zone_a_percent: zoneAPercent,
             zone_b_percent: zoneBPercent,
-        }, { withCredentials: true })
+        };
+        axios.post('/api/studio/generate', payload, { withCredentials: true })
             .then(res => {
                 const run = res.data.run;
                 setRuns(r => [run, ...r]);
@@ -113,7 +149,7 @@ export default function StudioIndex() {
                                     <label className="block text-sm">Type</label>
                                     <select value={landType} onChange={e => setLandType(e.target.value)} className="mt-1 w-full rounded border-slate-300">
                                         <option value="rectangle">Rectangle</option>
-                                        <option value="polygon">Polygon (coming soon)</option>
+                                        <option value="polygon">Polygon</option>
                                     </select>
                                 </div>
                                 {landType === 'rectangle' && (
@@ -128,10 +164,17 @@ export default function StudioIndex() {
                                         </div>
                                     </>
                                 )}
+                                {landType === 'polygon' && (
+                                    <div>
+                                        <label className="block text-sm">Points (x,y pairs, semicolon separated)</label>
+                                        <textarea value={pointsStr} onChange={e => setPointsStr(e.target.value)} rows={3} placeholder="0,0; 200,0; 200,165; 0,165" className="mt-1 w-full rounded border-slate-300 font-mono text-sm" />
+                                        <p className="mt-1 text-xs text-slate-500">Format: x1,y1; x2,y2; x3,y3; ... (min 3 points)</p>
+                                    </div>
+                                )}
                                 <div>
                                     <p className="text-sm text-slate-600">Area: {area.toLocaleString()} m²</p>
                                     <p className="text-sm text-slate-600">Perimeter: {perimeter.toLocaleString()} m</p>
-                                    {areaWarning && <p className="mt-1 text-sm text-amber-600">⚠ Far from target 33,000 m²</p>}
+                                    {area > 0 && areaWarning && <p className="mt-1 text-sm font-medium text-amber-600">⚠ Far from target 33,000 m²</p>}
                                 </div>
                             </div>
                         </section>
@@ -150,7 +193,7 @@ export default function StudioIndex() {
                                 </div>
                             </div>
                         </section>
-                        <button onClick={handleGenerate} disabled={generating || landType !== 'rectangle'} className="w-full rounded-md bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+                        <button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full rounded-md bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
                             {generating ? 'Generating...' : 'Generate Concept'}
                         </button>
                         <section className="rounded-xl border border-slate-200 bg-white p-4">

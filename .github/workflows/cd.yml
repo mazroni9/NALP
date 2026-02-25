@@ -1,14 +1,15 @@
-name: CI
+# CI/CD: Tests + Deploy to Fly.io on push to main
+name: CI/CD
 
-# CI for develop branch. main uses cd.yml (test + deploy).
 on:
   push:
-    branches: [develop]
+    branches: [main]
   pull_request:
-    branches: [develop]
+    branches: [main]
 
 jobs:
-  laravel:
+  test:
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,3 +46,19 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+  deploy:
+    name: Deploy to Fly.io
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Fly.io
+        uses: superfly/flyctl-actions@1.5
+        with:
+          args: "deploy . --config apps/web/fly.toml --app nalp"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

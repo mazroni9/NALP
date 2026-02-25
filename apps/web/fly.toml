@@ -1,0 +1,35 @@
+# fly.toml app configuration file generated for nalp-patient-frog-3104 on 2026-02-26T00:36:25+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'nalp'
+primary_region = 'cdg'
+
+[build]
+  dockerfile = '../../Dockerfile'
+
+[deploy]
+  release_command = 'php artisan migrate --force && php artisan db:seed --force || true'
+
+[env]
+  APP_DEBUG = 'false'
+  APP_ENV = 'production'
+  CACHE_STORE = 'database'
+  DB_CONNECTION = 'sqlite'
+  QUEUE_CONNECTION = 'sync'
+  SESSION_DRIVER = 'database'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'
+  cpus = 1
+  memory_mb = 512

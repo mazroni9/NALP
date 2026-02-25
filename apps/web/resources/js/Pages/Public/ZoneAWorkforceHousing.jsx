@@ -1,6 +1,6 @@
 import PublicLayout from '@/Layouts/PublicLayout';
 
-export default function ZoneA() {
+export default function ZoneAWorkforceHousing() {
     return (
         <PublicLayout title="Zone A - Workforce Housing">
             <div className="mx-auto max-w-4xl px-4 py-12">

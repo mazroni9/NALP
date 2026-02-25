@@ -15,7 +15,7 @@ class DesignGeneratorClient
 
     public function generate(array $inputs): array
     {
-        $response = Http::timeout(300)->post("{$this->baseUrl}/api/generate", $inputs);
+        $response = Http::timeout(300)->post("{$this->baseUrl}/generate-concept", $inputs);
 
         if (! $response->successful()) {
             throw new \RuntimeException(
@@ -23,7 +23,7 @@ class DesignGeneratorClient
             );
         }
 
-        return $response->json('outputs', []);
+        return $response->json('outputs', $response->json());
     }
 
     public function health(): bool

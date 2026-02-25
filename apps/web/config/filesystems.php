@@ -47,6 +47,15 @@ return [
             'report' => false,
         ],
 
+        // Data Room documents (Admin uploads). S3 can be enabled later via env.
+        'data-room' => [
+            'driver' => 'local',
+            'root' => storage_path('app/data-room'),
+            'visibility' => 'private',
+            'throw' => false,
+        ],
+
+        // S3 can be enabled for production file storage. Configure AWS_* env vars.
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

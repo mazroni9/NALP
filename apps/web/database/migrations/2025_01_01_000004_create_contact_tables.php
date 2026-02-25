@@ -14,7 +14,8 @@ return new class extends Migration
             $table->string('email');
             $table->string('company')->nullable();
             $table->text('message')->nullable();
-            $table->string('type')->default('contact'); // contact, data_room_access
+            $table->boolean('request_nda')->default(false);
+            $table->string('request_type')->default('contact'); // contact, nda, data_room_access
             $table->string('status')->default('new');
             $table->timestamps();
         });
@@ -34,11 +35,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->decimal('occupancy', 8, 4)->nullable();
-            $table->decimal('bed_rate', 12, 2)->nullable();
-            $table->decimal('opex_cap', 12, 2)->nullable();
-            $table->decimal('land_exit_price', 18, 2)->nullable();
-            $table->json('extra_params')->nullable();
+            $table->json('inputs')->nullable(); // occupancy, bed_rate, opex_cap, exit_price, etc.
             $table->timestamps();
         });
     }

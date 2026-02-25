@@ -41,8 +41,23 @@ class PortalController extends Controller
             'land_exit_price' => 'nullable|numeric',
         ]);
 
-        $request->user()->scenarios()->create($validated);
+        $name = $validated['name'];
+        $inputs = collect($validated)->except('name')->filter()->all();
+
+        $request->user()->scenarios()->create([
+            'name' => $name,
+            'inputs' => $inputs,
+        ]);
 
         return redirect()->route('portal.scenarios')->with('success', 'Scenario saved.');
+    }
+
+    public function compareScenarios(Request $request)
+    {
+        $scenarios = $request->user()->scenarios()->orderByDesc('created_at')->get();
+
+        return Inertia::render('Portal/CompareScenarios', [
+            'scenarios' => $scenarios,
+        ]);
     }
 }

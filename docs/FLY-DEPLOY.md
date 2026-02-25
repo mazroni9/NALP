@@ -1,25 +1,59 @@
 # نشر NALP على Fly.io
 
-## بعد الدفع إلى GitHub
+## التحضير
 
-إذا كان تطبيق `nalp` مربوطًا بالريبو على Fly.io، ستبدأ عملية النشر تلقائياً.
+1. **تثبيت Fly CLI**
+   ```powershell
+   iwr https://fly.io/install.ps1 -useb | iex
+   ```
 
-## المتغيرات المطلوبة (Secrets)
+2. **تسجيل الدخول**
+   ```powershell
+   fly auth login
+   ```
 
-شغّل محلياً من جذر المشروع:
+## خطوات النشر
 
-```bash
-cd apps/web
-fly secrets set APP_KEY=$(php artisan key:generate --show)
-fly secrets set APP_URL=https://nalp.fly.dev
+### 1. الدخول لمجلد Laravel
+```powershell
+cd NALP/apps/web
 ```
 
-## إعادة النشر يدوياً
+### 2. إطلاق التطبيق (أول مرة فقط)
+```powershell
+fly launch
+```
+- اختر Region قريب (مثلاً دبي أو فرانكفورت)
+- **Use existing Dockerfile?** → نعم
+- سيُنشئ Fly تطبيقاً وملف `fly.toml` في `apps/web`
 
-```bash
+### 3. إعداد الأسرار
+```powershell
+# من .env المحلي انسخ APP_KEY ثم:
+fly secrets set APP_KEY="base64:xxxx..."
+
+# اختياري - رابط التطبيق بعد النشر:
+fly secrets set APP_URL="https://nalp.fly.dev"
+```
+
+### 4. النشر
+```powershell
 fly deploy
 ```
 
-## رابط التطبيق
+### 5. مراقبة السجلات
+```powershell
+fly logs
+```
 
-بعد نجاح النشر: **https://nalp.fly.dev**
+## إعدادات fly.toml (apps/web)
+
+- `internal_port = 8080` يطابق Dockerfile
+- `release_command` يشغّل migrations
+- MVP يستخدم SQLite (قاعدة ملف داخل الحاوية)
+
+## ملاحظات
+
+- **infra/docker-compose** للبيئة المحلية فقط، Fly لا يستخدمه
+- لربط Fly Postgres و Redis لاحقاً: أنشئهم من Fly وراجع `fly postgres create` و `fly redis create`
+- خطأ "No application encryption key": راجع أن `fly secrets set APP_KEY` تم تنفيذه
