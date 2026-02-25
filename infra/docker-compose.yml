@@ -1,0 +1,99 @@
+services:
+  web:
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=nalp
+      - DB_USERNAME=nalp
+      - DB_PASSWORD=nalp_secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - CACHE_STORE=redis
+      - SESSION_DRIVER=redis
+      - GENERATOR_SERVICE_URL=http://generator:8000
+    volumes:
+      - ../apps/web:/var/www/html
+      - design-outputs:/var/www/html/storage/app/public/design-outputs
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - nalp
+
+  worker:
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+    command: php artisan queue:work redis --tries=3 --timeout=300
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=nalp
+      - DB_USERNAME=nalp
+      - DB_PASSWORD=nalp_secret
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - GENERATOR_SERVICE_URL=http://generator:8000
+    volumes:
+      - ../apps/web:/var/www/html
+      - design-outputs:/var/www/html/storage/app/public/design-outputs
+    depends_on:
+      - postgres
+      - redis
+      - generator
+    networks:
+      - nalp
+
+  generator:
+    build:
+      context: ../services/generator
+      dockerfile: Dockerfile.generator
+    ports:
+      - "8001:8000"
+    environment:
+      - GENERATOR_OUTPUT_DIR=/output
+    volumes:
+      - design-outputs:/output
+    networks:
+      - nalp
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nalp
+      POSTGRES_USER: nalp
+      POSTGRES_PASSWORD: nalp_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nalp
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - nalp
+
+volumes:
+  postgres_data:
+  design-outputs:
+
+networks:
+  nalp:
+    driver: bridge
