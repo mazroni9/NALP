@@ -7,7 +7,7 @@ COPY apps/web ./
 RUN npm run build
 
 # Stage 2: Laravel app
-FROM php:8.3-cli
+FROM php:8.4-cli
 
 RUN apt-get update && apt-get install -y \
     git unzip libpq-dev libzip-dev libxml2-dev libicu-dev \
@@ -22,6 +22,7 @@ WORKDIR /var/www/html
 COPY apps/web /var/www/html
 COPY --from=frontend /app/public/build /var/www/html/public/build
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 EXPOSE 8080
