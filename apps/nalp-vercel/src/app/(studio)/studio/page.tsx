@@ -460,6 +460,12 @@ export default function StudioPage() {
                       }
                     : { lengthX: 520, depthY: 65 }
               }
+              zonePercents={{
+                a: normA,
+                b: normB,
+                c: normC,
+                d: normD,
+              }}
             />
           </Suspense>
           <CompassOverlay />
