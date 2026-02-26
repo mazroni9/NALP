@@ -1,12 +1,16 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Grid, useGLTF, useTexture } from "@react-three/drei";
+import { OrbitControls, Grid, useGLTF, useTexture, Html } from "@react-three/drei";
 import { Suspense } from "react";
 import type { Group } from "three";
 
 /** عرض الشارع المستقبلي بالمتر (شرق–غرب) — حصة الشارع لتقابل شارع الجيران */
 const STREET_WIDTH_M = 12.5;
+/** عرض شارع الغرب (خلفي) */
+const WEST_STREET_WIDTH_M = 30;
+/** عرض طريق الشرق (الجبيل–الدمام) */
+const EAST_ROAD_WIDTH_M = 18;
 
 interface LandBounds {
   lengthX: number;
@@ -28,23 +32,101 @@ const ZONE_COLORS = {
   d: "#8b5cf6", // violet - استثمارية على الشارع
 };
 
-/** رصيف/شارع ملاصق للحافة الجنوبية */
+const STREET_COLOR = "#4b5563";
+const NEIGHBOR_STREET_COLOR = "#6b7280";
+
+/** رصيف/شارع ملاصق للحافة الجنوبية (12.5 م – حصة أرض المشروع) */
 function StreetPlane({ landBounds }: { landBounds: LandBounds }) {
   const len = landBounds.lengthX;
   const w = STREET_WIDTH_M;
   return (
-    <mesh
-      position={[len / 2, 0.02, w / 2]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      renderOrder={1}
-    >
+    <mesh position={[len / 2, 0.02, w / 2]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
       <planeGeometry args={[len, w]} />
-      <meshStandardMaterial
-        color="#374151"
-        roughness={0.95}
-        metalness={0.05}
-      />
+      <meshStandardMaterial color={STREET_COLOR} roughness={0.95} metalness={0.05} />
     </mesh>
+  );
+}
+
+/** حصة الجار الجنوبي (12.5 م × 520 م) */
+function NeighborSouthStreet({ landBounds }: { landBounds: LandBounds }) {
+  const len = landBounds.lengthX;
+  const w = STREET_WIDTH_M;
+  return (
+    <mesh position={[len / 2, 0.01, -w / 2]} rotation={[-Math.PI / 2, 0, 0]}>
+      <planeGeometry args={[len, w]} />
+      <meshStandardMaterial color={NEIGHBOR_STREET_COLOR} roughness={0.95} metalness={0.05} />
+    </mesh>
+  );
+}
+
+/** طريق الجبيل–الدمام من الشرق */
+function EastRoad({ landBounds }: { landBounds: LandBounds }) {
+  const len = landBounds.lengthX;
+  const depth = landBounds.depthY;
+  return (
+    <group>
+      <mesh
+        position={[len + EAST_ROAD_WIDTH_M / 2, 0.01, depth / 2]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <planeGeometry args={[EAST_ROAD_WIDTH_M, depth]} />
+        <meshStandardMaterial color={STREET_COLOR} roughness={0.95} metalness={0.05} />
+      </mesh>
+      <Html position={[len + EAST_ROAD_WIDTH_M / 2, 1, depth / 2]} center className="pointer-events-none">
+        <span className="whitespace-nowrap rounded bg-slate-800/90 px-2 py-1 text-xs font-medium text-white">
+          طريق الجبيل–الدمام (خدمة)
+        </span>
+      </Html>
+    </group>
+  );
+}
+
+/** شارع خلفي من الغرب */
+function WestStreet({ landBounds }: { landBounds: LandBounds }) {
+  const depth = landBounds.depthY;
+  return (
+    <group>
+      <mesh
+        position={[-WEST_STREET_WIDTH_M / 2, 0.01, depth / 2]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <planeGeometry args={[WEST_STREET_WIDTH_M, depth]} />
+        <meshStandardMaterial color={STREET_COLOR} roughness={0.95} metalness={0.05} />
+      </mesh>
+      <Html position={[-WEST_STREET_WIDTH_M / 2, 1, depth / 2]} center className="pointer-events-none">
+        <span className="whitespace-nowrap rounded bg-slate-800/90 px-2 py-1 text-xs font-medium text-white">
+          شارع خلفي عرض 30 م
+        </span>
+      </Html>
+    </group>
+  );
+}
+
+/** تسميات الأبعاد على الحواف */
+function DimensionLabels({ len, depth }: { len: number; depth: number }) {
+  return (
+    <>
+      <Html position={[len / 2, 0.5, depth + 2]} center className="pointer-events-none">
+        <span className="rounded bg-indigo-600/90 px-2 py-0.5 text-sm font-bold text-white">520 م</span>
+      </Html>
+      <Html position={[len + 3, 0.5, depth / 2]} center className="pointer-events-none">
+        <span className="rounded bg-indigo-600/90 px-2 py-0.5 text-sm font-bold text-white">65 م</span>
+      </Html>
+    </>
+  );
+}
+
+/** نصوص الجنوب: حصة المشروع + حصة الجار */
+function SouthLabels({ len }: { len: number }) {
+  return (
+    <group>
+      <Html position={[len / 2, 0.3, 6.25]} center className="pointer-events-none">
+        <span className="text-[10px] font-medium text-slate-700">12.5 م – حصة أرض المشروع</span>
+      </Html>
+      <Html position={[len / 2, 0.3, -6.25]} center className="pointer-events-none">
+        <span className="text-[10px] font-medium text-slate-600">12.5 م – حصة الجار الجنوبي</span>
+      </Html>
+    </group>
   );
 }
 
@@ -198,9 +280,14 @@ interface SceneProps {
   streetEnabled: boolean;
   landBounds: LandBounds;
   zonePercents: ZonePercents;
+  useReferenceSketch: boolean;
 }
 
-function Scene({ glbUrl, streetEnabled, landBounds, zonePercents }: SceneProps) {
+function Scene({ glbUrl, streetEnabled, landBounds, zonePercents, useReferenceSketch }: SceneProps) {
+  const len = landBounds.lengthX;
+  const depth = landBounds.depthY;
+  const isReferenceDims = len === 520 && depth === 65;
+
   return (
     <>
       <ambientLight intensity={0.9} />
@@ -217,6 +304,19 @@ function Scene({ glbUrl, streetEnabled, landBounds, zonePercents }: SceneProps) 
         infiniteGrid
       />
       {streetEnabled && <StreetPlane landBounds={landBounds} />}
+      {useReferenceSketch && isReferenceDims && (
+        <>
+          <EastRoad landBounds={landBounds} />
+          <WestStreet landBounds={landBounds} />
+          {streetEnabled && (
+            <>
+              <NeighborSouthStreet landBounds={landBounds} />
+              <SouthLabels len={len} />
+            </>
+          )}
+          <DimensionLabels len={len} depth={depth} />
+        </>
+      )}
       <LandPlanSketch
         landBounds={landBounds}
         streetEnabled={streetEnabled}
@@ -234,6 +334,7 @@ function Scene({ glbUrl, streetEnabled, landBounds, zonePercents }: SceneProps) 
 interface CanvasViewerProps {
   glbUrl: string | null;
   streetEnabled?: boolean;
+  useReferenceSketch?: boolean;
   landBounds?: LandBounds;
   zonePercents?: ZonePercents;
 }
@@ -241,6 +342,7 @@ interface CanvasViewerProps {
 export function CanvasViewer({
   glbUrl,
   streetEnabled = false,
+  useReferenceSketch = false,
   landBounds = { lengthX: 520, depthY: 65 },
   zonePercents = { a: 20, b: 25, c: 40, d: 15 },
 }: CanvasViewerProps) {
@@ -251,6 +353,7 @@ export function CanvasViewer({
         streetEnabled={streetEnabled}
         landBounds={landBounds}
         zonePercents={zonePercents}
+        useReferenceSketch={useReferenceSketch}
       />
     </Canvas>
   );
