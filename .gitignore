@@ -6,6 +6,7 @@ apps/web/node_modules/
 # Build outputs
 apps/web/public/build/
 apps/web/public/hot/
+**/.next/
 
 # Environment
 .env
