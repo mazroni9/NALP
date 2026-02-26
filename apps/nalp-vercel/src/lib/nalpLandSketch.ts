@@ -3,14 +3,19 @@
  * مصدر: صورة الخريطة + ملف PROMPT — Auto-Design Architectural Masterplan
  * الموقع: محور الظهران–الجبيل (طريق 613)
  *
- * الأبعاد من المستند:
- * - الطول: 520 م | العرض: 65 م
- * - إجمالي المساحة: ≈ 33,800 م² (حوالي 33.8 ألف م²)
+ * الأبعاد من المستند (مطابقة للمخطط المرجعي):
+ * - الطول: 520 م (شرق–غرب)
+ * - العمق: 65 م (شمال–جنوب تقريبًا)
+ * - إجمالي المساحة: ≈ 33,800 م²
  *
  * المناطق الثلاث:
- * - أ: إسكان العمال
- * - ب: خدمات سيارات / مزادات / مستودعات
- * - ج: مساحات مرنة (مواقف، دعم تشغيلي، توسعة مستقبلية)
+ * - أ: منطقة المزاد وإيواء المركبات (شرق الأرض)
+ * - ب: منطقة السكن والمرافق (غرب الأرض)
+ * - ج: منطقة مرنة/استثمارية (وسطية أو تكميلية — تجارية مستقبلية على واجهة الشارع الداخلي)
+ *
+ * شارع مستقبلي داخلي:
+ * - يمتد شرق–غرب بطول 520 م، عرض 12.5 م
+ * - مساحة الشارع: 6,500 م² (تُخصم من المساحة الصافية عند التفعيل)
  */
 
 export interface LandSketch {
@@ -88,20 +93,25 @@ export const nalpLandSketch: LandSketch = {
   name: "قطعة NALP المرجعية — محور الظهران الجبيل",
   nameEn: "NALP Reference Parcel — Dhahran Jubail Corridor",
   description:
-    "قطعة أرض على طريق الظهران الجبيل الفرعي/الغربي. إجمالي ≈ 33,800 م² (520 م × 65 م). ثلاث مناطق: أ (إسكان العمال)، ب (خدمات سيارات/مزادات/مستودعات)، ج (مساحات مرنة).",
+    "قطعة أرض على طريق الظهران الجبيل الفرعي/الغربي. إجمالي ≈ 33,800 م² (520 م شرق–غرب × 65 م شمال–جنوب). ثلاث مناطق: أ (مزاد وإيواء مركبات)، ب (سكن ومرافق)، ج (استثمارية/واجهة شارع داخلي).",
   sourceFile: "/PROMPT — Auto-Design Architectural Masterplan-برومبت معماري تخطيطي احترافي.docx",
   /** صورة الخريطة المصدر */
   mapImageUrl: "/nalp-land-sketch-map.png",
   totalAreaM2: Math.round(rectArea),
   gpsCoordinates: GPS_COORDS,
   polygonPointsMeters: RECTANGLE_POINTS,
-  zoneAPercent: 40,
-  zoneBPercent: 35,
-  zoneCPercent: 25,
-  zoneAAreaM2: Math.round(rectArea * 0.4),
-  zoneBAreaM2: Math.round(rectArea * 0.35),
-  zoneCAreaM2: Math.round(rectArea * 0.25),
+  zoneAPercent: 50,
+  zoneBPercent: 30,
+  zoneCPercent: 20,
+  zoneAAreaM2: Math.round(rectArea * 0.5),
+  zoneBAreaM2: Math.round(rectArea * 0.3),
+  zoneCAreaM2: Math.round(rectArea * 0.2),
 };
+
+/** شارع مستقبلي داخلي: طول 520م شرق–غرب، عرض 12.5م — مساحة 6,500 م² */
+export const STREET_LENGTH_M = 520;
+export const STREET_WIDTH_M = 12.5;
+export const STREET_AREA_M2 = STREET_LENGTH_M * STREET_WIDTH_M; // 6500
 
 /**
  * استكتش بالمضلع غير المنتظم (تقريبي)
@@ -113,9 +123,9 @@ export const nalpLandSketchIrregular: LandSketch = {
   nameEn: "NALP Parcel (Approximate Irregular Shape)",
   polygonPointsMeters: IRREGULAR_POINTS,
   totalAreaM2: Math.round(irregularArea),
-  zoneAAreaM2: Math.round(irregularArea * 0.4),
-  zoneBAreaM2: Math.round(irregularArea * 0.35),
-  zoneCAreaM2: Math.round(irregularArea * 0.25),
+  zoneAAreaM2: Math.round(irregularArea * 0.5),
+  zoneBAreaM2: Math.round(irregularArea * 0.3),
+  zoneCAreaM2: Math.round(irregularArea * 0.2),
 };
 
 /** صيغة النقاط للاستوديو (x,y; x,y; ...) */

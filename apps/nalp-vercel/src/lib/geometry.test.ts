@@ -51,9 +51,9 @@ describe("zone area distribution (3 zones)", () => {
     const totalArea = polygonArea(rect);
     expect(totalArea).toBe(33800);
 
-    const zoneAPercent = 40;
-    const zoneBPercent = 35;
-    const zoneCPercent = 25;
+    const zoneAPercent = 50;
+    const zoneBPercent = 30;
+    const zoneCPercent = 20;
     expect(zoneAPercent + zoneBPercent + zoneCPercent).toBe(100);
 
     const zoneAArea = totalArea * (zoneAPercent / 100);
@@ -62,5 +62,21 @@ describe("zone area distribution (3 zones)", () => {
 
     const sumZones = zoneAArea + zoneBArea + zoneCArea;
     expect(sumZones).toBe(totalArea);
+  });
+});
+
+describe("net area with street deduction", () => {
+  it("totalNetArea = totalArea - streetArea when street is enabled", () => {
+    const rect = [[0, 0], [520, 0], [520, 65], [0, 65]] as [number, number][];
+    const totalArea = polygonArea(rect);
+    expect(totalArea).toBe(33800);
+
+    const streetLength = 520;
+    const streetWidth = 12.5;
+    const streetArea = streetLength * streetWidth;
+    expect(streetArea).toBe(6500);
+
+    const totalNetArea = totalArea - streetArea;
+    expect(totalNetArea).toBe(27300);
   });
 });

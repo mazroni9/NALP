@@ -5,6 +5,7 @@ import { apiPost, apiGet } from "@/lib/apiClient";
 import {
   nalpLandSketch,
   getPointsStringForStudio,
+  STREET_WIDTH_M,
 } from "@/lib/nalpLandSketch";
 import { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
@@ -50,12 +51,10 @@ export default function StudioPage() {
   const [length, setLength] = useState(200);
   const [width, setWidth] = useState(165);
   const [pointsStr, setPointsStr] = useState("0,0; 200,0; 200,165; 0,165");
-  const [zoneAPercent, setZoneAPercent] = useState(40);
-  const [zoneBPercent, setZoneBPercent] = useState(35);
-  const [zoneCPercent, setZoneCPercent] = useState(25);
+  const [zoneAPercent, setZoneAPercent] = useState(50);
+  const [zoneBPercent, setZoneBPercent] = useState(30);
+  const [zoneCPercent, setZoneCPercent] = useState(20);
   const [streetEnabled, setStreetEnabled] = useState(false);
-  const [streetDirection, setStreetDirection] = useState<"ns" | "ew">("ns");
-  const [streetWidthM, setStreetWidthM] = useState(12);
   const [runs, setRuns] = useState<StudioRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<StudioRun | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -83,6 +82,15 @@ export default function StudioPage() {
       : points && points.length >= 3
         ? polygonArea(points)
         : 0;
+  const streetLength =
+    landType === "rectangle"
+      ? length
+      : points && points.length >= 1
+        ? Math.max(...(points?.map((p) => p[0]) ?? [0])) -
+          Math.min(...(points?.map((p) => p[0]) ?? [0]))
+        : 0;
+  const streetArea = streetEnabled ? streetLength * STREET_WIDTH_M : 0;
+  const netArea = Math.max(0, area - streetArea);
   const perimeter =
     landType === "rectangle"
       ? 2 * (length + width)
@@ -94,9 +102,10 @@ export default function StudioPage() {
   const normA = totalZonePercent > 0 ? (zoneAPercent / totalZonePercent) * 100 : 33.33;
   const normB = totalZonePercent > 0 ? (zoneBPercent / totalZonePercent) * 100 : 33.33;
   const normC = totalZonePercent > 0 ? (zoneCPercent / totalZonePercent) * 100 : 33.33;
-  const zoneAArea = area * (normA / 100);
-  const zoneBArea = area * (normB / 100);
-  const zoneCArea = area * (normC / 100);
+  const areaForZones = streetEnabled ? netArea : area;
+  const zoneAArea = areaForZones * (normA / 100);
+  const zoneBArea = areaForZones * (normB / 100);
+  const zoneCArea = areaForZones * (normC / 100);
   const sumValid = Math.abs(totalZonePercent - 100) < 0.01;
 
   const sumOther = (exclude: "a" | "b" | "c") => {
@@ -166,7 +175,7 @@ export default function StudioPage() {
         zone_b_percent: normB,
         zone_c_percent: normC,
         street: streetEnabled
-          ? { direction: streetDirection, width_m: streetWidthM }
+          ? { length_m: streetLength, width_m: STREET_WIDTH_M, area_m2: streetArea }
           : null,
       };
       const data = await apiPost<{ run: StudioRun }>(
@@ -278,13 +287,23 @@ export default function StudioPage() {
             )}
             <div>
               <p className="text-sm text-slate-600">
-                المساحة: {area.toLocaleString("ar-SA")} م²
+                المساحة الإجمالية للأرض: {area.toLocaleString("ar-SA")} م²
               </p>
+              {streetEnabled && (
+                <>
+                  <p className="text-sm text-slate-600">
+                    مساحة الشارع الداخلي: {Math.round(streetArea).toLocaleString("ar-SA")} م²
+                  </p>
+                  <p className="text-sm font-medium text-slate-700">
+                    المساحة الصافية بعد خصم الشارع: {Math.round(netArea).toLocaleString("ar-SA")} م²
+                  </p>
+                </>
+              )}
               <p className="text-sm text-slate-600">
                 المحيط: {perimeter.toLocaleString("ar-SA")} م
               </p>
               <p className="mt-1 text-xs text-slate-500">
-                المساحة المرجعية للأرض حوالي 33,800 م² (520 م × 65 م).
+                المساحة المرجعية للأرض حوالي 33,800 م² (520 م شرق–غرب × 65 م شمال–جنوب).
               </p>
               {area > 0 && areaWarning && (
                 <p className="mt-1 text-sm font-medium text-amber-600">
@@ -304,7 +323,7 @@ export default function StudioPage() {
           )}
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block text-sm">نسبة المنطقة أ (إسكان العمال) %</label>
+              <label className="block text-sm">نسبة المنطقة أ (مزاد وإيواء مركبات — شرق) %</label>
               <input
                 type="range"
                 min={0}
@@ -318,7 +337,7 @@ export default function StudioPage() {
               </span>
             </div>
             <div>
-              <label className="block text-sm">نسبة المنطقة ب (خدمات سيارات/مزادات) %</label>
+              <label className="block text-sm">نسبة المنطقة ب (سكن ومرافق — غرب) %</label>
               <input
                 type="range"
                 min={0}
@@ -332,7 +351,7 @@ export default function StudioPage() {
               </span>
             </div>
             <div>
-              <label className="block text-sm">نسبة المنطقة ج (مساحات مرنة) %</label>
+              <label className="block text-sm">نسبة المنطقة ج (تجارية مستقبلية على واجهة الشارع الداخلي) %</label>
               <input
                 type="range"
                 min={0}
@@ -349,8 +368,8 @@ export default function StudioPage() {
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="font-semibold">شارع داخلي</h2>
-          <div className="mt-4 space-y-4">
+          <h2 className="font-semibold">شارع داخلي مستقبلي</h2>
+          <div className="mt-4 space-y-2">
             <div className="flex items-center gap-2">
               <input
                 id="streetEnabled"
@@ -360,39 +379,12 @@ export default function StudioPage() {
                 className="h-4 w-4 rounded border-slate-300 text-indigo-600"
               />
               <label htmlFor="streetEnabled" className="text-sm">
-                إضافة شارع داخلي
+                إضافة شارع داخلي مستقبلي (12.5 م × 520 م) – تُخصم مساحته من المساحة الصافية للأرض.
               </label>
             </div>
-            {streetEnabled && (
-              <>
-                <div>
-                  <label className="block text-sm">الاتجاه</label>
-                  <select
-                    value={streetDirection}
-                    onChange={(e) =>
-                      setStreetDirection(e.target.value as "ns" | "ew")
-                    }
-                    className="mt-1 w-full rounded border border-slate-300 px-2 py-2"
-                  >
-                    <option value="ns">طوليّ (شمال ← جنوب)</option>
-                    <option value="ew">عرضيّ (شرق ← غرب)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm">عرض الشارع (م)</label>
-                  <input
-                    type="number"
-                    value={streetWidthM}
-                    onChange={(e) =>
-                      setStreetWidthM(Math.max(6, Number(e.target.value)))
-                    }
-                    min={6}
-                    max={30}
-                    className="mt-1 w-full rounded border border-slate-300 px-2 py-2"
-                  />
-                </div>
-              </>
-            )}
+            <p className="text-xs text-slate-500">
+              الشارع يمتد شرق–غرب على طول الأرض، عرض 12.5 م، ملاصق للحافة الجنوبية.
+            </p>
           </div>
         </section>
 
@@ -428,7 +420,22 @@ export default function StudioPage() {
       <main className="relative min-h-[600px] flex-1 rounded-xl border border-slate-200 bg-white">
         <div className="relative h-[600px] w-full">
           <Suspense fallback={<div className="flex h-full items-center justify-center">جاري تحميل العرض الثلاثي الأبعاد...</div>}>
-            <CanvasViewer glbUrl={glbUrl} />
+            <CanvasViewer
+              glbUrl={glbUrl}
+              streetEnabled={streetEnabled}
+              landBounds={
+                landType === "rectangle"
+                  ? { lengthX: length, depthY: width }
+                  : points && points.length >= 1
+                    ? {
+                        lengthX: streetLength || 520,
+                        depthY:
+                          Math.max(...(points?.map((p) => p[1]) ?? [0])) -
+                          Math.min(...(points?.map((p) => p[1]) ?? [0])),
+                      }
+                    : { lengthX: 520, depthY: 65 }
+              }
+            />
           </Suspense>
           <CompassOverlay />
         </div>

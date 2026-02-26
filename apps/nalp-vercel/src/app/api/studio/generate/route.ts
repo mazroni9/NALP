@@ -17,9 +17,9 @@ export async function POST(request: NextRequest) {
       status: "completed",
       input: {
         land: land ?? {},
-        zone_a_percent: zone_a_percent ?? 40,
-        zone_b_percent: zone_b_percent ?? 35,
-        zone_c_percent: zone_c_percent ?? 25,
+        zone_a_percent: zone_a_percent ?? 50,
+        zone_b_percent: zone_b_percent ?? 30,
+        zone_c_percent: zone_c_percent ?? 20,
         street: street ?? null,
       },
       files: [
