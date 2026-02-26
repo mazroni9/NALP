@@ -10,7 +10,9 @@ RUN npm run build
 FROM php:8.4-cli
 
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libzip-dev libxml2-dev libicu-dev \
+    git unzip \
+    libpq-dev libzip-dev libxml2-dev libicu-dev \
+    sqlite3 libsqlite3-dev \
     && docker-php-ext-install pdo pdo_pgsql pdo_sqlite pcntl bcmath zip intl \
     && pecl install redis && docker-php-ext-enable redis \
     && rm -rf /var/lib/apt/lists/*
