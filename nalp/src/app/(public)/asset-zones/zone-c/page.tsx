@@ -68,13 +68,13 @@ export default function ZoneCPage() {
           <h2 className="text-lg font-semibold">المميزات الرئيسية</h2>
           <ul className="mt-2 list-inside list-disc space-y-1 text-slate-600">
             <li>مباني سكنية حديثة بطابقين (G+2)</li>
-            <li>حوالي 225 غرفة بنمط استوديو</li>
+            <li>حوالي 198 غرفة بنمط استوديو</li>
             <li>مبنى 6 — الطابق الأرضي: مكاتب لقسم الإيواء، سوبرماركت صغير، مغسلة، وخدمات</li>
             <li>ساحات خضراء طولية وممرات مشاة</li>
           </ul>
         </Card>
         <Card>
-          <h2 className="text-lg font-semibold">جدوى المساحة لـ 225 غرفة</h2>
+          <h2 className="text-lg font-semibold">جدوى المساحة لـ 198 غرفة</h2>
           <p className="mt-2 text-slate-600">
             على الطول 208 م: مبنى شرقي 7م يطل شرقاً، مواقف 25م، مباني وسطية 14م (ظهر لظهر — جزء يطل على
             المواقف وجزء على ساحة الإيواء)، وبين المبنى الشرقي وساحة الإيواء مواقف مهما كان حجمها.
