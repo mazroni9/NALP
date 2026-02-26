@@ -34,6 +34,8 @@ npm run dev
 
 ## النشر على Vercel (Deploy)
 
+**Vercel Project ID:** `prj_h9FWAGULyDeCFHBjOCkPo0OzKh09`
+
 ### الإعداد المطلوب (مرة واحدة)
 
 1. اربط المستودع بـ Vercel: [vercel.com](https://vercel.com) → **New Project** → اختر الريبو.
