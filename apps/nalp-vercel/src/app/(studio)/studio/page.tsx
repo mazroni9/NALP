@@ -48,10 +48,10 @@ interface StudioRun {
 
 export default function StudioPage() {
   const [landType, setLandType] = useState<"rectangle" | "polygon">("rectangle");
-  const [referenceSketchActive, setReferenceSketchActive] = useState(false);
-  const [length, setLength] = useState(200);
-  const [width, setWidth] = useState(165);
-  const [pointsStr, setPointsStr] = useState("0,0; 200,0; 200,165; 0,165");
+  const [referenceSketchActive, setReferenceSketchActive] = useState(true);
+  const [length, setLength] = useState(520);
+  const [width, setWidth] = useState(65);
+  const [pointsStr, setPointsStr] = useState("0,0; 520,0; 520,65; 0,65");
   const [zoneAPercent, setZoneAPercent] = useState(20);
   const [zoneBPercent, setZoneBPercent] = useState(25);
   const [zoneCPercent, setZoneCPercent] = useState(40);
