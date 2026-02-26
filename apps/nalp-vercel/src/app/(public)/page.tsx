@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 
 const keyNumbers = [
-  { label: "إجمالي مساحة الأرض", value: "33,000 م²" },
+  { label: "إجمالي مساحة الأرض", value: "≈33,800 م²" },
   { label: "المناطق", value: "2" },
   { label: "المنطقة أ (إسكان)", value: "مفهوم G+2" },
   { label: "المنطقة ب (سيارات)", value: "خدمات وتخزين" },

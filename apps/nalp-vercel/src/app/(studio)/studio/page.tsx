@@ -2,10 +2,16 @@
 
 import { Button } from "@/components/ui/Button";
 import { apiPost, apiGet } from "@/lib/apiClient";
+import {
+  nalpLandSketch,
+  getPointsStringForStudio,
+} from "@/lib/nalpLandSketch";
 import { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
+import { CompassOverlay } from "@/components/studio/CompassOverlay";
 
-const TARGET_AREA = 33000;
+const TARGET_AREA = 33800;
 
 function polygonArea(points: [number, number][]): number {
   if (!points || points.length < 3) return 0;
@@ -44,8 +50,13 @@ export default function StudioPage() {
   const [length, setLength] = useState(200);
   const [width, setWidth] = useState(165);
   const [pointsStr, setPointsStr] = useState("0,0; 200,0; 200,165; 0,165");
-  const [zoneAPercent, setZoneAPercent] = useState(50);
-  const [zoneBPercent, setZoneBPercent] = useState(50);
+  const [zoneAPercent, setZoneAPercent] = useState(25);
+  const [zoneBPercent, setZoneBPercent] = useState(25);
+  const [zoneCPercent, setZoneCPercent] = useState(25);
+  const [zoneDPercent, setZoneDPercent] = useState(25);
+  const [streetEnabled, setStreetEnabled] = useState(false);
+  const [streetDirection, setStreetDirection] = useState<"ns" | "ew">("ns");
+  const [streetWidthM, setStreetWidthM] = useState(12);
   const [runs, setRuns] = useState<StudioRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<StudioRun | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -80,8 +91,61 @@ export default function StudioPage() {
         ? polygonPerimeter(points)
         : 0;
 
-  const zoneAArea = area * (zoneAPercent / 100);
-  const zoneBArea = area * (zoneBPercent / 100);
+  const totalZonePercent =
+    zoneAPercent + zoneBPercent + zoneCPercent + zoneDPercent;
+  const normA = totalZonePercent > 0 ? (zoneAPercent / totalZonePercent) * 100 : 25;
+  const normB = totalZonePercent > 0 ? (zoneBPercent / totalZonePercent) * 100 : 25;
+  const normC = totalZonePercent > 0 ? (zoneCPercent / totalZonePercent) * 100 : 25;
+  const normD = totalZonePercent > 0 ? (zoneDPercent / totalZonePercent) * 100 : 25;
+  const zoneAArea = area * (normA / 100);
+  const zoneBArea = area * (normB / 100);
+  const zoneCArea = area * (normC / 100);
+  const zoneDArea = area * (normD / 100);
+
+  const sumOther = (exclude: "a" | "b" | "c" | "d") => {
+    let s = 0;
+    if (exclude !== "a") s += zoneAPercent;
+    if (exclude !== "b") s += zoneBPercent;
+    if (exclude !== "c") s += zoneCPercent;
+    if (exclude !== "d") s += zoneDPercent;
+    return s || 1;
+  };
+  const setZoneA = (v: number) => {
+    const val = Math.max(0, Math.min(100, v));
+    const rem = 100 - val;
+    const s = sumOther("a");
+    setZoneAPercent(val);
+    setZoneBPercent(Math.round((rem * zoneBPercent) / s));
+    setZoneCPercent(Math.round((rem * zoneCPercent) / s));
+    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
+  };
+  const setZoneB = (v: number) => {
+    const val = Math.max(0, Math.min(100, v));
+    const rem = 100 - val;
+    const s = sumOther("b");
+    setZoneBPercent(val);
+    setZoneAPercent(Math.round((rem * zoneAPercent) / s));
+    setZoneCPercent(Math.round((rem * zoneCPercent) / s));
+    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
+  };
+  const setZoneC = (v: number) => {
+    const val = Math.max(0, Math.min(100, v));
+    const rem = 100 - val;
+    const s = sumOther("c");
+    setZoneCPercent(val);
+    setZoneAPercent(Math.round((rem * zoneAPercent) / s));
+    setZoneBPercent(Math.round((rem * zoneBPercent) / s));
+    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
+  };
+  const setZoneD = (v: number) => {
+    const val = Math.max(0, Math.min(100, v));
+    const rem = 100 - val;
+    const s = sumOther("d");
+    setZoneDPercent(val);
+    setZoneAPercent(Math.round((rem * zoneAPercent) / s));
+    setZoneBPercent(Math.round((rem * zoneBPercent) / s));
+    setZoneCPercent(Math.round((rem * zoneCPercent) / s));
+  };
   const areaDiff = Math.abs(area - TARGET_AREA);
   const areaWarning = areaDiff > 5000;
 
@@ -114,8 +178,13 @@ export default function StudioPage() {
               ? points
               : null,
         },
-        zone_a_percent: zoneAPercent,
-        zone_b_percent: zoneBPercent,
+        zone_a_percent: normA,
+        zone_b_percent: normB,
+        zone_c_percent: normC,
+        zone_d_percent: normD,
+        street: streetEnabled
+          ? { direction: streetDirection, width_m: streetWidthM }
+          : null,
       };
       const data = await apiPost<{ run: StudioRun }>(
         "/api/studio/generate",
@@ -135,9 +204,39 @@ export default function StudioPage() {
   const glbUrl =
     rawGlbUrl && !rawGlbUrl.includes("mock") ? rawGlbUrl : null;
 
+  const loadReferenceSketch = () => {
+    setLandType("polygon");
+    setPointsStr(getPointsStringForStudio(nalpLandSketch));
+    setZoneAPercent(25);
+    setZoneBPercent(25);
+    setZoneCPercent(25);
+    setZoneDPercent(25);
+  };
   return (
     <div className="flex gap-6 p-6 pt-6">
       <aside className="w-80 shrink-0 space-y-6">
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="font-semibold">استكتش مرجعي</h2>
+          <p className="mt-1 text-xs text-slate-600">
+            قطعة NALP من الخريطة والملف المرفق
+          </p>
+          <Button
+            onClick={loadReferenceSketch}
+            variant="outline"
+            size="sm"
+            className="mt-2 w-full"
+          >
+            تحميل الاستكتش المرجعي
+          </Button>
+          <Link
+            href={nalpLandSketch.sourceFile}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 block text-center text-xs text-indigo-600 hover:underline"
+          >
+            الملف المرجعي (PROMPT)
+          </Link>
+        </section>
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <h2 className="font-semibold">بيانات الأرض</h2>
           <div className="mt-4 space-y-4">
@@ -187,7 +286,7 @@ export default function StudioPage() {
                   value={pointsStr}
                   onChange={(e) => setPointsStr(e.target.value)}
                   rows={3}
-                  placeholder="0,0; 200,0; 200,165; 0,165"
+                  placeholder="0,0; 520,0; 520,65; 0,65"
                   className="mt-1 w-full rounded border border-slate-300 px-2 py-2 font-mono text-sm"
                 />
                 <p className="mt-1 text-xs text-slate-500">
@@ -202,9 +301,12 @@ export default function StudioPage() {
               <p className="text-sm text-slate-600">
                 المحيط: {perimeter.toLocaleString("ar-SA")} م
               </p>
+              <p className="mt-1 text-xs text-slate-500">
+                المساحة المرجعية للأرض حوالي 33,800 م² (520 م × 65 م).
+              </p>
               {area > 0 && areaWarning && (
                 <p className="mt-1 text-sm font-medium text-amber-600">
-                  ⚠ بعيد عن الهدف 33,000 م²
+                  ⚠ بعيد عن المساحة المرجعية ≈33,800 م²
                 </p>
               )}
             </div>
@@ -221,11 +323,11 @@ export default function StudioPage() {
                 min={0}
                 max={100}
                 value={zoneAPercent}
-                onChange={(e) => setZoneAPercent(Number(e.target.value))}
+                onChange={(e) => setZoneA(Number(e.target.value))}
                 className="w-full"
               />
               <span>
-                {zoneAPercent}% — {zoneAArea.toLocaleString("ar-SA")} م²
+                {Math.round(normA)}% — {zoneAArea.toLocaleString("ar-SA")} م²
               </span>
             </div>
             <div>
@@ -235,13 +337,89 @@ export default function StudioPage() {
                 min={0}
                 max={100}
                 value={zoneBPercent}
-                onChange={(e) => setZoneBPercent(Number(e.target.value))}
+                onChange={(e) => setZoneB(Number(e.target.value))}
                 className="w-full"
               />
               <span>
-                {zoneBPercent}% — {zoneBArea.toLocaleString("ar-SA")} م²
+                {Math.round(normB)}% — {zoneBArea.toLocaleString("ar-SA")} م²
               </span>
             </div>
+            <div>
+              <label className="block text-sm">المنطقة ج %</label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={zoneCPercent}
+                onChange={(e) => setZoneC(Number(e.target.value))}
+                className="w-full"
+              />
+              <span>
+                {Math.round(normC)}% — {zoneCArea.toLocaleString("ar-SA")} م²
+              </span>
+            </div>
+            <div>
+              <label className="block text-sm">المنطقة د %</label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={zoneDPercent}
+                onChange={(e) => setZoneD(Number(e.target.value))}
+                className="w-full"
+              />
+              <span>
+                {Math.round(normD)}% — {zoneDArea.toLocaleString("ar-SA")} م²
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="font-semibold">شارع داخلي</h2>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <input
+                id="streetEnabled"
+                type="checkbox"
+                checked={streetEnabled}
+                onChange={(e) => setStreetEnabled(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+              />
+              <label htmlFor="streetEnabled" className="text-sm">
+                إضافة شارع داخلي
+              </label>
+            </div>
+            {streetEnabled && (
+              <>
+                <div>
+                  <label className="block text-sm">الاتجاه</label>
+                  <select
+                    value={streetDirection}
+                    onChange={(e) =>
+                      setStreetDirection(e.target.value as "ns" | "ew")
+                    }
+                    className="mt-1 w-full rounded border border-slate-300 px-2 py-2"
+                  >
+                    <option value="ns">طوليّ (شمال ← جنوب)</option>
+                    <option value="ew">عرضيّ (شرق ← غرب)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm">عرض الشارع (م)</label>
+                  <input
+                    type="number"
+                    value={streetWidthM}
+                    onChange={(e) =>
+                      setStreetWidthM(Math.max(6, Number(e.target.value)))
+                    }
+                    min={6}
+                    max={30}
+                    className="mt-1 w-full rounded border border-slate-300 px-2 py-2"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </section>
 
@@ -274,11 +452,12 @@ export default function StudioPage() {
         </section>
       </aside>
 
-      <main className="min-h-[600px] flex-1 rounded-xl border border-slate-200 bg-white">
-        <div className="h-[600px] w-full">
+      <main className="relative min-h-[600px] flex-1 rounded-xl border border-slate-200 bg-white">
+        <div className="relative h-[600px] w-full">
           <Suspense fallback={<div className="flex h-full items-center justify-center">جاري تحميل العرض الثلاثي الأبعاد...</div>}>
             <CanvasViewer glbUrl={glbUrl} />
           </Suspense>
+          <CompassOverlay />
         </div>
       </main>
     </div>

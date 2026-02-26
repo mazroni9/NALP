@@ -28,8 +28,8 @@ describe("polygonArea", () => {
   });
 
   it("calculates rectangle area correctly", () => {
-    const rect = [[0, 0], [200, 0], [200, 165], [0, 165]] as [number, number][];
-    expect(polygonArea(rect)).toBe(33000);
+    const rect = [[0, 0], [520, 0], [520, 65], [0, 65]] as [number, number][];
+    expect(polygonArea(rect)).toBe(33800);
   });
 });
 
@@ -40,7 +40,7 @@ describe("polygonPerimeter", () => {
   });
 
   it("calculates rectangle perimeter correctly", () => {
-    const rect = [[0, 0], [200, 0], [200, 165], [0, 165]] as [number, number][];
-    expect(polygonPerimeter(rect)).toBe(730);
+    const rect = [[0, 0], [520, 0], [520, 65], [0, 65]] as [number, number][];
+    expect(polygonPerimeter(rect)).toBe(1170);
   });
 });
