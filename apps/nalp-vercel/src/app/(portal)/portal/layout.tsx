@@ -7,33 +7,33 @@ export default function PortalLayout({
 }) {
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <aside className="w-64 shrink-0 border-r border-slate-200 bg-white">
+      <aside className="w-64 shrink-0 border-e border-slate-200 bg-white">
         <div className="sticky top-0 flex h-screen flex-col p-4">
           <Link href="/portal" className="mb-6 font-bold text-indigo-600">
-            NALP Portal
+            بوابة NALP
           </Link>
           <nav className="flex flex-1 flex-col gap-1">
             <Link
               href="/portal/dashboard"
               className="rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100"
             >
-              Dashboard
+              لوحة المستثمر
             </Link>
             <Link
               href="/portal/data-room"
               className="rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100"
             >
-              Data Room
+              غرفة البيانات
             </Link>
             <Link
               href="/portal/scenarios"
               className="rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100"
             >
-              Scenarios
+              السيناريوهات
             </Link>
           </nav>
           <Link href="/" className="text-sm text-slate-500 hover:text-indigo-600">
-            ← Back to Site
+            → العودة للموقع
           </Link>
         </div>
       </aside>

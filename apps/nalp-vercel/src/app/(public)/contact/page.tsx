@@ -37,16 +37,16 @@ export default function ContactPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="text-3xl font-bold text-slate-800">Contact</h1>
+      <h1 className="text-3xl font-bold text-slate-800">تواصل</h1>
       <p className="mt-2 text-slate-600">
-        Send us your inquiry or request an NDA.
+        أرسل استفسارك أو اطلب اتفاقية عدم إفصاح.
       </p>
 
       <Card className="mt-8">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-slate-700">
-              Name
+              الاسم الكامل
             </label>
             <input
               id="name"
@@ -59,7 +59,7 @@ export default function ContactPage() {
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-              Email
+              البريد الإلكتروني
             </label>
             <input
               id="email"
@@ -72,7 +72,7 @@ export default function ContactPage() {
           </div>
           <div>
             <label htmlFor="requestType" className="block text-sm font-medium text-slate-700">
-              Request Type
+              نوع الطلب
             </label>
             <select
               id="requestType"
@@ -80,15 +80,15 @@ export default function ContactPage() {
               onChange={(e) => setRequestType(e.target.value as RequestType)}
               className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
-              <option value="info">General Information</option>
-              <option value="nda">NDA Request</option>
-              <option value="partnership">Partnership Inquiry</option>
-              <option value="other">Other</option>
+              <option value="info">معلومات عامة</option>
+              <option value="nda">طلب اتفاقية عدم إفصاح</option>
+              <option value="partnership">استفسار شراكة</option>
+              <option value="other">أخرى</option>
             </select>
           </div>
           <div>
             <label htmlFor="message" className="block text-sm font-medium text-slate-700">
-              Message
+              الرسالة
             </label>
             <textarea
               id="message"
@@ -108,17 +108,17 @@ export default function ContactPage() {
               className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
             />
             <label htmlFor="requestNda" className="text-sm text-slate-700">
-              I would like to request an NDA
+              أود طلب اتفاقية عدم إفصاح
             </label>
           </div>
           {status === "success" && (
-            <p className="text-sm text-green-600">Thank you. Your message has been sent.</p>
+            <p className="text-sm text-green-600">شكراً لك. تم إرسال رسالتك بنجاح.</p>
           )}
           {status === "error" && (
-            <p className="text-sm text-red-600">Something went wrong. Please try again.</p>
+            <p className="text-sm text-red-600">حدث خطأ. يرجى المحاولة مرة أخرى.</p>
           )}
           <Button type="submit" disabled={status === "loading"}>
-            {status === "loading" ? "Sending..." : "Send"}
+            {status === "loading" ? "جاري الإرسال..." : "إرسال"}
           </Button>
         </form>
       </Card>

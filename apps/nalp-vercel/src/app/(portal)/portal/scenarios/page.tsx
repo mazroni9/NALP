@@ -36,16 +36,16 @@ export default function ScenariosPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-slate-800">Scenarios</h1>
+      <h1 className="text-2xl font-bold text-slate-800">السيناريوهات</h1>
       <p className="mt-1 text-slate-600">
-        Create and compare financial scenarios. (TODO: Backend persistence later)
+        إنشاء ومقارنة السيناريوهات المالية. (سيتم حفظها في الخادم لاحقاً)
       </p>
 
       <Card className="mt-8">
-        <h2 className="font-semibold">New Scenario</h2>
+        <h2 className="font-semibold">سيناريو جديد</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label className="block text-sm">Occupancy (%)</label>
+            <label className="block text-sm">الإشغال (%)</label>
             <input
               type="number"
               value={occupancy}
@@ -56,7 +56,7 @@ export default function ScenariosPage() {
             />
           </div>
           <div>
-            <label className="block text-sm">Bed Rate (SAR)</label>
+            <label className="block text-sm">سعر السرير (ريال)</label>
             <input
               type="number"
               value={bedRate}
@@ -65,7 +65,7 @@ export default function ScenariosPage() {
             />
           </div>
           <div>
-            <label className="block text-sm">OPEX Cap (%)</label>
+            <label className="block text-sm">حد التشغيل (%)</label>
             <input
               type="number"
               value={opexCap}
@@ -74,7 +74,7 @@ export default function ScenariosPage() {
             />
           </div>
           <div>
-            <label className="block text-sm">Exit Price (x)</label>
+            <label className="block text-sm">سعر الخروج (x)</label>
             <input
               type="number"
               value={exitPrice}
@@ -85,13 +85,13 @@ export default function ScenariosPage() {
           </div>
         </div>
         <Button onClick={addScenario} className="mt-4">
-          Add Scenario
+          إضافة سيناريو
         </Button>
       </Card>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <Card>
-          <h2 className="font-semibold">Scenario List</h2>
+          <h2 className="font-semibold">قائمة السيناريوهات</h2>
           <ul className="mt-4 space-y-2">
             {scenarios.map((s) => (
               <li
@@ -99,64 +99,64 @@ export default function ScenariosPage() {
                 className="flex items-center justify-between rounded border border-slate-100 px-3 py-2"
               >
                 <span className="text-sm">
-                  Occ {s.occupancy}% • SAR {s.bedRate} • OPEX {s.opexCap}% • Exit {s.exitPrice}x
+                  إشغال {s.occupancy}% • {s.bedRate} ر.س • تشغيل {s.opexCap}% • خروج {s.exitPrice}x
                 </span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCompareA(compareA === s.id ? null : s.id)}
                     className={`rounded px-2 py-1 text-xs ${compareA === s.id ? "bg-indigo-200" : "bg-slate-100 hover:bg-slate-200"}`}
                   >
-                    A
+                    أ
                   </button>
                   <button
                     onClick={() => setCompareB(compareB === s.id ? null : s.id)}
                     className={`rounded px-2 py-1 text-xs ${compareB === s.id ? "bg-indigo-200" : "bg-slate-100 hover:bg-slate-200"}`}
                   >
-                    B
+                    ب
                   </button>
                 </div>
               </li>
             ))}
             {scenarios.length === 0 && (
-              <li className="text-sm text-slate-500">No scenarios yet</li>
+              <li className="text-sm text-slate-500">لا توجد سيناريوهات بعد</li>
             )}
           </ul>
         </Card>
 
         <Card>
-          <h2 className="font-semibold">Compare</h2>
+          <h2 className="font-semibold">مقارنة</h2>
           {scA && scB ? (
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-right text-sm">
                 <thead>
                   <tr className="border-b border-slate-200">
-                    <th className="py-2 text-left">Param</th>
-                    <th className="py-2 text-left">A</th>
-                    <th className="py-2 text-left">B</th>
-                    <th className="py-2 text-left">Diff %</th>
+                    <th className="py-2">المعامل</th>
+                    <th className="py-2">أ</th>
+                    <th className="py-2">ب</th>
+                    <th className="py-2">الفرق %</th>
                   </tr>
                 </thead>
                 <tbody className="text-slate-600">
                   <tr className="border-b border-slate-100">
-                    <td className="py-2">Occupancy</td>
+                    <td className="py-2">الإشغال</td>
                     <td>{scA.occupancy}%</td>
                     <td>{scB.occupancy}%</td>
                     <td>{diff(scA.occupancy, scB.occupancy).toFixed(1)}%</td>
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-2">Bed Rate</td>
+                    <td className="py-2">سعر السرير</td>
                     <td>{scA.bedRate}</td>
                     <td>{scB.bedRate}</td>
                     <td>{diff(scA.bedRate, scB.bedRate).toFixed(1)}%</td>
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-2">OPEX Cap</td>
+                    <td className="py-2">حد التشغيل</td>
                     <td>{scA.opexCap}%</td>
                     <td>{scB.opexCap}%</td>
                     <td>{diff(scA.opexCap, scB.opexCap).toFixed(1)}%</td>
                   </tr>
                   <tr>
-                    <td className="py-2">Exit Price</td>
+                    <td className="py-2">سعر الخروج</td>
                     <td>{scA.exitPrice}x</td>
                     <td>{scB.exitPrice}x</td>
                     <td>{diff(scA.exitPrice, scB.exitPrice).toFixed(1)}%</td>
@@ -166,7 +166,7 @@ export default function ScenariosPage() {
             </div>
           ) : (
             <p className="mt-4 text-sm text-slate-500">
-              Select two scenarios (A and B) to compare.
+              اختر سيناريوين (أ و ب) للمقارنة.
             </p>
           )}
         </Card>

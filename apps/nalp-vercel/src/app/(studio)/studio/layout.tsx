@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const LEGAL_BANNER =
-  "All AI-generated outputs are conceptual drafts and are not for construction. Final engineering drawings require licensed professional approval.";
+  "جميع المخرجات المولدة بالذكاء الاصطناعي هي تصاميم مفهومية أولية وليست صالحة للتنفيذ. المخططات الهندسية النهائية تتطلب اعتماد مهندس مرخّص.";
 
 export default function StudioLayout({
   children,
@@ -16,10 +16,10 @@ export default function StudioLayout({
       <nav className="border-b border-slate-200 bg-white pt-12">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
           <Link href="/" className="font-bold text-indigo-600">
-            NALP Studio
+            استوديو NALP
           </Link>
           <Link href="/portal" className="text-slate-600 hover:text-indigo-600">
-            Portal
+            البوابة
           </Link>
         </div>
       </nav>

@@ -139,10 +139,10 @@ export default function StudioPage() {
     <div className="flex gap-6 p-6 pt-6">
       <aside className="w-80 shrink-0 space-y-6">
         <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="font-semibold">Land Input</h2>
+          <h2 className="font-semibold">بيانات الأرض</h2>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block text-sm">Type</label>
+              <label className="block text-sm">النوع</label>
               <select
                 value={landType}
                 onChange={(e) =>
@@ -150,14 +150,14 @@ export default function StudioPage() {
                 }
                 className="mt-1 w-full rounded border border-slate-300 px-2 py-2"
               >
-                <option value="rectangle">Rectangle</option>
-                <option value="polygon">Polygon</option>
+                <option value="rectangle">مستطيل</option>
+                <option value="polygon">مضلع</option>
               </select>
             </div>
             {landType === "rectangle" && (
               <>
                 <div>
-                  <label className="block text-sm">Length (m)</label>
+                  <label className="block text-sm">الطول (م)</label>
                   <input
                     type="number"
                     value={length}
@@ -167,7 +167,7 @@ export default function StudioPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm">Width (m)</label>
+                  <label className="block text-sm">العرض (م)</label>
                   <input
                     type="number"
                     value={width}
@@ -181,7 +181,7 @@ export default function StudioPage() {
             {landType === "polygon" && (
               <div>
                 <label className="block text-sm">
-                  Points (x,y pairs, semicolon separated)
+                  النقاط (أزواج x,y مفصولة بفاصلة منقوطة)
                 </label>
                 <textarea
                   value={pointsStr}
@@ -191,20 +191,20 @@ export default function StudioPage() {
                   className="mt-1 w-full rounded border border-slate-300 px-2 py-2 font-mono text-sm"
                 />
                 <p className="mt-1 text-xs text-slate-500">
-                  Format: x1,y1; x2,y2; x3,y3; ... (min 3 points)
+                  الصيغة: x1,y1; x2,y2; x3,y3; ... (3 نقاط كحد أدنى)
                 </p>
               </div>
             )}
             <div>
               <p className="text-sm text-slate-600">
-                Area: {area.toLocaleString()} m²
+                المساحة: {area.toLocaleString("ar-SA")} م²
               </p>
               <p className="text-sm text-slate-600">
-                Perimeter: {perimeter.toLocaleString()} m
+                المحيط: {perimeter.toLocaleString("ar-SA")} م
               </p>
               {area > 0 && areaWarning && (
                 <p className="mt-1 text-sm font-medium text-amber-600">
-                  ⚠ Far from target 33,000 m²
+                  ⚠ بعيد عن الهدف 33,000 م²
                 </p>
               )}
             </div>
@@ -212,10 +212,10 @@ export default function StudioPage() {
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="font-semibold">Zones</h2>
+          <h2 className="font-semibold">تقسيم المناطق</h2>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block text-sm">Zone A %</label>
+              <label className="block text-sm">المنطقة أ %</label>
               <input
                 type="range"
                 min={0}
@@ -225,11 +225,11 @@ export default function StudioPage() {
                 className="w-full"
               />
               <span>
-                {zoneAPercent}% — {zoneAArea.toLocaleString()} m²
+                {zoneAPercent}% — {zoneAArea.toLocaleString("ar-SA")} م²
               </span>
             </div>
             <div>
-              <label className="block text-sm">Zone B %</label>
+              <label className="block text-sm">المنطقة ب %</label>
               <input
                 type="range"
                 min={0}
@@ -239,7 +239,7 @@ export default function StudioPage() {
                 className="w-full"
               />
               <span>
-                {zoneBPercent}% — {zoneBArea.toLocaleString()} m²
+                {zoneBPercent}% — {zoneBArea.toLocaleString("ar-SA")} م²
               </span>
             </div>
           </div>
@@ -250,25 +250,25 @@ export default function StudioPage() {
           disabled={generating || !canGenerate}
           className="w-full"
         >
-          {generating ? "Generating..." : "Generate Concept"}
+          {generating ? "جاري التوليد..." : "توليد نموذج مبدئي"}
         </Button>
 
         <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="font-semibold">Runs</h2>
+          <h2 className="font-semibold">التشغيلات</h2>
           <div className="mt-2 max-h-48 space-y-1 overflow-y-auto">
             {runs.map((r) => (
               <button
                 key={r.id}
                 onClick={() => setSelectedRun(r)}
-                className={`block w-full rounded px-2 py-1 text-left text-sm ${
+                className={`block w-full rounded px-2 py-1 text-right text-sm ${
                   selectedRun?.id === r.id ? "bg-indigo-100" : "hover:bg-slate-100"
                 }`}
               >
-                Run #{r.id} — {r.status}
+                تشغيل #{r.id} — {r.status === "completed" ? "مكتمل" : r.status}
               </button>
             ))}
             {runs.length === 0 && (
-              <p className="text-sm text-slate-500">No runs yet</p>
+              <p className="text-sm text-slate-500">لا توجد تشغيلات بعد</p>
             )}
           </div>
         </section>
@@ -276,7 +276,7 @@ export default function StudioPage() {
 
       <main className="min-h-[600px] flex-1 rounded-xl border border-slate-200 bg-white">
         <div className="h-[600px] w-full">
-          <Suspense fallback={<div className="flex h-full items-center justify-center">Loading 3D...</div>}>
+          <Suspense fallback={<div className="flex h-full items-center justify-center">جاري تحميل العرض الثلاثي الأبعاد...</div>}>
             <CanvasViewer glbUrl={glbUrl} />
           </Suspense>
         </div>

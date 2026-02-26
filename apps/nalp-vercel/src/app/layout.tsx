@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME || "NALP",
-  description: "Nabiyah Automotive & Logistics Park — A premier mixed-use development on the Jubail–Dammam corridor.",
+  description: "مجمع نبيه للسيارات والخدمات اللوجستية — مشروع تطوير متعدد الاستخدامات على محور الجبيل–الظهران.",
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

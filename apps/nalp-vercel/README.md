@@ -2,6 +2,12 @@
 
 Next.js 14+ frontend and API project, ready to deploy on **Vercel**.
 
+### اللغة والاتجاه (Language & Direction)
+
+- **اللغة الافتراضية:** العربية
+- **الاتجاه:** من اليمين لليسار (RTL) — `dir="rtl"` و `lang="ar"` على العنصر الجذري
+- **TODO:** يمكن إضافة دعم الإنجليزية لاحقاً عبر نظام i18n (مثل next-intl أو next-i18next)
+
 > **ملاحظة:** هذا المشروع داخل monorepo. المسار الصحيح للتشغيل والنشر هو `apps/nalp-vercel`.
 
 ---

@@ -5,30 +5,30 @@ export default function ZoneBPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
       <Link href="/asset-zones" className="text-sm text-indigo-600 hover:underline">
-        ← Back to Zones
+        → العودة للمناطق
       </Link>
       <h1 className="mt-4 text-3xl font-bold text-slate-800">
-        Zone B: Auto Services
+        المنطقة ب: خدمات السيارات
       </h1>
       <p className="mt-2 text-slate-600">
-        Automotive services, auctions, and storage facilities.
+        خدمات السيارات والمزادات ومرافق التخزين.
       </p>
       <div className="mt-8 space-y-6">
         <Card>
-          <h2 className="text-lg font-semibold">Services & Storage</h2>
+          <h2 className="text-lg font-semibold">الخدمات والتخزين</h2>
           <p className="mt-2 text-slate-600">
-            Zone B supports automotive retail, maintenance, auction activities,
-            and storage—creating synergies with the residential workforce in
-            Zone A and serving the broader Jubail–Dammam corridor demand.
+            تدعم المنطقة ب تجارة السيارات والصيانة وأنشطة المزادات
+            والتخزين—مما يخلق تكافلاً مع العمالة السكنية في المنطقة أ وخدمة
+            الطلب الأوسع في محور الجبيل–الظهران.
           </p>
         </Card>
         <Card>
-          <h2 className="text-lg font-semibold">Key Features</h2>
+          <h2 className="text-lg font-semibold">المميزات الرئيسية</h2>
           <ul className="mt-2 list-inside list-disc space-y-1 text-slate-600">
-            <li>Automotive services and maintenance</li>
-            <li>Vehicle auctions</li>
-            <li>Storage and logistics facilities</li>
-            <li>Strategic corridor location</li>
+            <li>خدمات وصيانة السيارات</li>
+            <li>مزادات المركبات</li>
+            <li>مرافق التخزين واللوجستيات</li>
+            <li>موقع استراتيجي على المحور</li>
           </ul>
         </Card>
       </div>
