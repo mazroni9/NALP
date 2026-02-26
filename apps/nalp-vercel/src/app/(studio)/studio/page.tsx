@@ -2,8 +2,13 @@
 
 import { Button } from "@/components/ui/Button";
 import { apiPost, apiGet } from "@/lib/apiClient";
+import {
+  nalpLandSketch,
+  getPointsStringForStudio,
+} from "@/lib/nalpLandSketch";
 import { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 const TARGET_AREA = 33000;
 
@@ -135,9 +140,38 @@ export default function StudioPage() {
   const glbUrl =
     rawGlbUrl && !rawGlbUrl.includes("mock") ? rawGlbUrl : null;
 
+  const loadReferenceSketch = () => {
+    setLandType("polygon");
+    setPointsStr(getPointsStringForStudio(nalpLandSketch));
+    setZoneAPercent(nalpLandSketch.zoneAPercent);
+    setZoneBPercent(nalpLandSketch.zoneBPercent);
+  };
+
   return (
     <div className="flex gap-6 p-6 pt-6">
       <aside className="w-80 shrink-0 space-y-6">
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="font-semibold">استكتش مرجعي</h2>
+          <p className="mt-1 text-xs text-slate-600">
+            قطعة NALP من الخريطة والملف المرفق
+          </p>
+          <Button
+            onClick={loadReferenceSketch}
+            variant="outline"
+            size="sm"
+            className="mt-2 w-full"
+          >
+            تحميل الاستكتش المرجعي
+          </Button>
+          <Link
+            href={nalpLandSketch.sourceFile}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 block text-center text-xs text-indigo-600 hover:underline"
+          >
+            الملف المرجعي (PROMPT)
+          </Link>
+        </section>
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <h2 className="font-semibold">بيانات الأرض</h2>
           <div className="mt-4 space-y-4">
