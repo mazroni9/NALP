@@ -161,7 +161,10 @@ php artisan test
 ### الملفات
 
 - **`.github/workflows/cd.yml`** — اختبارات + نشر على `main`
-- **`apps/web/fly.toml`** — إعداد Fly.io (Dockerfile من الجذر على port 8080)
+- **`apps/web/fly.toml`** — إعداد Fly.io الوحيد؛ GitHub Actions تستخدم الأمر:
+  ```bash
+  flyctl deploy . --config apps/web/fly.toml
+  ```
 - **`Dockerfile`** (جذر الريبو) — بناء Laravel من `apps/web`
 
 ### Secret المطلوب في GitHub
@@ -186,11 +189,20 @@ fly secrets set APP_KEY="base64:xxxx..." --app nalp
 
 ## Fly.io deployment (يدوي)
 
+إعداد Fly موجود في **`apps/web/fly.toml`** فقط. للنشر:
+
+```bash
+cd <repo-root>
+fly deploy . --config apps/web/fly.toml
+```
+
+أو أول مرة:
 ```bash
 cd apps/web
-fly launch    # أول مرة: اختر Region
-fly secrets set APP_KEY="base64:xxxx"   # من .env المحلي
-fly deploy
+fly launch --name nalp --copy-config --no-deploy
+fly secrets set APP_KEY="base64:xxxx" --app nalp   # من .env المحلي
+cd ../..
+fly deploy . --config apps/web/fly.toml
 ```
 
 See [docs/FLY-DEPLOY.md](docs/FLY-DEPLOY.md) and [FLY_SETUP_STEPS.md](FLY_SETUP_STEPS.md). MVP uses SQLite; add Fly Postgres/Redis when needed.

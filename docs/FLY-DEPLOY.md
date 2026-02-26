@@ -49,7 +49,7 @@ fly logs
 ## إعدادات fly.toml (apps/web)
 
 - `internal_port = 8080` يطابق Dockerfile
-- `release_command` يشغّل migrations
+- لا يوجد release_command؛ المايغريشن يدوي
 - MVP يستخدم SQLite (قاعدة ملف داخل الحاوية)
 
 ## ملاحظات
