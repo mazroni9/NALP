@@ -50,10 +50,9 @@ export default function StudioPage() {
   const [length, setLength] = useState(200);
   const [width, setWidth] = useState(165);
   const [pointsStr, setPointsStr] = useState("0,0; 200,0; 200,165; 0,165");
-  const [zoneAPercent, setZoneAPercent] = useState(25);
-  const [zoneBPercent, setZoneBPercent] = useState(25);
+  const [zoneAPercent, setZoneAPercent] = useState(40);
+  const [zoneBPercent, setZoneBPercent] = useState(35);
   const [zoneCPercent, setZoneCPercent] = useState(25);
-  const [zoneDPercent, setZoneDPercent] = useState(25);
   const [streetEnabled, setStreetEnabled] = useState(false);
   const [streetDirection, setStreetDirection] = useState<"ns" | "ew">("ns");
   const [streetWidthM, setStreetWidthM] = useState(12);
@@ -91,23 +90,20 @@ export default function StudioPage() {
         ? polygonPerimeter(points)
         : 0;
 
-  const totalZonePercent =
-    zoneAPercent + zoneBPercent + zoneCPercent + zoneDPercent;
-  const normA = totalZonePercent > 0 ? (zoneAPercent / totalZonePercent) * 100 : 25;
-  const normB = totalZonePercent > 0 ? (zoneBPercent / totalZonePercent) * 100 : 25;
-  const normC = totalZonePercent > 0 ? (zoneCPercent / totalZonePercent) * 100 : 25;
-  const normD = totalZonePercent > 0 ? (zoneDPercent / totalZonePercent) * 100 : 25;
+  const totalZonePercent = zoneAPercent + zoneBPercent + zoneCPercent;
+  const normA = totalZonePercent > 0 ? (zoneAPercent / totalZonePercent) * 100 : 33.33;
+  const normB = totalZonePercent > 0 ? (zoneBPercent / totalZonePercent) * 100 : 33.33;
+  const normC = totalZonePercent > 0 ? (zoneCPercent / totalZonePercent) * 100 : 33.33;
   const zoneAArea = area * (normA / 100);
   const zoneBArea = area * (normB / 100);
   const zoneCArea = area * (normC / 100);
-  const zoneDArea = area * (normD / 100);
+  const sumValid = Math.abs(totalZonePercent - 100) < 0.01;
 
-  const sumOther = (exclude: "a" | "b" | "c" | "d") => {
+  const sumOther = (exclude: "a" | "b" | "c") => {
     let s = 0;
     if (exclude !== "a") s += zoneAPercent;
     if (exclude !== "b") s += zoneBPercent;
     if (exclude !== "c") s += zoneCPercent;
-    if (exclude !== "d") s += zoneDPercent;
     return s || 1;
   };
   const setZoneA = (v: number) => {
@@ -117,7 +113,6 @@ export default function StudioPage() {
     setZoneAPercent(val);
     setZoneBPercent(Math.round((rem * zoneBPercent) / s));
     setZoneCPercent(Math.round((rem * zoneCPercent) / s));
-    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
   };
   const setZoneB = (v: number) => {
     const val = Math.max(0, Math.min(100, v));
@@ -126,7 +121,6 @@ export default function StudioPage() {
     setZoneBPercent(val);
     setZoneAPercent(Math.round((rem * zoneAPercent) / s));
     setZoneCPercent(Math.round((rem * zoneCPercent) / s));
-    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
   };
   const setZoneC = (v: number) => {
     const val = Math.max(0, Math.min(100, v));
@@ -135,16 +129,6 @@ export default function StudioPage() {
     setZoneCPercent(val);
     setZoneAPercent(Math.round((rem * zoneAPercent) / s));
     setZoneBPercent(Math.round((rem * zoneBPercent) / s));
-    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
-  };
-  const setZoneD = (v: number) => {
-    const val = Math.max(0, Math.min(100, v));
-    const rem = 100 - val;
-    const s = sumOther("d");
-    setZoneDPercent(val);
-    setZoneAPercent(Math.round((rem * zoneAPercent) / s));
-    setZoneBPercent(Math.round((rem * zoneBPercent) / s));
-    setZoneCPercent(Math.round((rem * zoneCPercent) / s));
   };
   const areaDiff = Math.abs(area - TARGET_AREA);
   const areaWarning = areaDiff > 5000;
@@ -181,7 +165,6 @@ export default function StudioPage() {
         zone_a_percent: normA,
         zone_b_percent: normB,
         zone_c_percent: normC,
-        zone_d_percent: normD,
         street: streetEnabled
           ? { direction: streetDirection, width_m: streetWidthM }
           : null,
@@ -207,10 +190,9 @@ export default function StudioPage() {
   const loadReferenceSketch = () => {
     setLandType("polygon");
     setPointsStr(getPointsStringForStudio(nalpLandSketch));
-    setZoneAPercent(25);
-    setZoneBPercent(25);
-    setZoneCPercent(25);
-    setZoneDPercent(25);
+    setZoneAPercent(nalpLandSketch.zoneAPercent);
+    setZoneBPercent(nalpLandSketch.zoneBPercent);
+    setZoneCPercent(nalpLandSketch.zoneCPercent);
   };
   return (
     <div className="flex gap-6 p-6 pt-6">
@@ -314,10 +296,15 @@ export default function StudioPage() {
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="font-semibold">تقسيم المناطق</h2>
+          <h2 className="font-semibold">تقسيم المناطق (ثلاث مناطق)</h2>
+          {!sumValid && (
+            <p className="mt-1 text-sm font-medium text-amber-600">
+              ⚠ مجموع النسب يجب أن يساوي 100% (حاليًا: {Math.round(totalZonePercent)}%)
+            </p>
+          )}
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block text-sm">المنطقة أ %</label>
+              <label className="block text-sm">نسبة المنطقة أ (إسكان العمال) %</label>
               <input
                 type="range"
                 min={0}
@@ -327,11 +314,11 @@ export default function StudioPage() {
                 className="w-full"
               />
               <span>
-                {Math.round(normA)}% — {zoneAArea.toLocaleString("ar-SA")} م²
+                {Math.round(normA)}% — مساحة المنطقة أ: {zoneAArea.toLocaleString("ar-SA")} م²
               </span>
             </div>
             <div>
-              <label className="block text-sm">المنطقة ب %</label>
+              <label className="block text-sm">نسبة المنطقة ب (خدمات سيارات/مزادات) %</label>
               <input
                 type="range"
                 min={0}
@@ -341,11 +328,11 @@ export default function StudioPage() {
                 className="w-full"
               />
               <span>
-                {Math.round(normB)}% — {zoneBArea.toLocaleString("ar-SA")} م²
+                {Math.round(normB)}% — مساحة المنطقة ب: {zoneBArea.toLocaleString("ar-SA")} م²
               </span>
             </div>
             <div>
-              <label className="block text-sm">المنطقة ج %</label>
+              <label className="block text-sm">نسبة المنطقة ج (مساحات مرنة) %</label>
               <input
                 type="range"
                 min={0}
@@ -355,21 +342,7 @@ export default function StudioPage() {
                 className="w-full"
               />
               <span>
-                {Math.round(normC)}% — {zoneCArea.toLocaleString("ar-SA")} م²
-              </span>
-            </div>
-            <div>
-              <label className="block text-sm">المنطقة د %</label>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={zoneDPercent}
-                onChange={(e) => setZoneD(Number(e.target.value))}
-                className="w-full"
-              />
-              <span>
-                {Math.round(normD)}% — {zoneDArea.toLocaleString("ar-SA")} م²
+                {Math.round(normC)}% — مساحة المنطقة ج: {zoneCArea.toLocaleString("ar-SA")} م²
               </span>
             </div>
           </div>

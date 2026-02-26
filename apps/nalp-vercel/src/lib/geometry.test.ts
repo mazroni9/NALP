@@ -44,3 +44,23 @@ describe("polygonPerimeter", () => {
     expect(polygonPerimeter(rect)).toBe(1170);
   });
 });
+
+describe("zone area distribution (3 zones)", () => {
+  it("sum of zone areas equals total area when percentages sum to 100%", () => {
+    const rect = [[0, 0], [520, 0], [520, 65], [0, 65]] as [number, number][];
+    const totalArea = polygonArea(rect);
+    expect(totalArea).toBe(33800);
+
+    const zoneAPercent = 40;
+    const zoneBPercent = 35;
+    const zoneCPercent = 25;
+    expect(zoneAPercent + zoneBPercent + zoneCPercent).toBe(100);
+
+    const zoneAArea = totalArea * (zoneAPercent / 100);
+    const zoneBArea = totalArea * (zoneBPercent / 100);
+    const zoneCArea = totalArea * (zoneCPercent / 100);
+
+    const sumZones = zoneAArea + zoneBArea + zoneCArea;
+    expect(sumZones).toBe(totalArea);
+  });
+});

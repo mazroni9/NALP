@@ -8,7 +8,7 @@ let runIdCounter = 1;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { land, zone_a_percent, zone_b_percent, zone_c_percent, zone_d_percent, street } = body;
+    const { land, zone_a_percent, zone_b_percent, zone_c_percent, street } = body;
 
     const id = `run-${runIdCounter++}`;
 
@@ -17,10 +17,9 @@ export async function POST(request: NextRequest) {
       status: "completed",
       input: {
         land: land ?? {},
-        zone_a_percent: zone_a_percent ?? 25,
-        zone_b_percent: zone_b_percent ?? 25,
+        zone_a_percent: zone_a_percent ?? 40,
+        zone_b_percent: zone_b_percent ?? 35,
         zone_c_percent: zone_c_percent ?? 25,
-        zone_d_percent: zone_d_percent ?? 25,
         street: street ?? null,
       },
       files: [

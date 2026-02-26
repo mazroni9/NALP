@@ -6,8 +6,11 @@
  * الأبعاد من المستند:
  * - الطول: 520 م | العرض: 65 م
  * - إجمالي المساحة: ≈ 33,800 م² (حوالي 33.8 ألف م²)
- * - المنطقة أ (إسكان): ~17,000 م²
- * - المنطقة ب (خدمات): ~16,000 م²
+ *
+ * المناطق الثلاث:
+ * - أ: إسكان العمال
+ * - ب: خدمات سيارات / مزادات / مستودعات
+ * - ج: مساحات مرنة (مواقف، دعم تشغيلي، توسعة مستقبلية)
  */
 
 export interface LandSketch {
@@ -22,11 +25,13 @@ export interface LandSketch {
   gpsCoordinates?: [number, number][];
   /** نقاط المضلع بإحداثيات محلية (متر) - للاستوديو */
   polygonPointsMeters: [number, number][];
-  /** نسب المناطق المقترحة */
+  /** نسب المناطق المقترحة (أ، ب، ج) — المجموع = 100% */
   zoneAPercent: number;
   zoneBPercent: number;
+  zoneCPercent: number;
   zoneAAreaM2: number;
   zoneBAreaM2: number;
+  zoneCAreaM2: number;
 }
 
 /**
@@ -83,17 +88,19 @@ export const nalpLandSketch: LandSketch = {
   name: "قطعة NALP المرجعية — محور الظهران الجبيل",
   nameEn: "NALP Reference Parcel — Dhahran Jubail Corridor",
   description:
-    "قطعة أرض على طريق الظهران الجبيل الفرعي/الغربي. إجمالي ≈ 33,800 م² (520 م × 65 م)، تقسيم المنطقة أ (إسكان) ~17,000 م² والمنطقة ب (خدمات سيارات) ~16,000 م².",
+    "قطعة أرض على طريق الظهران الجبيل الفرعي/الغربي. إجمالي ≈ 33,800 م² (520 م × 65 م). ثلاث مناطق: أ (إسكان العمال)، ب (خدمات سيارات/مزادات/مستودعات)، ج (مساحات مرنة).",
   sourceFile: "/PROMPT — Auto-Design Architectural Masterplan-برومبت معماري تخطيطي احترافي.docx",
   /** صورة الخريطة المصدر */
   mapImageUrl: "/nalp-land-sketch-map.png",
   totalAreaM2: Math.round(rectArea),
   gpsCoordinates: GPS_COORDS,
   polygonPointsMeters: RECTANGLE_POINTS,
-  zoneAPercent: 52,
-  zoneBPercent: 48,
-  zoneAAreaM2: 17000,
-  zoneBAreaM2: 16000,
+  zoneAPercent: 40,
+  zoneBPercent: 35,
+  zoneCPercent: 25,
+  zoneAAreaM2: Math.round(rectArea * 0.4),
+  zoneBAreaM2: Math.round(rectArea * 0.35),
+  zoneCAreaM2: Math.round(rectArea * 0.25),
 };
 
 /**
@@ -106,8 +113,9 @@ export const nalpLandSketchIrregular: LandSketch = {
   nameEn: "NALP Parcel (Approximate Irregular Shape)",
   polygonPointsMeters: IRREGULAR_POINTS,
   totalAreaM2: Math.round(irregularArea),
-  zoneAAreaM2: Math.round(irregularArea * 0.52),
-  zoneBAreaM2: Math.round(irregularArea * 0.48),
+  zoneAAreaM2: Math.round(irregularArea * 0.4),
+  zoneBAreaM2: Math.round(irregularArea * 0.35),
+  zoneCAreaM2: Math.round(irregularArea * 0.25),
 };
 
 /** صيغة النقاط للاستوديو (x,y; x,y; ...) */
