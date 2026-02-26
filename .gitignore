@@ -1,11 +1,7 @@
 # Dependencies
-apps/web/vendor/
-apps/web/node_modules/
 **/node_modules/
 
 # Build outputs
-apps/web/public/build/
-apps/web/public/hot/
 **/.next/
 
 # Environment
@@ -13,23 +9,10 @@ apps/web/public/hot/
 .env.*
 !.env.example
 
-# Laravel
-apps/web/storage/*.key
-apps/web/bootstrap/cache/*
-!apps/web/bootstrap/cache/.gitignore
-
 # IDE / OS
 .idea/
-.vscode/
 .DS_Store
 Thumbs.db
-
-# Python
-services/generator/__pycache__/
-services/generator/*.pyc
-*.py[cod]
-venv/
-.venv/
 
 # Logs
 *.log

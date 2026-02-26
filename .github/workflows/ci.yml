@@ -1,6 +1,6 @@
+# CI للفرع develop
 name: CI
 
-# CI for develop branch. main uses cd.yml (test + deploy).
 on:
   push:
     branches: [develop]
@@ -8,40 +8,28 @@ on:
     branches: [develop]
 
 jobs:
-  laravel:
+  build:
+    name: Build & Test
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/web
+        working-directory: nalp
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          php-version: '8.4'
-          extensions: pdo, pdo_pgsql, pdo_sqlite, intl, redis, zip, bcmath, xml
-          coverage: none
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: nalp/package-lock.json
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist
-
-      - name: Prepare environment
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
-          sed -i 's/DB_DATABASE=.*/DB_DATABASE=:memory:/' .env
-
-      - name: Run migrations
-        run: php artisan migrate --force
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run tests
-        run: php artisan test
+        run: npm run test
 
-      - name: Install npm dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Build frontend
+      - name: Build
         run: npm run build

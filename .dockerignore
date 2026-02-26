@@ -4,14 +4,7 @@
 .env.*
 *.log
 node_modules
-apps/web/node_modules
-apps/web/vendor
-apps/web/public/hot
-apps/web/public/storage
-apps/web/storage/logs/*
-docs
-services/generator
-infra
-PUSH-TO-GITHUB.md
+nalp/node_modules
+nalp/.next
 *.md
 !README.md

@@ -1,0 +1,10 @@
+{
+  "name": "nalp-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix nalp",
+    "build": "npm run build --prefix nalp",
+    "start": "npm run start --prefix nalp",
+    "lint": "npm run lint --prefix nalp"
+  }
+}
