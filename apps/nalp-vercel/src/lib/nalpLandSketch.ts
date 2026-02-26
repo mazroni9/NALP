@@ -8,10 +8,11 @@
  * - العمق: 65 م (شمال–جنوب تقريبًا)
  * - إجمالي المساحة: ≈ 33,800 م²
  *
- * المناطق الثلاث:
- * - أ: منطقة المزاد وإيواء المركبات (شرق الأرض)
- * - ب: منطقة السكن والمرافق (غرب الأرض)
- * - ج: منطقة مرنة/استثمارية (وسطية أو تكميلية — تجارية مستقبلية على واجهة الشارع الداخلي)
+ * المناطق الأربع:
+ * - أ: منطقة المزاد
+ * - ب: منطقة إيواء المركبات
+ * - ج: منطقة سكن الموظفين والمرافق
+ * - د: منطقة استثمارية على الشارع الداخلي
  *
  * شارع مستقبلي داخلي:
  * - يمتد شرق–غرب بطول 520 م، عرض 12.5 م
@@ -30,13 +31,23 @@ export interface LandSketch {
   gpsCoordinates?: [number, number][];
   /** نقاط المضلع بإحداثيات محلية (متر) - للاستوديو */
   polygonPointsMeters: [number, number][];
-  /** نسب المناطق المقترحة (أ، ب، ج) — المجموع = 100% */
+  /** نسب المناطق المقترحة (أ، ب، ج، د) — المجموع = 100% */
   zoneAPercent: number;
   zoneBPercent: number;
   zoneCPercent: number;
+  zoneDPercent: number;
   zoneAAreaM2: number;
   zoneBAreaM2: number;
   zoneCAreaM2: number;
+  zoneDAreaM2: number;
+}
+
+/** تعريف المناطق للنصوص في الاستوديو */
+export interface ZoneConfig {
+  id: "a" | "b" | "c" | "d";
+  title: string;
+  shortDesc: string;
+  description: string;
 }
 
 /**
@@ -93,19 +104,21 @@ export const nalpLandSketch: LandSketch = {
   name: "قطعة NALP المرجعية — محور الظهران الجبيل",
   nameEn: "NALP Reference Parcel — Dhahran Jubail Corridor",
   description:
-    "قطعة أرض على طريق الظهران الجبيل الفرعي/الغربي. إجمالي ≈ 33,800 م² (520 م شرق–غرب × 65 م شمال–جنوب). ثلاث مناطق: أ (مزاد وإيواء مركبات)، ب (سكن ومرافق)، ج (استثمارية/واجهة شارع داخلي).",
+    "قطعة أرض على طريق الظهران الجبيل الفرعي/الغربي. إجمالي ≈ 33,800 م² (520 م شرق–غرب × 65 م شمال–جنوب). أربع مناطق: أ (المزاد)، ب (إيواء المركبات)، ج (سكن الموظفين والمرافق)، د (استثمارية على الشارع الداخلي).",
   sourceFile: "/PROMPT — Auto-Design Architectural Masterplan-برومبت معماري تخطيطي احترافي.docx",
   /** صورة الخريطة المصدر */
   mapImageUrl: "/nalp-land-sketch-map.png",
   totalAreaM2: Math.round(rectArea),
   gpsCoordinates: GPS_COORDS,
   polygonPointsMeters: RECTANGLE_POINTS,
-  zoneAPercent: 50,
-  zoneBPercent: 30,
-  zoneCPercent: 20,
-  zoneAAreaM2: Math.round(rectArea * 0.5),
-  zoneBAreaM2: Math.round(rectArea * 0.3),
-  zoneCAreaM2: Math.round(rectArea * 0.2),
+  zoneAPercent: 20,
+  zoneBPercent: 25,
+  zoneCPercent: 40,
+  zoneDPercent: 15,
+  zoneAAreaM2: Math.round(rectArea * 0.2),
+  zoneBAreaM2: Math.round(rectArea * 0.25),
+  zoneCAreaM2: Math.round(rectArea * 0.4),
+  zoneDAreaM2: Math.round(rectArea * 0.15),
 };
 
 /** شارع مستقبلي داخلي: طول 520م شرق–غرب، عرض 12.5م — مساحة 6,500 م² */
@@ -123,10 +136,43 @@ export const nalpLandSketchIrregular: LandSketch = {
   nameEn: "NALP Parcel (Approximate Irregular Shape)",
   polygonPointsMeters: IRREGULAR_POINTS,
   totalAreaM2: Math.round(irregularArea),
-  zoneAAreaM2: Math.round(irregularArea * 0.5),
-  zoneBAreaM2: Math.round(irregularArea * 0.3),
-  zoneCAreaM2: Math.round(irregularArea * 0.2),
+  zoneAAreaM2: Math.round(irregularArea * 0.2),
+  zoneBAreaM2: Math.round(irregularArea * 0.25),
+  zoneCAreaM2: Math.round(irregularArea * 0.4),
+  zoneDAreaM2: Math.round(irregularArea * 0.15),
 };
+
+/** نصوص المناطق للاستوديو */
+export const ZONE_CONFIGS: ZoneConfig[] = [
+  {
+    id: "a",
+    title: "منطقة المزاد",
+    shortDesc: "واجهة المشروع النشطة على طريق الجبيل–الدمام، منصة المزاد ومنطقة العرض.",
+    description:
+      "منطقة المزاد تشكّل واجهة المشروع النشطة على طريق الجبيل–الدمام، وفيها منصة المزاد، منطقة العرض المباشر، ومسارات حركة الجمهور والمزايدين. تصميمها يركّز على وضوح المشهد، إبراز العلامة التجارية، وسهولة دخول السيارات المعروضة وخروجها.",
+  },
+  {
+    id: "b",
+    title: "منطقة إيواء المركبات",
+    shortDesc: "تخزين السيارات قبل وبعد المزاد، مواقف وممرات شاحنات السحب.",
+    description:
+      "منطقة إيواء المركبات مخصّصة لتخزين السيارات قبل وبعد المزاد، مع تنظيم دقيق للمواقف ومسارات حركة شاحنات السحب. يتم توزيع المواقف في صفوف طولية بممرات مناسبة للمناورة، مع إمكانية تقسيم الساحة إلى بلوكات بحسب نوع السيارات أو حالة المركبات.",
+  },
+  {
+    id: "c",
+    title: "منطقة سكن الموظفين والمرافق",
+    shortDesc: "الجزء الهادئ من الأرض، بيئة معيشية مريحة، مباني سكنية ومرافق مركزية.",
+    description:
+      "منطقة سكن الموظفين والمرافق تقع في الجزء الهادئ من الأرض، وتوفر بيئة معيشية مريحة للعاملين. تضم مباني سكنية حديثة بطابقين تحقق حوالي 200 غرفة بنمط استوديو، إضافة إلى مبنى خدمات مركزية يضم مقهى/مطعم صغير، ميني ماركت، ومغسلة، مع ساحات خضراء طولية وممرات مشاة.",
+  },
+  {
+    id: "d",
+    title: "منطقة استثمارية على الشارع الداخلي",
+    shortDesc: "تطل على الشارع الداخلي المستقبلي، معارض فرعية وورش ومكاتب وتوسعات.",
+    description:
+      "المنطقة الاستثمارية تطل مباشرة على الشارع الداخلي المستقبلي، ومهيأة لاستيعاب أنشطة تجارية وتشغيلية مساندة مثل معارض فرعية، ورش متخصصة، مكاتب تشغيل، أو توسعات مستقبلية لساحة المزاد أو السكن. صُممت لتستفيد من واجهة الشارع وتعوّض جزءاً من المساحة المخصّصة للممر الداخلي.",
+  },
+];
 
 /** صيغة النقاط للاستوديو (x,y; x,y; ...) */
 export function getPointsStringForStudio(sketch: LandSketch): string {

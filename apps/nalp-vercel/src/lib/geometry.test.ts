@@ -45,23 +45,35 @@ describe("polygonPerimeter", () => {
   });
 });
 
-describe("zone area distribution (3 zones)", () => {
+describe("zone area distribution (4 zones)", () => {
   it("sum of zone areas equals total area when percentages sum to 100%", () => {
     const rect = [[0, 0], [520, 0], [520, 65], [0, 65]] as [number, number][];
     const totalArea = polygonArea(rect);
     expect(totalArea).toBe(33800);
 
-    const zoneAPercent = 50;
-    const zoneBPercent = 30;
-    const zoneCPercent = 20;
-    expect(zoneAPercent + zoneBPercent + zoneCPercent).toBe(100);
+    const zoneAPercent = 20;
+    const zoneBPercent = 25;
+    const zoneCPercent = 40;
+    const zoneDPercent = 15;
+    expect(zoneAPercent + zoneBPercent + zoneCPercent + zoneDPercent).toBe(100);
 
     const zoneAArea = totalArea * (zoneAPercent / 100);
     const zoneBArea = totalArea * (zoneBPercent / 100);
     const zoneCArea = totalArea * (zoneCPercent / 100);
+    const zoneDArea = totalArea * (zoneDPercent / 100);
 
-    const sumZones = zoneAArea + zoneBArea + zoneCArea;
+    const sumZones = zoneAArea + zoneBArea + zoneCArea + zoneDArea;
     expect(sumZones).toBe(totalArea);
+  });
+});
+
+describe("default zone percentages", () => {
+  it("default percentages (20, 25, 40, 15) sum to 100", () => {
+    const defaultA = 20;
+    const defaultB = 25;
+    const defaultC = 40;
+    const defaultD = 15;
+    expect(defaultA + defaultB + defaultC + defaultD).toBe(100);
   });
 });
 
@@ -78,5 +90,24 @@ describe("net area with street deduction", () => {
 
     const totalNetArea = totalArea - streetArea;
     expect(totalNetArea).toBe(27300);
+  });
+
+  it("zone areas from net area sum to net area when street enabled", () => {
+    const totalArea = 33800;
+    const streetArea = 6500;
+    const netArea = totalArea - streetArea;
+    expect(netArea).toBe(27300);
+
+    const zoneAPercent = 20;
+    const zoneBPercent = 25;
+    const zoneCPercent = 40;
+    const zoneDPercent = 15;
+    const zoneAArea = netArea * (zoneAPercent / 100);
+    const zoneBArea = netArea * (zoneBPercent / 100);
+    const zoneCArea = netArea * (zoneCPercent / 100);
+    const zoneDArea = netArea * (zoneDPercent / 100);
+
+    const sumZones = zoneAArea + zoneBArea + zoneCArea + zoneDArea;
+    expect(sumZones).toBe(netArea);
   });
 });
