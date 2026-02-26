@@ -15,7 +15,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME || "NALP",
-  description: "مجمع نبيه للسيارات والخدمات اللوجستية — مشروع تطوير متعدد الاستخدامات على محور الجبيل–الظهران.",
+  description: "مجمع النابية للسيارات والخدمات اللوجستية — مشروع تطوير متعدد الاستخدامات على محور الجبيل–الظهران.",
 };
 
 export default function RootLayout({
