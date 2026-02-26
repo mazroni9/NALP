@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 
 const keyNumbers = [
-  { label: "إجمالي مساحة الأرض", value: "33,000 م²" },
+  { label: "إجمالي مساحة الأرض", value: "≈33,800 م²" },
   { label: "المناطق", value: "2" },
   { label: "المنطقة أ (إسكان)", value: "مفهوم G+2" },
   { label: "المنطقة ب (سيارات)", value: "خدمات وتخزين" },
@@ -15,7 +15,7 @@ export default function HomePage() {
       <section className="bg-gradient-to-br from-indigo-600 to-indigo-800 px-4 py-24 text-white sm:py-32">
         <div className="mx-auto max-w-7xl text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            مجمع نبيه للسيارات والخدمات اللوجستية (NALP)
+            مجمع النابية للسيارات والخدمات اللوجستية (NALP)
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-indigo-100">
             مشروع تطوير متعدد الاستخدامات يجمع بين إسكان العمالة وخدمات

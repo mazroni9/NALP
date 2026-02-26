@@ -8,7 +8,7 @@ export function PublicNavbar() {
           <Link href="/" className="flex items-center gap-2 font-bold text-indigo-600">
             <span className="text-xl">NALP</span>
             <span className="hidden text-sm font-normal text-slate-500 sm:inline">
-              مجمع نبيه للسيارات والخدمات اللوجستية
+              مجمع النابية للسيارات والخدمات اللوجستية
             </span>
           </Link>
           <div className="flex items-center gap-4">

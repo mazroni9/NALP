@@ -3,11 +3,20 @@
  * مصدر: صورة الخريطة + ملف PROMPT — Auto-Design Architectural Masterplan
  * الموقع: محور الظهران–الجبيل (طريق 613)
  *
- * الأبعاد من المستند:
- * - إجمالي المساحة: ~33,000 م²
- * - الطول: 520 م تقريباً | العرض: 66 م تقريباً
- * - المنطقة أ (إسكان): ~17,000 م²
- * - المنطقة ب (خدمات): ~16,000 م²
+ * الأبعاد من المستند (مطابقة للمخطط المرجعي):
+ * - الطول: 520 م (شرق–غرب)
+ * - العمق: 65 م (شمال–جنوب تقريبًا)
+ * - إجمالي المساحة: ≈ 33,800 م²
+ *
+ * المناطق الأربع:
+ * - أ: منطقة المزاد
+ * - ب: منطقة إيواء المركبات
+ * - ج: منطقة سكن الموظفين والمرافق
+ * - د: منطقة استثمارية على الشارع الداخلي
+ *
+ * شارع مستقبلي داخلي:
+ * - يمتد شرق–غرب بطول 520 م، عرض 12.5 م
+ * - مساحة الشارع: 6,500 م² (تُخصم من المساحة الصافية عند التفعيل)
  */
 
 export interface LandSketch {
@@ -22,22 +31,34 @@ export interface LandSketch {
   gpsCoordinates?: [number, number][];
   /** نقاط المضلع بإحداثيات محلية (متر) - للاستوديو */
   polygonPointsMeters: [number, number][];
-  /** نسب المناطق المقترحة */
+  /** نسب المناطق المقترحة (أ، ب، ج، د) — المجموع = 100% */
   zoneAPercent: number;
   zoneBPercent: number;
+  zoneCPercent: number;
+  zoneDPercent: number;
   zoneAAreaM2: number;
   zoneBAreaM2: number;
+  zoneCAreaM2: number;
+  zoneDAreaM2: number;
+}
+
+/** تعريف المناطق للنصوص في الاستوديو */
+export interface ZoneConfig {
+  id: "a" | "b" | "c" | "d";
+  title: string;
+  shortDesc: string;
+  description: string;
 }
 
 /**
- * مضلع مستطيل تقريبي مطابق للأبعاد الواردة في المستند:
- * 500 م × 66 م ≈ 33,000 م²
+ * مضلع مستطيل مطابق للأبعاد الواردة في المستند:
+ * 520 م × 65 م ≈ 33,800 م²
  */
 const RECTANGLE_POINTS: [number, number][] = [
   [0, 0],
-  [500, 0],
-  [500, 66],
-  [0, 66],
+  [520, 0],
+  [520, 65],
+  [0, 65],
 ];
 
 /**
@@ -52,15 +73,15 @@ const GPS_COORDS: [number, number][] = [
 
 /**
  * مضلع غير منتظم تقريبي (يُستنتج من شكل القطعة على الخريطة)
- * نقاط مترية تقارب الشكل الأفقي على محور الطريق
+ * نقاط مترية تقارب الشكل الأفقي على محور الطريق (520 م × 65 م)
  */
 const IRREGULAR_POINTS: [number, number][] = [
   [0, 0],
   [180, 0],
   [400, 15],
-  [500, 50],
-  [500, 66],
-  [350, 66],
+  [520, 50],
+  [520, 65],
+  [350, 65],
   [150, 55],
   [0, 30],
 ];
@@ -83,18 +104,27 @@ export const nalpLandSketch: LandSketch = {
   name: "قطعة NALP المرجعية — محور الظهران الجبيل",
   nameEn: "NALP Reference Parcel — Dhahran Jubail Corridor",
   description:
-    "قطعة أرض على طريق الظهران الجبيل الفرعي/الغربي. إجمالي ~33,000 م²، تقسيم المنطقة أ (إسكان) ~17,000 م² والمنطقة ب (خدمات سيارات) ~16,000 م².",
+    "قطعة أرض على طريق الظهران الجبيل الفرعي/الغربي. إجمالي ≈ 33,800 م² (520 م شرق–غرب × 65 م شمال–جنوب). أربع مناطق: أ (المزاد)، ب (إيواء المركبات)، ج (سكن الموظفين والمرافق)، د (استثمارية على الشارع الداخلي).",
   sourceFile: "/PROMPT — Auto-Design Architectural Masterplan-برومبت معماري تخطيطي احترافي.docx",
   /** صورة الخريطة المصدر */
   mapImageUrl: "/nalp-land-sketch-map.png",
   totalAreaM2: Math.round(rectArea),
   gpsCoordinates: GPS_COORDS,
   polygonPointsMeters: RECTANGLE_POINTS,
-  zoneAPercent: 52,
-  zoneBPercent: 48,
-  zoneAAreaM2: 17000,
-  zoneBAreaM2: 16000,
+  zoneAPercent: 20,
+  zoneBPercent: 25,
+  zoneCPercent: 40,
+  zoneDPercent: 15,
+  zoneAAreaM2: Math.round(rectArea * 0.2),
+  zoneBAreaM2: Math.round(rectArea * 0.25),
+  zoneCAreaM2: Math.round(rectArea * 0.4),
+  zoneDAreaM2: Math.round(rectArea * 0.15),
 };
+
+/** شارع مستقبلي داخلي: طول 520م شرق–غرب، عرض 12.5م — مساحة 6,500 م² */
+export const STREET_LENGTH_M = 520;
+export const STREET_WIDTH_M = 12.5;
+export const STREET_AREA_M2 = STREET_LENGTH_M * STREET_WIDTH_M; // 6500
 
 /**
  * استكتش بالمضلع غير المنتظم (تقريبي)
@@ -106,9 +136,43 @@ export const nalpLandSketchIrregular: LandSketch = {
   nameEn: "NALP Parcel (Approximate Irregular Shape)",
   polygonPointsMeters: IRREGULAR_POINTS,
   totalAreaM2: Math.round(irregularArea),
-  zoneAAreaM2: Math.round(irregularArea * 0.52),
-  zoneBAreaM2: Math.round(irregularArea * 0.48),
+  zoneAAreaM2: Math.round(irregularArea * 0.2),
+  zoneBAreaM2: Math.round(irregularArea * 0.25),
+  zoneCAreaM2: Math.round(irregularArea * 0.4),
+  zoneDAreaM2: Math.round(irregularArea * 0.15),
 };
+
+/** نصوص المناطق للاستوديو */
+export const ZONE_CONFIGS: ZoneConfig[] = [
+  {
+    id: "a",
+    title: "منطقة المزاد",
+    shortDesc: "واجهة المشروع النشطة على طريق الجبيل–الدمام، منصة المزاد ومنطقة العرض.",
+    description:
+      "منطقة المزاد تشكّل واجهة المشروع النشطة على طريق الجبيل–الدمام، وفيها منصة المزاد، منطقة العرض المباشر، ومسارات حركة الجمهور والمزايدين. تصميمها يركّز على وضوح المشهد، إبراز العلامة التجارية، وسهولة دخول السيارات المعروضة وخروجها.",
+  },
+  {
+    id: "b",
+    title: "منطقة إيواء المركبات",
+    shortDesc: "تخزين السيارات قبل وبعد المزاد، مواقف وممرات شاحنات السحب.",
+    description:
+      "منطقة إيواء المركبات مخصّصة لتخزين السيارات قبل وبعد المزاد، مع تنظيم دقيق للمواقف ومسارات حركة شاحنات السحب. يتم توزيع المواقف في صفوف طولية بممرات مناسبة للمناورة، مع إمكانية تقسيم الساحة إلى بلوكات بحسب نوع السيارات أو حالة المركبات.",
+  },
+  {
+    id: "c",
+    title: "منطقة سكن الموظفين والمرافق",
+    shortDesc: "الجزء الهادئ من الأرض، بيئة معيشية مريحة، مباني سكنية ومرافق مركزية.",
+    description:
+      "منطقة سكن الموظفين والمرافق تقع في الجزء الهادئ من الأرض، وتوفر بيئة معيشية مريحة للعاملين. تضم مباني سكنية حديثة بطابقين تحقق حوالي 200 غرفة بنمط استوديو، إضافة إلى مبنى خدمات مركزية يضم مقهى/مطعم صغير، ميني ماركت، ومغسلة، مع ساحات خضراء طولية وممرات مشاة.",
+  },
+  {
+    id: "d",
+    title: "منطقة استثمارية على الشارع الداخلي",
+    shortDesc: "تطل على الشارع الداخلي المستقبلي، معارض فرعية وورش ومكاتب وتوسعات.",
+    description:
+      "المنطقة الاستثمارية تطل مباشرة على الشارع الداخلي المستقبلي، ومهيأة لاستيعاب أنشطة تجارية وتشغيلية مساندة مثل معارض فرعية، ورش متخصصة، مكاتب تشغيل، أو توسعات مستقبلية لساحة المزاد أو السكن. صُممت لتستفيد من واجهة الشارع وتعوّض جزءاً من المساحة المخصّصة للممر الداخلي.",
+  },
+];
 
 /** صيغة النقاط للاستوديو (x,y; x,y; ...) */
 export function getPointsStringForStudio(sketch: LandSketch): string {

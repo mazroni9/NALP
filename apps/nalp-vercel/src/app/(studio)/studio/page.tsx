@@ -5,12 +5,15 @@ import { apiPost, apiGet } from "@/lib/apiClient";
 import {
   nalpLandSketch,
   getPointsStringForStudio,
+  STREET_WIDTH_M,
+  ZONE_CONFIGS,
 } from "@/lib/nalpLandSketch";
 import { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { CompassOverlay } from "@/components/studio/CompassOverlay";
 
-const TARGET_AREA = 33000;
+const TARGET_AREA = 33800;
 
 function polygonArea(points: [number, number][]): number {
   if (!points || points.length < 3) return 0;
@@ -49,8 +52,11 @@ export default function StudioPage() {
   const [length, setLength] = useState(200);
   const [width, setWidth] = useState(165);
   const [pointsStr, setPointsStr] = useState("0,0; 200,0; 200,165; 0,165");
-  const [zoneAPercent, setZoneAPercent] = useState(50);
-  const [zoneBPercent, setZoneBPercent] = useState(50);
+  const [zoneAPercent, setZoneAPercent] = useState(20);
+  const [zoneBPercent, setZoneBPercent] = useState(25);
+  const [zoneCPercent, setZoneCPercent] = useState(40);
+  const [zoneDPercent, setZoneDPercent] = useState(15);
+  const [streetEnabled, setStreetEnabled] = useState(false);
   const [runs, setRuns] = useState<StudioRun[]>([]);
   const [selectedRun, setSelectedRun] = useState<StudioRun | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -78,6 +84,15 @@ export default function StudioPage() {
       : points && points.length >= 3
         ? polygonArea(points)
         : 0;
+  const streetLength =
+    landType === "rectangle"
+      ? length
+      : points && points.length >= 1
+        ? Math.max(...(points?.map((p) => p[0]) ?? [0])) -
+          Math.min(...(points?.map((p) => p[0]) ?? [0]))
+        : 0;
+  const streetArea = streetEnabled ? streetLength * STREET_WIDTH_M : 0;
+  const netArea = Math.max(0, area - streetArea);
   const perimeter =
     landType === "rectangle"
       ? 2 * (length + width)
@@ -85,8 +100,62 @@ export default function StudioPage() {
         ? polygonPerimeter(points)
         : 0;
 
-  const zoneAArea = area * (zoneAPercent / 100);
-  const zoneBArea = area * (zoneBPercent / 100);
+  const totalZonePercent = zoneAPercent + zoneBPercent + zoneCPercent + zoneDPercent;
+  const normA = totalZonePercent > 0 ? (zoneAPercent / totalZonePercent) * 100 : 25;
+  const normB = totalZonePercent > 0 ? (zoneBPercent / totalZonePercent) * 100 : 25;
+  const normC = totalZonePercent > 0 ? (zoneCPercent / totalZonePercent) * 100 : 25;
+  const normD = totalZonePercent > 0 ? (zoneDPercent / totalZonePercent) * 100 : 25;
+  const areaForZones = streetEnabled ? netArea : area;
+  const zoneAArea = areaForZones * (normA / 100);
+  const zoneBArea = areaForZones * (normB / 100);
+  const zoneCArea = areaForZones * (normC / 100);
+  const zoneDArea = areaForZones * (normD / 100);
+  const sumValid = Math.abs(totalZonePercent - 100) < 0.01;
+
+  const sumOther = (exclude: "a" | "b" | "c" | "d") => {
+    let s = 0;
+    if (exclude !== "a") s += zoneAPercent;
+    if (exclude !== "b") s += zoneBPercent;
+    if (exclude !== "c") s += zoneCPercent;
+    if (exclude !== "d") s += zoneDPercent;
+    return s || 1;
+  };
+  const setZoneA = (v: number) => {
+    const val = Math.max(0, Math.min(100, v));
+    const rem = 100 - val;
+    const s = sumOther("a");
+    setZoneAPercent(val);
+    setZoneBPercent(Math.round((rem * zoneBPercent) / s));
+    setZoneCPercent(Math.round((rem * zoneCPercent) / s));
+    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
+  };
+  const setZoneB = (v: number) => {
+    const val = Math.max(0, Math.min(100, v));
+    const rem = 100 - val;
+    const s = sumOther("b");
+    setZoneBPercent(val);
+    setZoneAPercent(Math.round((rem * zoneAPercent) / s));
+    setZoneCPercent(Math.round((rem * zoneCPercent) / s));
+    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
+  };
+  const setZoneC = (v: number) => {
+    const val = Math.max(0, Math.min(100, v));
+    const rem = 100 - val;
+    const s = sumOther("c");
+    setZoneCPercent(val);
+    setZoneAPercent(Math.round((rem * zoneAPercent) / s));
+    setZoneBPercent(Math.round((rem * zoneBPercent) / s));
+    setZoneDPercent(Math.round((rem * zoneDPercent) / s));
+  };
+  const setZoneD = (v: number) => {
+    const val = Math.max(0, Math.min(100, v));
+    const rem = 100 - val;
+    const s = sumOther("d");
+    setZoneDPercent(val);
+    setZoneAPercent(Math.round((rem * zoneAPercent) / s));
+    setZoneBPercent(Math.round((rem * zoneBPercent) / s));
+    setZoneCPercent(Math.round((rem * zoneCPercent) / s));
+  };
   const areaDiff = Math.abs(area - TARGET_AREA);
   const areaWarning = areaDiff > 5000;
 
@@ -119,8 +188,13 @@ export default function StudioPage() {
               ? points
               : null,
         },
-        zone_a_percent: zoneAPercent,
-        zone_b_percent: zoneBPercent,
+        zone_a_percent: normA,
+        zone_b_percent: normB,
+        zone_c_percent: normC,
+        zone_d_percent: normD,
+        street: streetEnabled
+          ? { length_m: streetLength, width_m: STREET_WIDTH_M, area_m2: streetArea }
+          : null,
       };
       const data = await apiPost<{ run: StudioRun }>(
         "/api/studio/generate",
@@ -145,8 +219,9 @@ export default function StudioPage() {
     setPointsStr(getPointsStringForStudio(nalpLandSketch));
     setZoneAPercent(nalpLandSketch.zoneAPercent);
     setZoneBPercent(nalpLandSketch.zoneBPercent);
+    setZoneCPercent(nalpLandSketch.zoneCPercent);
+    setZoneDPercent(nalpLandSketch.zoneDPercent);
   };
-
   return (
     <div className="flex gap-6 p-6 pt-6">
       <aside className="w-80 shrink-0 space-y-6">
@@ -221,7 +296,7 @@ export default function StudioPage() {
                   value={pointsStr}
                   onChange={(e) => setPointsStr(e.target.value)}
                   rows={3}
-                  placeholder="0,0; 200,0; 200,165; 0,165"
+                  placeholder="0,0; 520,0; 520,65; 0,65"
                   className="mt-1 w-full rounded border border-slate-300 px-2 py-2 font-mono text-sm"
                 />
                 <p className="mt-1 text-xs text-slate-500">
@@ -231,14 +306,27 @@ export default function StudioPage() {
             )}
             <div>
               <p className="text-sm text-slate-600">
-                المساحة: {area.toLocaleString("ar-SA")} م²
+                المساحة الإجمالية للأرض: {area.toLocaleString("ar-SA")} م²
               </p>
+              {streetEnabled && (
+                <>
+                  <p className="text-sm text-slate-600">
+                    مساحة الشارع الداخلي: {Math.round(streetArea).toLocaleString("ar-SA")} م²
+                  </p>
+                  <p className="text-sm font-medium text-slate-700">
+                    المساحة الصافية بعد خصم الشارع: {Math.round(netArea).toLocaleString("ar-SA")} م²
+                  </p>
+                </>
+              )}
               <p className="text-sm text-slate-600">
                 المحيط: {perimeter.toLocaleString("ar-SA")} م
               </p>
+              <p className="mt-1 text-xs text-slate-500">
+                المساحة المرجعية للأرض حوالي 33,800 م² (520 م شرق–غرب × 65 م شمال–جنوب).
+              </p>
               {area > 0 && areaWarning && (
                 <p className="mt-1 text-sm font-medium text-amber-600">
-                  ⚠ بعيد عن الهدف 33,000 م²
+                  ⚠ بعيد عن المساحة المرجعية ≈33,800 م²
                 </p>
               )}
             </div>
@@ -246,36 +334,82 @@ export default function StudioPage() {
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-4">
-          <h2 className="font-semibold">تقسيم المناطق</h2>
+          <h2 className="font-semibold">تقسيم المناطق (أربع مناطق)</h2>
+          {!sumValid && (
+            <p className="mt-1 text-sm font-medium text-amber-600">
+              ⚠ مجموع النسب يجب أن يساوي 100% (حاليًا: {Math.round(totalZonePercent)}%)
+            </p>
+          )}
           <div className="mt-4 space-y-4">
-            <div>
-              <label className="block text-sm">المنطقة أ %</label>
+            {[
+              { key: "a" as const, pct: zoneAPercent, norm: normA, area: zoneAArea, set: setZoneA },
+              { key: "b" as const, pct: zoneBPercent, norm: normB, area: zoneBArea, set: setZoneB },
+              { key: "c" as const, pct: zoneCPercent, norm: normC, area: zoneCArea, set: setZoneC },
+              { key: "d" as const, pct: zoneDPercent, norm: normD, area: zoneDArea, set: setZoneD },
+            ].map(({ key, pct, norm, area, set }) => {
+              const cfg = ZONE_CONFIGS.find((z) => z.id === key)!;
+              const zoneLabel = { a: "أ", b: "ب", c: "ج", d: "د" }[key];
+              return (
+                <div key={key}>
+                  <label className="block text-sm font-medium">{cfg.title} (المنطقة {zoneLabel})</label>
+                  <p className="text-xs text-slate-500">{cfg.shortDesc}</p>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={pct}
+                    onChange={(e) => set(Number(e.target.value))}
+                    className="mt-1 w-full"
+                  />
+                  <span className="block text-sm">
+                    {Math.round(norm)}% — مساحة المنطقة {zoneLabel}: {area.toLocaleString("ar-SA")} م²
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-3 rounded border border-slate-200 bg-slate-50 p-2 text-xs">
+            <p className="font-medium">ملخص المساحات (م²)</p>
+            <table className="mt-1 w-full text-right">
+              <tbody>
+                {[
+                  { label: "أ", area: zoneAArea },
+                  { label: "ب", area: zoneBArea },
+                  { label: "ج", area: zoneCArea },
+                  { label: "د", area: zoneDArea },
+                ].map(({ label, area }) => (
+                  <tr key={label}>
+                    <td>المنطقة {label}</td>
+                    <td>{area.toLocaleString("ar-SA")}</td>
+                  </tr>
+                ))}
+                <tr className="border-t border-slate-300 font-medium">
+                  <td>المجموع</td>
+                  <td>{(zoneAArea + zoneBArea + zoneCArea + zoneDArea).toLocaleString("ar-SA")}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h2 className="font-semibold">شارع داخلي مستقبلي</h2>
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center gap-2">
               <input
-                type="range"
-                min={0}
-                max={100}
-                value={zoneAPercent}
-                onChange={(e) => setZoneAPercent(Number(e.target.value))}
-                className="w-full"
+                id="streetEnabled"
+                type="checkbox"
+                checked={streetEnabled}
+                onChange={(e) => setStreetEnabled(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-indigo-600"
               />
-              <span>
-                {zoneAPercent}% — {zoneAArea.toLocaleString("ar-SA")} م²
-              </span>
+              <label htmlFor="streetEnabled" className="text-sm">
+                إضافة شارع داخلي مستقبلي (12.5 م × 520 م) – تُخصم مساحته من المساحة الصافية للأرض.
+              </label>
             </div>
-            <div>
-              <label className="block text-sm">المنطقة ب %</label>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={zoneBPercent}
-                onChange={(e) => setZoneBPercent(Number(e.target.value))}
-                className="w-full"
-              />
-              <span>
-                {zoneBPercent}% — {zoneBArea.toLocaleString("ar-SA")} م²
-              </span>
-            </div>
+            <p className="text-xs text-slate-500">
+              الشارع يمتد شرق–غرب على طول الأرض، عرض 12.5 م، ملاصق للحافة الجنوبية.
+            </p>
           </div>
         </section>
 
@@ -308,11 +442,27 @@ export default function StudioPage() {
         </section>
       </aside>
 
-      <main className="min-h-[600px] flex-1 rounded-xl border border-slate-200 bg-white">
-        <div className="h-[600px] w-full">
+      <main className="relative min-h-[600px] flex-1 rounded-xl border border-slate-200 bg-white">
+        <div className="relative h-[600px] w-full">
           <Suspense fallback={<div className="flex h-full items-center justify-center">جاري تحميل العرض الثلاثي الأبعاد...</div>}>
-            <CanvasViewer glbUrl={glbUrl} />
+            <CanvasViewer
+              glbUrl={glbUrl}
+              streetEnabled={streetEnabled}
+              landBounds={
+                landType === "rectangle"
+                  ? { lengthX: length, depthY: width }
+                  : points && points.length >= 1
+                    ? {
+                        lengthX: streetLength || 520,
+                        depthY:
+                          Math.max(...(points?.map((p) => p[1]) ?? [0])) -
+                          Math.min(...(points?.map((p) => p[1]) ?? [0])),
+                      }
+                    : { lengthX: 520, depthY: 65 }
+              }
+            />
           </Suspense>
+          <CompassOverlay />
         </div>
       </main>
     </div>
