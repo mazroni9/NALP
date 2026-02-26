@@ -20,7 +20,16 @@ export default function ZoneDPage() {
       <Card className="mt-8">
         <h2 className="text-lg font-semibold">اسكتش الأبعاد والحدود</h2>
         <div className="mt-4">
-          <ZoneSketch dims={dims} />
+          <ZoneSketch
+            dims={dims}
+            zoneDSections={{
+              rightWidthM: 39,
+              topDepthM: 26.25,
+              section1Label: "ورشة صيانة سيارات نموذجية",
+              section2Label: "ورشة تنجيد وتجديد للسيارات وتلميعها",
+              section3Label: "مغسلة سيارات نموذجية",
+            }}
+          />
         </div>
       </Card>
 
@@ -33,9 +42,15 @@ export default function ZoneDPage() {
           <h2 className="text-lg font-semibold">المميزات الرئيسية</h2>
           <ul className="mt-2 list-inside list-disc space-y-1 text-slate-600">
             <li>تطل على الشارع الداخلي المستقبلي</li>
-            <li>معارض فرعية وورش متخصصة</li>
-            <li>مكاتب تشغيل</li>
-            <li>توسعات مستقبلية لساحة المزاد أو السكن</li>
+            <li>
+              القسم 1: ورشة صيانة سيارات نموذجية
+            </li>
+            <li>
+              القسم 2: ورشة تنجيد وتجديد للسيارات وتلميعها
+            </li>
+            <li>
+              القسم 3: مغسلة سيارات نموذجية
+            </li>
           </ul>
         </Card>
       </div>

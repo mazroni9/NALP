@@ -17,12 +17,28 @@ export interface ZoneCLayout {
   parkingWidthM: number;
 }
 
+/**
+ * تخطيط المنطقة د: ثلاثة أقسام بخطوط منقطة — يمين (1)، يسار علوي (2)، يسار سفلي (3)
+ */
+export interface ZoneDSections {
+  /** عرض القسم الأيمن (شرق) — الباقي يُقسّم عمودياً */
+  rightWidthM: number;
+  /** عمق القسم العلوي من النصف الأيسر */
+  topDepthM: number;
+  /** تسميات الاستخدام (اختياري) */
+  section1Label?: string;
+  section2Label?: string;
+  section3Label?: string;
+}
+
 interface ZoneSketchProps {
   dims: ZoneDimensions;
   /** عدد المباني المتجاورة (يُقسّم العرض بالتساوي) — للإظهار البسيط */
   buildingCount?: number;
   /** تخطيط المنطقة ج: 7م طرفية، 14م وسطية، 22م مواقف — يحسب العدد تلقائياً */
   zoneCLayout?: ZoneCLayout;
+  /** تخطيط المنطقة د: ثلاثة أقسام بخطوط منقطة */
+  zoneDSections?: ZoneDSections;
 }
 
 /**
@@ -69,10 +85,16 @@ function computeZoneCLayout(
   return { buildings, parkings, eastBoundaryParkingM };
 }
 
-export function ZoneSketch({ dims, buildingCount, zoneCLayout }: ZoneSketchProps) {
+export function ZoneSketch({
+  dims,
+  buildingCount,
+  zoneCLayout,
+  zoneDSections,
+}: ZoneSketchProps) {
   const scale = 4;
   const w = dims.widthM * scale;
   const h = dims.depthM * scale;
+  const useLargeLabels = zoneDSections != null && dims.id === "d";
   const streetH = STREET_WIDTH_M * scale;
   const pad = 70;
   const strokeW = 2;
@@ -229,8 +251,141 @@ export function ZoneSketch({ dims, buildingCount, zoneCLayout }: ZoneSketchProps
               }
               return el;
             })()}
+          {/* تخطيط المنطقة د: ثلاثة أقسام بخطوط منقطة */}
+          {zoneDSections != null &&
+            dims.id === "d" &&
+            (() => {
+              const { rightWidthM, topDepthM, section1Label, section2Label, section3Label } =
+                zoneDSections;
+              const leftWidthM = dims.widthM - rightWidthM;
+              const bottomDepthM = dims.depthM - topDepthM;
+              const leftW = leftWidthM * scale;
+              const rightW = rightWidthM * scale;
+              const topH = topDepthM * scale;
+              const bottomH = bottomDepthM * scale;
+              const divX = leftW;
+              return (
+                <>
+                  <line
+                    x1={divX}
+                    y1={0}
+                    x2={divX}
+                    y2={h}
+                    stroke="#6366f1"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 3"
+                  />
+                  <line
+                    x1={0}
+                    y1={topH}
+                    x2={divX}
+                    y2={topH}
+                    stroke="#6366f1"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 3"
+                  />
+                  <text
+                    x={divX + rightW / 2}
+                    y={h / 2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-800 text-xl font-bold"
+                  >
+                    1
+                  </text>
+                  <text
+                    x={divX + rightW / 2}
+                    y={h / 2 + 18}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-700 text-sm font-semibold"
+                  >
+                    {rightWidthM}×{dims.depthM} م
+                  </text>
+                  {section1Label && (
+                    <text
+                      x={divX + rightW / 2}
+                      y={h / 2 + 36}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-slate-600 text-xs max-w-[95%]"
+                    >
+                      {section1Label}
+                    </text>
+                  )}
+                  <text
+                    x={leftW / 2}
+                    y={topH / 2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-800 text-xl font-bold"
+                  >
+                    2
+                  </text>
+                  <text
+                    x={leftW / 2}
+                    y={topH / 2 + 18}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-700 text-sm font-semibold"
+                  >
+                    {leftWidthM}×{topDepthM} م
+                  </text>
+                  {section2Label && (
+                    <text
+                      x={leftW / 2}
+                      y={topH / 2 + 36}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-slate-600 text-xs max-w-[95%]"
+                    >
+                      {section2Label}
+                    </text>
+                  )}
+                  <text
+                    x={leftW / 2}
+                    y={topH + bottomH / 2 - 28}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-800 text-xl font-bold"
+                  >
+                    3
+                  </text>
+                  <text
+                    x={leftW / 2}
+                    y={topH + bottomH / 2 - 10}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-700 text-sm font-semibold"
+                  >
+                    {leftWidthM}×{bottomDepthM} م
+                  </text>
+                  {section3Label && (
+                    <text
+                      x={leftW / 2}
+                      y={topH + bottomH / 2 + 18}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-slate-800 text-sm font-semibold"
+                    >
+                      {section3Label}
+                    </text>
+                  )}
+                  <text
+                    x={w / 2}
+                    y={28}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-slate-900 text-2xl font-bold uppercase tracking-wide"
+                  >
+                    المنطقة D
+                  </text>
+                </>
+              );
+            })()}
           {/* مباني متجاورة بسيطة (بدون تخطيط مواقف) */}
           {zoneCLayout == null &&
+            zoneDSections == null &&
             buildingCount != null &&
             Array.from({ length: buildingCount }).map((_, i) => {
               const bw = w / buildingCount;
@@ -261,10 +416,20 @@ export function ZoneSketch({ dims, buildingCount, zoneCLayout }: ZoneSketchProps
             })}
           {/* الشمال — طول الأرض 104 م ثم شمال */}
           <line x1={0} y1={0} x2={w} y2={0} stroke="#64748b" strokeWidth={1} strokeDasharray="4" />
-          <text x={w / 2} y={-4} textAnchor="middle" className="fill-slate-800 text-base font-bold">
+          <text
+            x={w / 2}
+            y={-4}
+            textAnchor="middle"
+            className={useLargeLabels ? "fill-slate-900 text-xl font-bold" : "fill-slate-800 text-base font-bold"}
+          >
             شمال — {dims.widthM} م
           </text>
-          <text x={w / 2} y={-20} textAnchor="middle" className="fill-slate-500 text-sm">
+          <text
+            x={w / 2}
+            y={-24}
+            textAnchor="middle"
+            className={useLargeLabels ? "fill-slate-700 text-base font-semibold" : "fill-slate-500 text-sm"}
+          >
             {dims.northBoundary}
           </text>
           {/* شريط شارعنا 12.5 م — ملاصق للمنطقة */}
@@ -307,7 +472,12 @@ export function ZoneSketch({ dims, buildingCount, zoneCLayout }: ZoneSketchProps
           </text>
           {/* جنوب — فوق الحد الجنوبي بتباعد واضح عن الشوارع */}
           <line x1={0} y1={h} x2={w} y2={h} stroke="#64748b" strokeWidth={1} strokeDasharray="4" />
-          <text x={w / 2} y={h - 12} textAnchor="middle" className="fill-slate-600 text-sm font-medium">
+          <text
+            x={w / 2}
+            y={h - 20}
+            textAnchor="middle"
+            className="fill-slate-600 text-xs font-medium"
+          >
             جنوب — {dims.widthM} م
           </text>
           {/* الشرق — البعد والعنوان */}
@@ -317,28 +487,36 @@ export function ZoneSketch({ dims, buildingCount, zoneCLayout }: ZoneSketchProps
             y={h / 2}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="fill-slate-800 text-base font-bold"
+            className={
+              useLargeLabels ? "fill-slate-900 text-xl font-bold" : "fill-slate-800 text-base font-bold"
+            }
             transform={`rotate(90, ${w + 16}, ${h / 2})`}
           >
             {dims.depthM} م
           </text>
           <text
-            x={w + 36}
+            x={w + (useLargeLabels ? 42 : 36)}
             y={h / 2}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="fill-slate-600 text-sm font-medium"
-            transform={`rotate(90, ${w + 36}, ${h / 2})`}
+            className={
+              useLargeLabels ? "fill-slate-700 text-base font-semibold" : "fill-slate-600 text-sm font-medium"
+            }
+            transform={`rotate(90, ${w + (useLargeLabels ? 42 : 36)}, ${h / 2})`}
           >
             شرق
           </text>
           <text
-            x={w + 48}
+            x={w + (useLargeLabels ? 58 : 48)}
             y={h / 2}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="fill-slate-500 text-sm max-w-[80px]"
-            transform={`rotate(90, ${w + 48}, ${h / 2})`}
+            className={
+              useLargeLabels
+                ? "fill-slate-700 text-base font-semibold max-w-[100px]"
+                : "fill-slate-500 text-sm max-w-[80px]"
+            }
+            transform={`rotate(90, ${w + (useLargeLabels ? 58 : 48)}, ${h / 2})`}
           >
             {dims.eastBoundary}
           </text>
@@ -349,23 +527,29 @@ export function ZoneSketch({ dims, buildingCount, zoneCLayout }: ZoneSketchProps
             y={h / 2}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="fill-slate-600 text-sm font-medium"
+            className={
+              useLargeLabels ? "fill-slate-700 text-base font-semibold" : "fill-slate-600 text-sm font-medium"
+            }
             transform={`rotate(-90, -16, ${h / 2})`}
           >
             غرب
           </text>
           <text
-            x={-36}
+            x={useLargeLabels ? -42 : -36}
             y={h / 2}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="fill-slate-500 text-sm"
-            transform={`rotate(-90, -36, ${h / 2})`}
+            className={
+              useLargeLabels ? "fill-slate-700 text-base font-semibold" : "fill-slate-500 text-sm"
+            }
+            transform={`rotate(-90, ${useLargeLabels ? -42 : -36}, ${h / 2})`}
           >
             {dims.westBoundary}
           </text>
-          {/* ملصق المنطقة والمساحة — يختفي عند عرض المباني */}
-          {zoneCLayout == null && buildingCount == null && (
+          {/* ملصق المنطقة والمساحة — يختفي عند عرض المباني أو أقسام المنطقة د */}
+          {zoneCLayout == null &&
+            buildingCount == null &&
+            zoneDSections == null && (
             <>
               <text
                 x={w / 2}
