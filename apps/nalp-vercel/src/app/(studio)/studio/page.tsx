@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/Button";
 import { apiPost, apiGet } from "@/lib/apiClient";
 import {
   nalpLandSketch,
-  getPointsStringForStudio,
   STREET_WIDTH_M,
   ZONE_CONFIGS,
 } from "@/lib/nalpLandSketch";
@@ -49,6 +48,7 @@ interface StudioRun {
 
 export default function StudioPage() {
   const [landType, setLandType] = useState<"rectangle" | "polygon">("rectangle");
+  const [referenceSketchActive, setReferenceSketchActive] = useState(false);
   const [length, setLength] = useState(200);
   const [width, setWidth] = useState(165);
   const [pointsStr, setPointsStr] = useState("0,0; 200,0; 200,165; 0,165");
@@ -215,12 +215,18 @@ export default function StudioPage() {
     rawGlbUrl && !rawGlbUrl.includes("mock") ? rawGlbUrl : null;
 
   const loadReferenceSketch = () => {
-    setLandType("polygon");
-    setPointsStr(getPointsStringForStudio(nalpLandSketch));
+    setLandType("rectangle");
+    setLength(520);
+    setWidth(65);
+    setPointsStr("0,0; 520,0; 520,65; 0,65");
+    setReferenceSketchActive(true);
     setZoneAPercent(nalpLandSketch.zoneAPercent);
     setZoneBPercent(nalpLandSketch.zoneBPercent);
     setZoneCPercent(nalpLandSketch.zoneCPercent);
     setZoneDPercent(nalpLandSketch.zoneDPercent);
+  };
+  const exitReferenceSketch = () => {
+    setReferenceSketchActive(false);
   };
   return (
     <div className="flex gap-6 p-6 pt-6">
@@ -254,9 +260,11 @@ export default function StudioPage() {
               <label className="block text-sm">النوع</label>
               <select
                 value={landType}
-                onChange={(e) =>
-                  setLandType(e.target.value as "rectangle" | "polygon")
-                }
+                onChange={(e) => {
+                  const v = e.target.value as "rectangle" | "polygon";
+                  setLandType(v);
+                  if (v === "polygon") setReferenceSketchActive(false);
+                }}
                 className="mt-1 w-full rounded border border-slate-300 px-2 py-2"
               >
                 <option value="rectangle">مستطيل</option>
@@ -270,8 +278,10 @@ export default function StudioPage() {
                   <input
                     type="number"
                     value={length}
-                    onChange={(e) => setLength(Number(e.target.value))}
-                    className="mt-1 w-full rounded border border-slate-300 px-2 py-2"
+                    onChange={(e) => !referenceSketchActive && setLength(Number(e.target.value))}
+                    readOnly={referenceSketchActive}
+                    disabled={referenceSketchActive}
+                    className={`mt-1 w-full rounded border border-slate-300 px-2 py-2 ${referenceSketchActive ? "cursor-not-allowed bg-slate-100" : ""}`}
                     min={1}
                   />
                 </div>
@@ -280,11 +290,27 @@ export default function StudioPage() {
                   <input
                     type="number"
                     value={width}
-                    onChange={(e) => setWidth(Number(e.target.value))}
-                    className="mt-1 w-full rounded border border-slate-300 px-2 py-2"
+                    onChange={(e) => !referenceSketchActive && setWidth(Number(e.target.value))}
+                    readOnly={referenceSketchActive}
+                    disabled={referenceSketchActive}
+                    className={`mt-1 w-full rounded border border-slate-300 px-2 py-2 ${referenceSketchActive ? "cursor-not-allowed bg-slate-100" : ""}`}
                     min={1}
                   />
                 </div>
+                {referenceSketchActive && (
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-slate-600">
+                      الأبعاد ثابتة حسب المخطط المرجعي: 520 م (شرق–غرب) × 65 م (شمال–جنوب).
+                    </p>
+                    <button
+                      type="button"
+                      onClick={exitReferenceSketch}
+                      className="shrink-0 text-xs text-indigo-600 hover:underline"
+                    >
+                      إلغاء المرجع
+                    </button>
+                  </div>
+                )}
               </>
             )}
             {landType === "polygon" && (
@@ -324,6 +350,11 @@ export default function StudioPage() {
               <p className="mt-1 text-xs text-slate-500">
                 المساحة المرجعية للأرض حوالي 33,800 م² (520 م شرق–غرب × 65 م شمال–جنوب).
               </p>
+              {referenceSketchActive && (
+                <p className="mt-2 text-xs text-slate-600">
+                  طريق الجبيل–الدمام من الشرق، شارع داخلي مستقبلي بعرض 12.5 م من جهة المشروع + 12.5 م من جهة الجار من الجنوب، وشارع خلفي بعرض 30 م من الغرب.
+                </p>
+              )}
               {area > 0 && areaWarning && (
                 <p className="mt-1 text-sm font-medium text-amber-600">
                   ⚠ بعيد عن المساحة المرجعية ≈33,800 م²
@@ -448,6 +479,7 @@ export default function StudioPage() {
             <CanvasViewer
               glbUrl={glbUrl}
               streetEnabled={streetEnabled}
+              useReferenceSketch={referenceSketchActive}
               landBounds={
                 landType === "rectangle"
                   ? { lengthX: length, depthY: width }
