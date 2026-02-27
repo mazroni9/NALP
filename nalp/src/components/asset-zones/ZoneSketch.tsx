@@ -131,20 +131,49 @@ export function ZoneSketch({
             stroke={ZONE_COLORS[dims.id]}
             strokeWidth={strokeW}
           />
-          {/* تخطيط المنطقة ج: طرفية 7م، وسطية 14م ظهر لظهر، مواقف 22م */}
+          {/* تخطيط المنطقة ج: طريق ٤م خلف المباني يربط ساحات المواقف، ثم مباني ومواقف (٤٨٫٥م مستخدمة) */}
           {zoneCLayout != null &&
             (() => {
+              const ROAD_BEHIND_M = 4;
+              const roadH = ROAD_BEHIND_M * scale;
+              const contentH = h - roadH;
               const { buildings, parkings, eastBoundaryParkingM } = computeZoneCLayout(
                 dims.widthM,
                 zoneCLayout
               );
               const el: JSX.Element[] = [];
+              el.push(
+                <rect
+                  key="roadBehind"
+                  x={0}
+                  y={0}
+                  width={w}
+                  height={roadH}
+                  fill="#94a3b8"
+                  fillOpacity={0.5}
+                  stroke="#64748b"
+                  strokeWidth={1}
+                  strokeDasharray="3 2"
+                />
+              );
+              el.push(
+                <text
+                  key="roadBehindLabel"
+                  x={w / 2}
+                  y={roadH / 2}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="fill-slate-700 text-sm font-semibold"
+                >
+                  طريق ٤م — يربط ساحات المواقف خلف المباني
+                </text>
+              );
               let x = 0;
               for (let i = 0; i < buildings.length; i++) {
                 const b = buildings[i];
                 const bW = b.widthM * scale;
-                const bH = h;
-                const bY = 0;
+                const bH = contentH;
+                const bY = roadH;
                 const isMiddle = b.depthM === 14;
                 el.push(
                   <g key={`b${i}`}>
@@ -161,7 +190,7 @@ export function ZoneSketch({
                     {isMiddle && (
                       <line
                         x1={x + bW / 2}
-                        y1={0}
+                        y1={roadH}
                         x2={x + bW / 2}
                         y2={h}
                         stroke="#92400e"
@@ -196,9 +225,9 @@ export function ZoneSketch({
                     <rect
                       key={`p${i}`}
                       x={x}
-                      y={0}
+                      y={roadH}
                       width={pW}
-                      height={h}
+                      height={contentH}
                       fill="#94a3b8"
                       fillOpacity={0.4}
                       stroke="#64748b"
@@ -210,7 +239,7 @@ export function ZoneSketch({
                     <text
                       key={`pt${i}`}
                       x={x + pW / 2}
-                      y={h / 2}
+                      y={roadH + contentH / 2}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       className="fill-slate-700 text-sm font-semibold"
@@ -227,9 +256,9 @@ export function ZoneSketch({
                   <rect
                     key="eastBoundary"
                     x={x}
-                    y={0}
+                    y={roadH}
                     width={ebW}
-                    height={h}
+                    height={contentH}
                     fill="#94a3b8"
                     fillOpacity={0.5}
                     stroke="#64748b"
@@ -241,7 +270,7 @@ export function ZoneSketch({
                   <text
                     key="eastBoundaryLabel"
                     x={x + ebW / 2}
-                    y={h / 2}
+                    y={roadH + contentH / 2}
                     textAnchor="middle"
                     dominantBaseline="middle"
                     className="fill-slate-700 text-sm font-semibold"
@@ -575,10 +604,13 @@ export function ZoneSketch({
               return (
                 <>
                   {" "}
-                  | {buildings.length} مباني، {parkings.length} مواقف
+                  | {buildings.length} مباني، {parkings.length} مواقف | طريق ٤م يربط ساحات المواقف خلف المباني
                 </>
               );
             })()}
+          {zoneDSections != null &&
+            dims.id === "d" &&
+            " | 3 أقسام (ورشة صيانة، تنجيد، مغسلة)"}
         </p>
       </div>
     </div>

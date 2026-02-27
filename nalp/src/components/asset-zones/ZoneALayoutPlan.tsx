@@ -204,16 +204,16 @@ export function ZoneALayoutPlan() {
           <line x1={0} y1={h} x2={w} y2={h} stroke="#64748b" strokeWidth={1} strokeDasharray="4" />
 
           {/* شارعنا — 12.5 م (متناسق مع العمق 52.5 م) */}
-          <rect x={0} y={h} width={w} height={streetH} fill="#cbd5e1" stroke="#94a3b8" strokeWidth={1} />
+          <rect x={0} y={h} width={w} height={streetH} fill="#94a3b8" stroke="#64748b" strokeWidth={1} />
           <line x1={w + 8} y1={h} x2={w + 8} y2={h + streetH} stroke="#64748b" strokeWidth={0.8} />
           <text x={w + 14} y={h + streetH / 2} textAnchor="start" dominantBaseline="middle" className="fill-slate-600 text-[14px] font-medium">12.5 م</text>
           <text x={w / 2} y={h + streetH / 2} textAnchor="middle" dominantBaseline="middle" className="fill-slate-700 text-base font-semibold">شارعنا 12.5 م</text>
 
           {/* شارع الجار — 12.5 م (نفس عرض شارعنا) */}
-          <rect x={0} y={h + streetH} width={w} height={streetH} fill="#cbd5e1" stroke="#94a3b8" strokeWidth={1} />
+          <rect x={0} y={h + streetH} width={w} height={streetH} fill="#64748b" stroke="#475569" strokeWidth={1} />
           <line x1={w + 8} y1={h + streetH} x2={w + 8} y2={h + streetH * 2} stroke="#64748b" strokeWidth={0.8} />
           <text x={w + 14} y={h + streetH + streetH / 2} textAnchor="start" dominantBaseline="middle" className="fill-slate-600 text-[14px] font-medium">12.5 م</text>
-          <text x={w / 2} y={h + streetH + streetH / 2} textAnchor="middle" dominantBaseline="middle" className="fill-slate-700 text-base">شارع الجار 12.5 م</text>
+          <text x={w / 2} y={h + streetH + streetH / 2} textAnchor="middle" dominantBaseline="middle" className="fill-white text-base font-medium">شارع الجار 12.5 م</text>
 
           <line x1={w} y1={0} x2={w} y2={h} stroke="#64748b" strokeWidth={1} strokeDasharray="4" />
           <text

@@ -19,6 +19,9 @@ export default function ZoneDPage() {
 
       <Card className="mt-8">
         <h2 className="text-lg font-semibold">اسكتش الأبعاد والحدود</h2>
+        <p className="mt-2 text-sm text-slate-600">
+          ثلاثة أقسام: القسم الأيمن (39×52.5م) ورشة صيانة، القسمان الأيسران (ورشة تنجيد ومغسلة).
+        </p>
         <div className="mt-4">
           <ZoneSketch
             dims={dims}

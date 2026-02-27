@@ -4,9 +4,11 @@ import { ZONE_CONFIGS, ZONE_DIMENSIONS } from "@/lib/nalpLandSketch";
 import { ZoneSketch } from "@/components/asset-zones/ZoneSketch";
 import { RoomLayoutSketch } from "@/components/asset-zones/RoomLayoutSketch";
 import { ROOMS_PER_BUILDING } from "@/lib/roomLayout";
+import { computeZoneCAreas } from "@/lib/zoneCAreas";
 
 const zone = ZONE_CONFIGS.find((z) => z.id === "c")!;
 const dims = ZONE_DIMENSIONS.find((z) => z.id === "c")!;
+const zoneCAreas = computeZoneCAreas();
 
 export default function ZoneCPage() {
   return (
@@ -22,9 +24,10 @@ export default function ZoneCPage() {
       <Card className="mt-8">
         <h2 className="text-lg font-semibold">اسكتش الأبعاد والحدود</h2>
         <p className="mt-2 text-sm text-slate-600">
-          6 مباني و5 مواقف (25م بينها)، مبنى شرقي 14×14م. المتبقي (6 م طولي) مواقف بين مبنى 6 ومنطقة
-          الإيواء. تُخصَّص الغرف السفلية من مبنى 6 مكاتب لقسم الإيواء وخدمات مثل سوبرماركت صغير
-          ومغسلة وغيرها.
+          6 مباني و5 مواقف (25م بينها)، مبنى شرقي 7×7م ومباني وسطية 14×14م. المتبقي (6 م طولي) مواقف بين مبنى 6 ومنطقة
+          الإيواء. المساحة المتبقية من عمق 52.5م بعد استخدام 48.5م للمباني = 4م تُخصَّص كطريق يربط
+          ساحات المواقف من خلف المباني مع بعضها. تُخصَّص الغرف السفلية من مبنى 6 مكاتب لقسم الإيواء
+          وخدمات مثل ميني سوبرماركت ومقهى صغير ومغسلة.
         </p>
         <div className="mt-4">
           <ZoneSketch
@@ -61,6 +64,50 @@ export default function ZoneCPage() {
             </ul>
             <p className="mt-2 text-sm text-slate-600">
               المجموع: {ROOMS_PER_BUILDING["7m"].total + 5 * ROOMS_PER_BUILDING["14m"].total} غرفة
+            </p>
+          </div>
+        </Card>
+        <Card>
+          <h2 className="text-lg font-semibold">حساب المساحات — لتقدير التكاليف</h2>
+          <p className="mt-2 text-sm text-slate-600 mb-4">
+            تفصيل مساحات المباني والمواقف والطريق ٤م لاستخدامها في بطاقة تقدير التكاليف.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse border border-slate-200">
+              <thead>
+                <tr className="bg-slate-100">
+                  <th className="border border-slate-200 px-3 py-2 text-right">المبنى</th>
+                  <th className="border border-slate-200 px-3 py-2 text-right">العرض × العمق</th>
+                  <th className="border border-slate-200 px-3 py-2 text-right">المساحة (م²)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {zoneCAreas.buildings.map((b) => (
+                  <tr key={b.id}>
+                    <td className="border border-slate-200 px-3 py-2">مبنى {b.id}</td>
+                    <td className="border border-slate-200 px-3 py-2">{b.widthM} × {b.depthM} م</td>
+                    <td className="border border-slate-200 px-3 py-2 font-medium">{b.areaM2.toLocaleString("ar-SA")}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 space-y-2 rounded-lg bg-slate-50 border border-slate-200 p-4">
+            <p className="flex justify-between">
+              <span className="font-semibold text-slate-700">مجموع المباني:</span>
+              <span>{zoneCAreas.buildingsTotalM2.toLocaleString("ar-SA")} م²</span>
+            </p>
+            <p className="flex justify-between">
+              <span className="font-semibold text-slate-700">ساحات المواقف:</span>
+              <span>{zoneCAreas.parkingsTotalM2.toLocaleString("ar-SA")} م²</span>
+            </p>
+            <p className="flex justify-between">
+              <span className="font-semibold text-slate-700">طريق ٤م (خلف المباني):</span>
+              <span>{zoneCAreas.roadM2.toLocaleString("ar-SA")} م²</span>
+            </p>
+            <p className="flex justify-between pt-2 border-t border-slate-200">
+              <span className="font-bold text-slate-800">إجمالي المنطقة ج:</span>
+              <span>{zoneCAreas.zoneTotalM2.toLocaleString("ar-SA")} م²</span>
             </p>
           </div>
         </Card>
