@@ -68,7 +68,7 @@ export default function ZoneCPage() {
           </div>
         </Card>
         <Card>
-          <h2 className="text-lg font-semibold">حساب المساحات — لتقدير التكاليف</h2>
+          <h2 className="text-lg font-semibold">حساب المساحات</h2>
           <p className="mt-2 text-sm text-slate-600 mb-4">
             تفصيل مساحات المباني والمواقف والطريق ٤م لاستخدامها في بطاقة تقدير التكاليف.
           </p>
@@ -108,6 +108,28 @@ export default function ZoneCPage() {
             <p className="flex justify-between pt-2 border-t border-slate-200">
               <span className="font-bold text-slate-800">إجمالي المنطقة ج:</span>
               <span>{zoneCAreas.zoneTotalM2.toLocaleString("ar-SA")} م²</span>
+            </p>
+          </div>
+        </Card>
+        <Card>
+          <h2 className="text-lg font-semibold">تقدير التكاليف</h2>
+          <p className="mt-2 text-sm text-slate-600 mb-4">
+            تكلفة المباني: ١٬٠٠٠ ريال/م². تسوية المواقف والشوارع والبنية التحتية (كهرباء، هاتف، مجاري، إلخ): ٢٠٠ ريال/م².
+          </p>
+          <div className="space-y-3 rounded-lg bg-slate-50 border border-slate-200 p-4">
+            <p className="flex justify-between text-sm">
+              <span className="text-slate-700">تكلفة المباني ({zoneCAreas.buildingsTotalM2.toLocaleString("ar-SA")} م² × ١٬٠٠٠ ر.س):</span>
+              <span className="font-semibold">{(zoneCAreas.buildingsTotalM2 * 1000).toLocaleString("ar-SA")} ر.س</span>
+            </p>
+            <p className="flex justify-between text-sm">
+              <span className="text-slate-700">المواقف + الطريق ({zoneCAreas.parkingsTotalM2.toLocaleString("ar-SA")} + {zoneCAreas.roadM2.toLocaleString("ar-SA")} م² × ٢٠٠ ر.س):</span>
+              <span className="font-semibold">{((zoneCAreas.parkingsTotalM2 + zoneCAreas.roadM2) * 200).toLocaleString("ar-SA")} ر.س</span>
+            </p>
+            <p className="flex justify-between pt-3 border-t border-slate-200">
+              <span className="font-bold text-slate-800">إجمالي التكلفة التقديرية:</span>
+              <span className="font-bold text-indigo-700">
+                {(zoneCAreas.buildingsTotalM2 * 1000 + (zoneCAreas.parkingsTotalM2 + zoneCAreas.roadM2) * 200).toLocaleString("ar-SA")} ر.س
+              </span>
             </p>
           </div>
         </Card>

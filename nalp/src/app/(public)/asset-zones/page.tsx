@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 import { ZONE_CONFIGS } from "@/lib/nalpLandSketch";
+import { AllZonesOverviewSketch } from "@/components/asset-zones/AllZonesOverviewSketch";
 
 const ZONE_SLUGS: Record<string, string> = {
   a: "zone-a",
@@ -16,6 +17,15 @@ export default function AssetZonesPage() {
       <p className="mt-2 text-slate-600">
         يتكون NALP من أربع مناطق متميزة مصممة لاستخدامات متكاملة.
       </p>
+
+      <Card className="mt-10">
+        <h2 className="text-xl font-semibold text-slate-800">المنظر العام</h2>
+        <p className="mt-2 text-sm text-slate-600 mb-4">
+          تجميع رسومات المناطق الأربع في اسكتش واحد: أ (المزاد)، ب (إيواء المركبات)، ج (سكن الموظفين)، د (استثمارية).
+        </p>
+        <AllZonesOverviewSketch />
+      </Card>
+
       <div className="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
         {ZONE_CONFIGS.map((zone) => (
           <Link key={zone.id} href={`/asset-zones/${ZONE_SLUGS[zone.id]}`}>
