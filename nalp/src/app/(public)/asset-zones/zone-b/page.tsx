@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 import { ZONE_CONFIGS, ZONE_DIMENSIONS } from "@/lib/nalpLandSketch";
 import { ZoneSketch } from "@/components/asset-zones/ZoneSketch";
+import { ZoneBStorageSketch } from "@/components/asset-zones/ZoneBStorageSketch";
 
 const zone = ZONE_CONFIGS.find((z) => z.id === "b")!;
 const dims = ZONE_DIMENSIONS.find((z) => z.id === "b")!;
@@ -30,9 +31,13 @@ export default function ZoneBPage() {
           <p className="mt-2 text-slate-600">{zone.description}</p>
         </Card>
         <Card>
+          <h2 className="mb-4 text-lg font-semibold">تخطيط ساحة الإيواء</h2>
+          <ZoneBStorageSketch dims={dims} />
+        </Card>
+        <Card>
           <h2 className="text-lg font-semibold">المميزات الرئيسية</h2>
           <ul className="mt-2 list-inside list-disc space-y-1 text-slate-600">
-            <li>تخزين السيارات قبل وبعد المزاد</li>
+            <li>تخزين سيارات مركز الإيواء من السيارات المسحوبة من شركات التأمين والبنوك</li>
             <li>مواقف وممرات شاحنات السحب</li>
             <li>صفوف طولية بممرات مناسبة للمناورة</li>
             <li>إمكانية تقسيم الساحة إلى بلوكات بحسب نوع السيارات</li>

@@ -104,7 +104,8 @@ export function ZoneSketch({
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
       <svg
         viewBox={`0 0 ${w + pad * 2} ${totalH + pad * 2}`}
-        className="w-full max-h-[380px]"
+        preserveAspectRatio="xMidYMid meet"
+        className="w-full max-h-[380px] object-contain"
       >
         <defs>
           <marker
@@ -414,7 +415,7 @@ export function ZoneSketch({
                 </g>
               );
             })}
-          {/* الشمال — طول الأرض 104 م ثم شمال */}
+          {/* الشمال — طول الأرض */}
           <line x1={0} y1={0} x2={w} y2={0} stroke="#64748b" strokeWidth={1} strokeDasharray="4" />
           <text
             x={w / 2}
@@ -470,16 +471,8 @@ export function ZoneSketch({
           >
             شارع الجار 12.5 م
           </text>
-          {/* جنوب — فوق الحد الجنوبي بتباعد واضح عن الشوارع */}
+          {/* جنوب — فوق الحد الجنوبي */}
           <line x1={0} y1={h} x2={w} y2={h} stroke="#64748b" strokeWidth={1} strokeDasharray="4" />
-          <text
-            x={w / 2}
-            y={h - 20}
-            textAnchor="middle"
-            className="fill-slate-600 text-xs font-medium"
-          >
-            جنوب — {dims.widthM} م
-          </text>
           {/* الشرق — البعد والعنوان */}
           <line x1={w} y1={0} x2={w} y2={h} stroke="#64748b" strokeWidth={1} strokeDasharray="4" />
           <text
