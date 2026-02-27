@@ -58,9 +58,10 @@ export function AllZonesOverviewSketch() {
   const pad = 40;
   const strokeW = 1.5;
 
-  // مواضع المناطق من الشرق (يمين) إلى الغرب (يسار)
+  // مواضع المناطق: غرب (يسار) ← د، ج، ب ← شرق (يمين) أ — المنطقة أ على الشرق (طريق الجبيل)
+  const zonesWestToEast = [...ZONE_DIMENSIONS].reverse(); // د، ج، ب، أ
   let xAcc = 0;
-  const zoneRects = ZONE_DIMENSIONS.map((dims) => {
+  const zoneRects = zonesWestToEast.map((dims) => {
     const w = dims.widthM * scale;
     const rect = { dims, x: xAcc, w };
     xAcc += w;
@@ -105,6 +106,9 @@ export function AllZonesOverviewSketch() {
           <marker id="overview-arrow" markerWidth="8" markerHeight="8" refX="7" refY="2.5" orient="auto">
             <path d="M0,0 L0,5 L7,2.5 z" fill="currentColor" />
           </marker>
+          <clipPath id="zone-d-clip">
+            <rect x={0} y={0} width={dRect.w} height={totalH} />
+          </clipPath>
         </defs>
         <g transform={`translate(${pad}, ${pad})`}>
           {/* المناطق الأربع */}
@@ -126,7 +130,7 @@ export function AllZonesOverviewSketch() {
                   <>
                     <text
                       x={x + w / 2}
-                      y={totalH / 2 - 10}
+                      y={totalH / 2 - 16}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       className="fill-slate-800 text-sm font-bold"
@@ -135,7 +139,7 @@ export function AllZonesOverviewSketch() {
                     </text>
                     <text
                       x={x + w / 2}
-                      y={totalH / 2}
+                      y={totalH / 2 - 2}
                       textAnchor="middle"
                       dominantBaseline="middle"
                       className="fill-slate-600 text-xs"
@@ -144,10 +148,10 @@ export function AllZonesOverviewSketch() {
                     </text>
                     <text
                       x={x + w / 2}
-                      y={totalH / 2 + 14}
+                      y={totalH - 6}
                       textAnchor="middle"
                       dominantBaseline="middle"
-                      className="fill-slate-500 text-[10px]"
+                      className="fill-slate-700 text-[10px] font-bold"
                     >
                       {dims.widthM} م
                     </text>
@@ -155,11 +159,11 @@ export function AllZonesOverviewSketch() {
                 )}
                 {hasInternalLayout && (
                   <text
-                    x={x + 12}
-                    y={14}
-                    textAnchor="start"
+                    x={x + w / 2}
+                    y={totalH - 6}
+                    textAnchor="middle"
                     dominantBaseline="middle"
-                    className="fill-slate-700 text-xs font-bold"
+                    className="fill-slate-700 text-[10px] font-bold"
                   >
                     {dims.id.toUpperCase()} ({dims.widthM} م)
                   </text>
@@ -262,8 +266,8 @@ export function AllZonesOverviewSketch() {
             })()}
           </g>
 
-          {/* تخطيط المنطقة د: ثلاثة أقسام */}
-          <g transform={`translate(${dRect.x}, 0)`}>
+          {/* تخطيط المنطقة د: ثلاثة أقسام — clipPath يمنع تداخل النص مع المنطقة ج */}
+          <g transform={`translate(${dRect.x}, 0)`} clipPath="url(#zone-d-clip)">
             {(() => {
               const { rightWidthM, topDepthM } = zoneDSections;
               const leftWidthM = dDims.widthM - rightWidthM;
@@ -272,6 +276,8 @@ export function AllZonesOverviewSketch() {
               const rightW = rightWidthM * scale;
               const topH = topDepthM * scale;
               const bottomH = bottomDepthM * scale;
+              const section1CenterX = leftW + rightW / 2;
+              const section1CenterY = totalH / 2;
               return (
                 <>
                   <line
@@ -292,23 +298,26 @@ export function AllZonesOverviewSketch() {
                     strokeWidth={1.5}
                     strokeDasharray="3 2"
                   />
-                  <text x={leftW + rightW / 2} y={totalH / 2 - 8} textAnchor="middle" dominantBaseline="middle" className="fill-slate-800 text-xs font-bold">1</text>
-                  <text x={leftW + rightW / 2} y={totalH / 2 + 4} textAnchor="middle" dominantBaseline="middle" className="fill-slate-600 text-[10px]">ورشة صيانة</text>
-                  <text x={leftW / 2} y={topH / 2 - 6} textAnchor="middle" dominantBaseline="middle" className="fill-slate-800 text-xs font-bold">2</text>
-                  <text x={leftW / 2} y={topH + bottomH / 2 - 6} textAnchor="middle" dominantBaseline="middle" className="fill-slate-800 text-xs font-bold">3</text>
+                  <text x={section1CenterX} y={section1CenterY - 10} textAnchor="middle" dominantBaseline="middle" fontSize={10} fontWeight="bold" fill="#1e293b">1</text>
+                  <text x={section1CenterX} y={section1CenterY - 2} textAnchor="middle" dominantBaseline="middle" fontSize={10} fill="#475569">الورشة</text>
+                  <text x={section1CenterX} y={section1CenterY + 10} textAnchor="middle" dominantBaseline="middle" fontSize={10} fill="#475569">النموذجية</text>
+                  <text x={leftW / 2} y={topH / 2 - 6} textAnchor="middle" dominantBaseline="middle" fontSize={10} fontWeight="bold" fill="#1e293b">2</text>
+                  <text x={leftW / 2} y={topH / 2 + 6} textAnchor="middle" dominantBaseline="middle" fontSize={9} fill="#475569">تلميع</text>
+                  <text x={leftW / 2} y={topH + bottomH / 2 - 6} textAnchor="middle" dominantBaseline="middle" fontSize={10} fontWeight="bold" fill="#1e293b">3</text>
+                  <text x={leftW / 2} y={topH + bottomH / 2 + 6} textAnchor="middle" dominantBaseline="middle" fontSize={9} fill="#475569">مغسلة</text>
                 </>
               );
             })()}
           </g>
 
-          {/* شارعنا 12.5 م */}
+          {/* شارعنا 12.5 م — نفس لون شارع الجار */}
           <rect
             x={0}
             y={totalH}
             width={totalW}
             height={streetH}
-            fill="#475569"
-            stroke="#334155"
+            fill="#64748b"
+            stroke="#475569"
             strokeWidth={1}
           />
           <text
@@ -355,7 +364,7 @@ export function AllZonesOverviewSketch() {
       </svg>
       <div className="border-t border-slate-200 bg-slate-50 px-4 py-2">
         <p className="text-center text-sm text-slate-600">
-          المنظر العام: المنطقة أ (مزاد) | ب (إيواء) | ج (سكن) | د (استثمارية) — إجمالي ٥٢٠×٥٢٫٥ م
+          المنظر العام: غرب ← د (استثمارية) | ج (سكن) | ب (إيواء) | أ (مزاد) ← شرق (طريق الجبيل)
         </p>
       </div>
     </div>
