@@ -26,9 +26,9 @@ export function PublicNavbar() {
             </Link>
             <Link
               href="/portal"
-              className="rounded-md bg-indigo-100 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
+              className="rounded-md bg-indigo-100 px-3 py-2 text-sm font-semibold text-[#1e3a5f] hover:bg-indigo-200"
             >
-              بوابة المستثمر
+              أدوات المستثمر ←
             </Link>
             <Link
               href="/studio"

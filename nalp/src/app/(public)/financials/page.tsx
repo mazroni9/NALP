@@ -73,6 +73,13 @@ export default function FinancialsPage() {
             </h2>
             <ShareBar />
           </div>
+
+          <a
+            href="/portal"
+            className="mt-12 mb-8 flex w-full items-center justify-center rounded-xl bg-[#1e3a5f] px-8 py-4 text-lg text-white transition hover:bg-[#2d5a7f]"
+          >
+            للاطلاع على التفاصيل الكاملة والسيناريوهات المالية — ادخل البوابة ←
+          </a>
         </section>
 
         {/* 8) Footer Disclaimer */}
