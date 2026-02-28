@@ -148,26 +148,26 @@ export default function PartnersPage() {
       </div>
 
       {isAdmin && (
-        <div className="mb-6 flex border-b border-slate-200">
-          <button
-            onClick={() => setActiveTab("partner")}
-            className={`px-6 py-2 text-sm font-medium transition-colors ${
-              activeTab === "partner"
-                ? "border-b-2 border-indigo-600 text-indigo-600"
-                : "text-slate-500 hover:text-indigo-600"
-            }`}
-          >
-            بيانات الشريك
-          </button>
+        <div className="mb-8 flex gap-2 border-b border-slate-200">
           <button
             onClick={() => setActiveTab("all")}
-            className={`px-6 py-2 text-sm font-medium transition-colors ${
+            className={`px-6 py-3 text-sm font-bold transition-all ${
               activeTab === "all"
-                ? "border-b-2 border-indigo-600 text-indigo-600"
-                : "text-slate-500 hover:text-indigo-600"
+                ? "border-b-4 border-indigo-600 bg-indigo-50 text-indigo-700"
+                : "text-slate-500 hover:bg-slate-50 hover:text-indigo-600"
             }`}
           >
-            جدول حصص الشركاء
+            📋 جدول حصص الشركاء
+          </button>
+          <button
+            onClick={() => setActiveTab("partner")}
+            className={`px-6 py-3 text-sm font-bold transition-all ${
+              activeTab === "partner"
+                ? "border-b-4 border-indigo-600 bg-indigo-50 text-indigo-700"
+                : "text-slate-500 hover:bg-slate-50 hover:text-indigo-600"
+            }`}
+          >
+            👤 بيانات الشريك المفصلة
           </button>
         </div>
       )}
@@ -175,104 +175,154 @@ export default function PartnersPage() {
       <div className="space-y-6">
         {activeTab === "all" && isAdmin ? (
           <Card>
-            <h2 className="text-lg font-semibold text-slate-800">جدول حصص جميع الشركاء</h2>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <h2 className="text-lg font-bold text-slate-800">جدول حصص جميع الشركاء</h2>
+              <div className="text-xs text-slate-400">محدث: فبراير 2026</div>
+            </div>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-right text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="px-2 py-2 font-medium text-slate-600">الاسم</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">المجموعة</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">الحصة%</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">الأسهم</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">الدخل السنوي</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">إجمالي 8 سنوات</th>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="px-3 py-3 font-semibold text-slate-700">الاسم</th>
+                    <th className="px-3 py-3 font-semibold text-slate-700">المجموعة</th>
+                    <th className="px-3 py-3 font-semibold text-slate-700 text-center">الحصة%</th>
+                    <th className="px-3 py-3 font-semibold text-slate-700 text-center">الأسهم</th>
+                    <th className="px-3 py-3 font-semibold text-slate-700 text-center">الدخل السنوي</th>
+                    <th className="px-3 py-3 font-semibold text-slate-700 text-center">إجمالي 8 سنوات</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100">
                   {adminPartnerRows.map((r, i) => (
-                    <tr key={i} className="border-b border-slate-100">
-                      <td className="px-2 py-2">{r.name}</td>
-                      <td className="px-2 py-2 text-slate-600">{r.group}</td>
-                      <td className="px-2 py-2">{r.sharePercent}</td>
-                      <td className="px-2 py-2">{r.shares.toLocaleString("en-US")}</td>
-                      <td className="px-2 py-2">{r.annualIncome.toLocaleString("en-US")}</td>
-                      <td className="px-2 py-2">{r.total8Y.toLocaleString("en-US")}</td>
+                    <tr key={i} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-3 py-3 font-medium text-slate-800">{r.name}</td>
+                      <td className="px-3 py-3 text-slate-600 text-xs">{r.group}</td>
+                      <td className="px-3 py-3 text-center text-slate-800 font-medium">{r.sharePercent}%</td>
+                      <td className="px-3 py-3 text-center text-slate-600">{r.shares.toLocaleString("en-US")}</td>
+                      <td className="px-3 py-3 text-center font-bold text-indigo-600">{r.annualIncome.toLocaleString("en-US")}</td>
+                      <td className="px-3 py-3 text-center font-bold text-slate-800">{r.total8Y.toLocaleString("en-US")}</td>
                     </tr>
                   ))}
-                  <tr className="border-t-2 border-slate-300 font-semibold">
-                    <td className="px-2 py-2">الإجمالي</td>
-                    <td className="px-2 py-2">—</td>
-                    <td className="px-2 py-2">{adminTotals.sharePercent.toFixed(2)}%</td>
-                    <td className="px-2 py-2">{adminTotals.shares.toLocaleString("en-US")}</td>
-                    <td className="px-2 py-2">{adminTotals.annualIncome.toLocaleString("en-US")}</td>
-                    <td className="px-2 py-2">{adminTotals.total8Y.toLocaleString("en-US")}</td>
-                  </tr>
                 </tbody>
+                <tfoot>
+                  <tr className="bg-indigo-50 border-t-2 border-indigo-200 font-bold">
+                    <td className="px-3 py-4 text-indigo-900 text-base" colSpan={2}>الإجمالي العام</td>
+                    <td className="px-3 py-4 text-center text-indigo-900 text-base">{adminTotals.sharePercent.toFixed(2)}%</td>
+                    <td className="px-3 py-4 text-center text-indigo-900">{adminTotals.shares.toLocaleString("en-US")}</td>
+                    <td className="px-3 py-4 text-center text-indigo-900">{adminTotals.annualIncome.toLocaleString("en-US")}</td>
+                    <td className="px-3 py-4 text-center text-indigo-900">{adminTotals.total8Y.toLocaleString("en-US")}</td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </Card>
         ) : activePartner && data && (
-          <>
+          <div className="space-y-6">
             {isAdmin && (
-              <Card>
-                <label className="block text-sm font-medium text-slate-700">اختر الشريك</label>
-                <select
-                  value={selectedPartnerId}
-                  onChange={(e) => setSelectedPartnerId(e.target.value)}
-                  className="mt-2 w-full rounded border border-slate-300 px-3 py-2"
-                >
-                  {PARTNERS.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name} — {p.group}</option>
-                  ))}
-                </select>
+              <Card className="bg-slate-50 border-indigo-100">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-1 bg-indigo-500 rounded-full" />
+                  <div className="flex-1">
+                    <label className="block text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">تصفح بيانات شريك محدد</label>
+                    <select
+                      value={selectedPartnerId}
+                      onChange={(e) => setSelectedPartnerId(e.target.value)}
+                      className="w-full bg-white rounded-lg border-2 border-indigo-100 focus:border-indigo-500 focus:ring-0 px-4 py-2 text-sm font-medium transition-all"
+                    >
+                      {PARTNERS.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name} — {p.group} ({p.sharePercent}%)</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </Card>
             )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <h2 className="text-lg font-bold text-slate-800 border-b border-slate-50 pb-3">هويتك في الشركة</h2>
+                <dl className="mt-4 space-y-3 text-sm">
+                  <div className="flex justify-between"><dt className="text-slate-500">الاسم</dt><dd className="font-bold text-slate-800">{activePartner.name}</dd></div>
+                  <div className="flex justify-between"><dt className="text-slate-500">المجموعة</dt><dd className="font-medium px-2 py-0.5 bg-slate-100 rounded text-xs">{activePartner.group}</dd></div>
+                  <div className="flex justify-between border-t border-slate-50 pt-2"><dt className="text-slate-500">نسبة الملكية</dt><dd className="font-black text-indigo-600">{activePartner.sharePercent}%</dd></div>
+                  <div className="flex justify-between"><dt className="text-slate-500">عدد الأسهم</dt><dd className="font-bold">{data.shares.toLocaleString()} سهم</dd></div>
+                </dl>
+              </Card>
+
+              <Card className="bg-indigo-600 text-white">
+                <h2 className="text-lg font-bold border-b border-indigo-500 pb-3">ملخص العوائد</h2>
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <p className="text-indigo-100 text-xs">الدخل السنوي المتوقع</p>
+                    <p className="text-3xl font-black">{data.annualIncome.toLocaleString()} <span className="text-sm font-normal">ريال</span></p>
+                  </div>
+                  <div className="pt-2 border-t border-indigo-500">
+                    <p className="text-indigo-100 text-xs">إجمالي دخل 8 سنوات</p>
+                    <p className="text-xl font-bold">{data.totalIncome8Y.toLocaleString()} ريال</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
             <Card>
-              <h2 className="text-lg font-semibold text-slate-800">هويتك في الشركة</h2>
-              <dl className="mt-4 space-y-2 text-sm">
-                <div><dt className="text-slate-500">اسم الشريك</dt><dd className="font-medium">{activePartner.name}</dd></div>
-                <div><dt className="text-slate-500">المجموعة</dt><dd className="font-medium">{activePartner.group}</dd></div>
-                <div><dt className="text-slate-500">نسبة ملكيتك</dt><dd className="font-medium">{activePartner.sharePercent}%</dd></div>
-                <div><dt className="text-slate-500">الأسهم</dt><dd className="font-medium">{data.shares} سهم</dd></div>
-              </dl>
-            </Card>
-            <Card>
-              <h2 className="text-lg font-semibold text-slate-800">دخلك التقديري</h2>
-              <dl className="mt-4 space-y-2 text-sm">
-                <div><dt className="text-slate-500">دخلك السنوي</dt><dd className="text-lg font-bold text-indigo-600">{data.annualIncome.toLocaleString("en-US")} ريال</dd></div>
-                <div><dt className="text-slate-500">إجمالي 8 سنوات</dt><dd className="text-lg font-bold text-indigo-600">{data.totalIncome8Y.toLocaleString("en-US")} ريال</dd></div>
-              </dl>
-            </Card>
-            <Card>
-              <h2 className="text-lg font-semibold text-slate-800">تطور قيمة حصتك من الأرض</h2>
-              <p className="mt-2 text-2xl font-bold text-indigo-600">مساحتك: {data.landAreaSqm.toLocaleString("en-US")} م²</p>
-              <div className="mt-6 overflow-x-auto">
-                <table className="w-full text-right text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200">
-                      <th>الآن</th><th>سنة 1</th><th>سنة 4</th><th>سنة 8</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="py-2">{data.landValueNow.toLocaleString("en-US")}</td>
-                      <td>{data.landValueYear1.toLocaleString("en-US")}</td>
-                      <td>{data.landValueYear4.toLocaleString("en-US")}</td>
-                      <td>{data.landValueYear8.toLocaleString("en-US")}</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <h2 className="text-lg font-bold text-slate-800 mb-4">تطور قيمة حصتك من الأرض</h2>
+              <div className="bg-slate-50 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                  <p className="text-slate-500 text-xs">مساحة حصتك الصافية</p>
+                  <p className="text-2xl font-black text-indigo-600">{data.landAreaSqm.toLocaleString()} <span className="text-sm font-normal">م²</span></p>
+                </div>
+                <div className="hidden md:block h-12 w-px bg-slate-200" />
+                <div className="text-center">
+                  <p className="text-slate-500 text-xs">سعر المتر التقديري (سنة 8)</p>
+                  <p className="text-xl font-bold text-slate-800">2,500 ريال</p>
+                </div>
               </div>
-              <div className="mt-6 rounded-lg bg-indigo-900 p-4 text-white">
-                <h3 className="font-semibold">إجمالي ثروتك نهاية السنة الثامنة</h3>
-                <p className="mt-2 text-2xl font-bold">{data.totalWealthYear8.toLocaleString("en-US")} ريال</p>
+
+              <div className="mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-2 w-2 bg-indigo-500 rounded-full" />
+                  <h3 className="font-bold text-sm text-slate-700">تقديرات القيمة المالية</h3>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div className="p-3 bg-white border border-slate-100 rounded-lg">
+                    <p className="text-slate-400 text-[10px] mb-1 italic">سعر الشراء</p>
+                    <p className="font-bold text-slate-700">{data.landValueNow.toLocaleString()}</p>
+                  </div>
+                  <div className="p-3 bg-white border border-slate-100 rounded-lg">
+                    <p className="text-slate-400 text-[10px] mb-1">نهاية سنة 1</p>
+                    <p className="font-bold text-slate-700">{data.landValueYear1.toLocaleString()}</p>
+                  </div>
+                  <div className="p-3 bg-white border border-slate-100 rounded-lg">
+                    <p className="text-slate-400 text-[10px] mb-1">نهاية سنة 4</p>
+                    <p className="font-bold text-slate-700">{data.landValueYear4.toLocaleString()}</p>
+                  </div>
+                  <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                    <p className="text-indigo-600 text-[10px] mb-1 font-bold">نهاية سنة 8</p>
+                    <p className="font-black text-indigo-700">{data.landValueYear8.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 p-6 bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl text-white shadow-xl">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-black mb-1">إجمالي الثروة (السنة 8)</h3>
+                    <p className="text-indigo-200 text-xs font-medium">الأرباح التراكمية + قيمة حصة الأرض</p>
+                  </div>
+                  <div className="bg-indigo-500/20 p-2 rounded-lg">📈</div>
+                </div>
+                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-100 to-white">
+                  {data.totalWealthYear8.toLocaleString()} <span className="text-lg font-normal opacity-80">ريال</span>
+                </p>
               </div>
             </Card>
-            <Card>
-              <h2 className="text-lg font-semibold text-slate-800">كيف تبيع حصتك</h2>
-              <p className="mt-4 whitespace-pre-line text-sm text-slate-600">{sellStepsText}</p>
+
+            <Card className="border-l-4 border-l-amber-400">
+              <h2 className="text-lg font-bold text-slate-800 mb-2">💡 كيف تبيع حصتك؟</h2>
+              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                {sellStepsText}
+              </p>
             </Card>
-          </>
+          </div>
         )}
       </div>
     </div>
