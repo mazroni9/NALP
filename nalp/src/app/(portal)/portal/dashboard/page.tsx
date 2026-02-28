@@ -45,6 +45,16 @@ export default function PortalDashboardPage() {
                 </p>
               </Card>
             </Link>
+            <Link href="/portal/board">
+              <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
+                <h2 className="text-lg font-semibold text-indigo-600">
+                  لوحة مجلس الإدارة
+                </h2>
+                <p className="mt-2 text-slate-600">
+                  هيكل الشركة، حصص الشركاء، التصويت، توزيع الأرباح
+                </p>
+              </Card>
+            </Link>
           </div>
         </section>
       </div>
