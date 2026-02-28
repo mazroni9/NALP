@@ -1,4 +1,5 @@
 // Simple geometry utilities used in Studio - unit tests
+import { LAND } from "./projectData";
 
 function polygonArea(points: [number, number][]): number {
   if (!points || points.length < 3) return 0;
@@ -29,7 +30,7 @@ describe("polygonArea", () => {
 
   it("calculates rectangle area correctly", () => {
     const rect = [[0, 0], [520, 0], [520, 65], [0, 65]] as [number, number][];
-    expect(polygonArea(rect)).toBe(33800);
+    expect(polygonArea(rect)).toBe(LAND.totalArea);
   });
 });
 
@@ -49,7 +50,7 @@ describe("zone area distribution (4 zones)", () => {
   it("sum of zone areas equals total area when percentages sum to 100%", () => {
     const rect = [[0, 0], [520, 0], [520, 65], [0, 65]] as [number, number][];
     const totalArea = polygonArea(rect);
-    expect(totalArea).toBe(33800);
+    expect(totalArea).toBe(LAND.totalArea);
 
     const zoneAPercent = 20;
     const zoneBPercent = 25;
@@ -81,22 +82,22 @@ describe("net area with street deduction", () => {
   it("totalNetArea = totalArea - streetArea when street is enabled", () => {
     const rect = [[0, 0], [520, 0], [520, 65], [0, 65]] as [number, number][];
     const totalArea = polygonArea(rect);
-    expect(totalArea).toBe(33800);
+    expect(totalArea).toBe(LAND.totalArea);
 
-    const streetLength = 520;
-    const streetWidth = 12.5;
+    const streetLength = LAND.landLength;
+    const streetWidth = LAND.streetWidth;
     const streetArea = streetLength * streetWidth;
-    expect(streetArea).toBe(6500);
+    expect(streetArea).toBe(LAND.streetDeduction);
 
     const totalNetArea = totalArea - streetArea;
-    expect(totalNetArea).toBe(27300);
+    expect(totalNetArea).toBe(LAND.netDevelopableArea);
   });
 
   it("zone areas from net area sum to net area when street enabled", () => {
-    const totalArea = 33800;
-    const streetArea = 6500;
+    const totalArea = LAND.totalArea;
+    const streetArea = LAND.streetDeduction;
     const netArea = totalArea - streetArea;
-    expect(netArea).toBe(27300);
+    expect(netArea).toBe(LAND.netDevelopableArea);
 
     const zoneAPercent = 20;
     const zoneBPercent = 25;

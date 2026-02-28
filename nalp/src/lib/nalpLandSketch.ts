@@ -1,3 +1,5 @@
+import { LAND } from "./projectData";
+
 /**
  * استكتش الأرض المرجعي لـ NALP
  * مصدر: صورة الخريطة + ملف PROMPT — Auto-Design Architectural Masterplan
@@ -6,7 +8,7 @@
  * الأبعاد من المستند (مطابقة للمخطط المرجعي):
  * - الطول: 520 م (شرق–غرب)
  * - العمق: 65 م (شمال–جنوب تقريبًا)
- * - إجمالي المساحة: ≈ 33,800 م²
+ * - إجمالي المساحة: من LAND.totalArea (33,800 م²)
  *
  * المناطق الأربع:
  * - أ: منطقة المزاد
@@ -52,7 +54,7 @@ export interface ZoneConfig {
 
 /**
  * مضلع مستطيل مطابق للأبعاد الواردة في المستند:
- * 520 م × 65 م ≈ 33,800 م²
+ * LAND.landLength × LAND.landWidth = LAND.totalArea
  */
 const RECTANGLE_POINTS: [number, number][] = [
   [0, 0],
@@ -107,7 +109,7 @@ export const nalpLandSketch: LandSketch = {
   name: "قطعة NALP المرجعية — محور الظهران الجبيل",
   nameEn: "NALP Reference Parcel — Dhahran Jubail Corridor",
   description:
-    "قطعة أرض على طريق الظهران الجبيل. إجمالي ≈ 33,800 م² (520 م شرق–غرب × 65 م). أربع مناطق بعمق 52.5 م (بعد خصم شارع 12.5 م جنوباً)، توزيع شرق–غرب: أ (المزاد)، ب (إيواء المركبات)، ج (سكن الموظفين والمرافق)، د (استثمارية على الشارع الداخلي 30 م).",
+    `قطعة أرض على طريق الظهران الجبيل. إجمالي مساحة الأرض: ${LAND.totalArea.toLocaleString("en-US")} م² — الصافي القابل للتطوير: ${LAND.netDevelopableArea.toLocaleString("en-US")} م² (${LAND.landLength} م شرق–غرب × ${LAND.landWidth} م). أربع مناطق بعمق 52.5 م (بعد خصم شارع ${LAND.streetWidth} م جنوباً)، توزيع شرق–غرب: أ (المزاد)، ب (إيواء المركبات)، ج (سكن الموظفين والمرافق)، د (استثمارية على الشارع الداخلي 30 م).`,
   sourceFile: "/PROMPT — Auto-Design Architectural Masterplan-برومبت معماري تخطيطي احترافي.docx",
   /** صورة الخريطة المصدر */
   mapImageUrl: "/nalp-land-sketch-map.png",

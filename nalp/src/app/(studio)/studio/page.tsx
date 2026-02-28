@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { LAND } from "@/lib/projectData";
 import {
   nalpLandSketch,
   STREET_WIDTH_M,
@@ -11,7 +12,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { CompassOverlay } from "@/components/studio/CompassOverlay";
 
-const TARGET_AREA = 33800;
+const TARGET_AREA = LAND.totalArea;
 
 function polygonArea(points: [number, number][]): number {
   if (!points || points.length < 3) return 0;
@@ -287,7 +288,7 @@ export default function StudioPage() {
                 المحيط: {perimeter.toLocaleString("ar-SA")} م
               </p>
               <p className="mt-1 text-xs text-slate-500">
-                المساحة المرجعية للأرض حوالي 33,800 م² (520 م شرق–غرب × 65 م شمال–جنوب).
+                المساحة المرجعية: إجمالي مساحة الأرض {LAND.totalArea.toLocaleString("en-US")} م² — الصافي القابل للتطوير: {LAND.netDevelopableArea.toLocaleString("en-US")} م² (520 م شرق–غرب × 65 م شمال–جنوب).
               </p>
               {referenceSketchActive && (
                 <p className="mt-2 text-xs text-slate-600">
@@ -296,7 +297,7 @@ export default function StudioPage() {
               )}
               {area > 0 && areaWarning && (
                 <p className="mt-1 text-sm font-medium text-amber-600">
-                  ⚠ بعيد عن المساحة المرجعية ≈33,800 م²
+                  ⚠ بعيد عن المساحة المرجعية (إجمالي {LAND.totalArea.toLocaleString("en-US")} م² — صافي {LAND.netDevelopableArea.toLocaleString("en-US")} م²)
                 </p>
               )}
             </div>

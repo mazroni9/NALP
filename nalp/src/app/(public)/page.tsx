@@ -1,9 +1,14 @@
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { LAND } from "@/lib/projectData";
 import Link from "next/link";
 
 const keyNumbers = [
-  { label: "إجمالي مساحة الأرض", value: "≈33,800 م²" },
+  {
+    label: "إجمالي مساحة الأرض",
+    value: `${LAND.totalArea.toLocaleString("en-US")} م²`,
+    subValue: `منها ${LAND.netDevelopableArea.toLocaleString("en-US")} م² صافٍ قابل للتطوير`,
+  },
   { label: "المناطق", value: "4" },
   { label: "المنطقة أ (المزاد)", value: "منصة وعرض" },
   { label: "المنطقة ب (إيواء المركبات)", value: "تخزين ومواقف" },
@@ -49,6 +54,9 @@ export default function HomePage() {
               <p className="mt-2 text-2xl font-bold text-indigo-600">
                 {item.value}
               </p>
+              {"subValue" in item && item.subValue && (
+                <p className="mt-1 text-sm text-slate-400">{item.subValue}</p>
+              )}
             </Card>
           ))}
         </div>

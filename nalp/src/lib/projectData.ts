@@ -1,3 +1,13 @@
+export const LAND = {
+  totalArea: 33800,
+  streetDeduction: 6500,
+  netDevelopableArea: 27300,
+  streetWidth: 12.5,
+  landLength: 520,
+  landWidth: 65,
+  note: "المساحة الصافية محسوبة بعد احتساب استقطاع شارع مستقبلي بعرض 12.5 م في امتداد 520 م — لم يُعتمد رسمياً بعد",
+};
+
 export const ZONE_A = {
   name: "Zone-A — المزاد",
   revenue8Years: 33397500,
