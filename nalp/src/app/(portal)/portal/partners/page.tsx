@@ -13,26 +13,23 @@ export default function PartnersPage() {
   const [partner, setPartner] = useState<(typeof PARTNERS)[0] | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedPartnerId, setSelectedPartnerId] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"partner" | "all">("partner");
 
   const handleLogin = () => {
     setError("");
     const cleanPin = pin.trim();
-
-    console.log("PIN entered:", JSON.stringify(cleanPin));
-    console.log("ADMIN_PIN:", JSON.stringify(ADMIN_PIN));
-    console.log("Match:", cleanPin === ADMIN_PIN);
-
     if (cleanPin === ADMIN_PIN) {
       setIsAdmin(true);
       setPartner(null);
       setSelectedPartnerId(PARTNERS[0]?.id ?? "");
+      setActiveTab("all");
       return;
     }
-
     const found = PARTNERS.find((p) => p.pin === cleanPin);
     if (found) {
       setPartner(found);
       setIsAdmin(false);
+      setActiveTab("partner");
     } else {
       setError("رمز غير صحيح، يرجى التواصل مع إدارة الشركة");
     }
@@ -84,6 +81,7 @@ export default function PartnersPage() {
       GROUP_ORDER.indexOf(a.group as (typeof GROUP_ORDER)[number]) -
       GROUP_ORDER.indexOf(b.group as (typeof GROUP_ORDER)[number])
   );
+
   const adminPartnerRows = sortedPartners.map((p) => {
     const d = calcPartnerData(p);
     return {
@@ -95,6 +93,7 @@ export default function PartnersPage() {
       total8Y: d.totalIncome8Y,
     };
   });
+
   const adminTotals = adminPartnerRows.reduce(
     (acc, r) => ({
       sharePercent: acc.sharePercent + r.sharePercent,
@@ -105,93 +104,13 @@ export default function PartnersPage() {
     { sharePercent: 0, shares: 0, annualIncome: 0, total8Y: 0 }
   );
 
-  if (isAdmin && !displayPartner) {
-    return (
-      <div className="p-8" dir="rtl">
-        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800">
-          ⚙️ وضع المدير — تصفح بيانات جميع الشركاء
-        </div>
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-slate-800">لوحة الشريك</h1>
-          <button onClick={handleLogout} className="text-sm text-slate-500 hover:text-indigo-600">
-            تسجيل الخروج
-          </button>
-        </div>
-        <div className="space-y-6">
-          <Card>
-            <h2 className="text-lg font-semibold text-slate-800">
-              جدول حصص جميع الشركاء
-            </h2>
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-right text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="px-2 py-2 font-medium text-slate-600">الاسم</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">المجموعة</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">الحصة%</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">الأسهم</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">الدخل السنوي</th>
-                    <th className="px-2 py-2 font-medium text-slate-600">إجمالي 8 سنوات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {adminPartnerRows.map((r, i) => (
-                    <tr key={i} className="border-b border-slate-100">
-                      <td className="px-2 py-2">{r.name}</td>
-                      <td className="px-2 py-2 text-slate-600">{r.group}</td>
-                      <td className="px-2 py-2">{r.sharePercent}</td>
-                      <td className="px-2 py-2">{r.shares.toLocaleString("en-US")}</td>
-                      <td className="px-2 py-2">{r.annualIncome.toLocaleString("en-US")}</td>
-                      <td className="px-2 py-2">{r.total8Y.toLocaleString("en-US")}</td>
-                    </tr>
-                  ))}
-                  <tr className="border-t-2 border-slate-300 font-semibold">
-                    <td className="px-2 py-2">الإجمالي</td>
-                    <td className="px-2 py-2">—</td>
-                    <td className="px-2 py-2">{adminTotals.sharePercent.toFixed(2)}%</td>
-                    <td className="px-2 py-2">{adminTotals.shares.toLocaleString("en-US")}</td>
-                    <td className="px-2 py-2">{adminTotals.annualIncome.toLocaleString("en-US")}</td>
-                    <td className="px-2 py-2">{adminTotals.total8Y.toLocaleString("en-US")}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </Card>
-          <Card>
-            <label className="block text-sm font-medium text-slate-700">اختر الشريك</label>
-            <select
-              value={selectedPartnerId}
-              onChange={(e) => setSelectedPartnerId(e.target.value)}
-              className="mt-2 w-full rounded border border-slate-300 px-3 py-2"
-            >
-              {PARTNERS.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} — {p.group} ({p.sharePercent}%)
-                </option>
-              ))}
-            </select>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (!displayPartner || !data) return null;
-
   const activePartner = displayPartner;
-
   const pricePerM2ByYear: Record<number, number> = {
-    1: 1_200,
-    2: 1_350,
-    3: 1_500,
-    4: 1_800,
-    5: 1_950,
-    6: 2_100,
-    7: 2_300,
-    8: 2_500,
+    1: 1_200, 2: 1_350, 3: 1_500, 4: 1_800,
+    5: 1_950, 6: 2_100, 7: 2_300, 8: 2_500,
   };
 
-  const wealthRows = Array.from({ length: COMPANY.projectYears }, (_, i) => {
+  const wealthRows = data ? Array.from({ length: COMPANY.projectYears }, (_, i) => {
     const year = i + 1;
     const annualIncome = data.annualIncome;
     const cumulativeIncome = annualIncome * year;
@@ -199,30 +118,19 @@ export default function PartnersPage() {
     const landValue = Math.round(data.landAreaSqm * pricePerM2);
     const remainingYears = 8 - year;
     const remainingIncome = remainingYears * annualIncome;
-    const discount =
-      year <= 3 ? 0.35 : year <= 6 ? 0.2 : 0;
-    const saleValue = Math.round(
-      (landValue + remainingIncome) * (1 - discount)
-    );
+    const discount = year <= 3 ? 0.35 : year <= 6 ? 0.2 : 0;
+    const saleValue = Math.round((landValue + remainingIncome) * (1 - discount));
     const totalWealth = cumulativeIncome + landValue;
-    return {
-      year,
-      annualIncome,
-      cumulativeIncome,
-      pricePerM2,
-      landValue,
-      saleValue,
-      totalWealth,
-    };
-  });
+    return { year, annualIncome, cumulativeIncome, pricePerM2, landValue, saleValue, totalWealth };
+  }) : [];
 
-  const sellStepsText = `يحق لك بيع حصتك لأي مستثمر خارجي أو لشريك آخر في أي وقت خلال مدة المشروع.
+  const sellStepsText = data ? `يحق لك بيع حصتك لأي مستثمر خارجي أو لشريك آخر في أي وقت خلال مدة المشروع.
 خطوات البيع:
 ① تواصل مع إدارة الشركة لإشعار البيع
 ② يُعرض على باقي الشركاء حق الأولوية (15 يوم)
 ③ إذا لم يمارس أحد حق الأولوية → يحق بيعها لطرف ثالث
 ④ يُوثَّق نقل الملكية لدى كاتب العدل وتُحدَّث سجلات الشركة
-القيمة المرجعية للبيع الآن: ${data.saleValueNow.toLocaleString("en-US")} ريال`;
+القيمة المرجعية للبيع الآن: ${data.saleValueNow.toLocaleString("en-US")} ريال` : "";
 
   return (
     <div className="p-8" dir="rtl">
@@ -231,34 +139,43 @@ export default function PartnersPage() {
           ⚙️ وضع المدير — تصفح بيانات جميع الشركاء
         </div>
       )}
+
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-slate-800">لوحة الشريك</h1>
-        <div className="flex items-center gap-4">
-          {isAdmin && (
-            <select
-              value={selectedPartnerId}
-              onChange={(e) => setSelectedPartnerId(e.target.value)}
-              className="rounded border border-slate-300 px-3 py-2 text-sm"
-            >
-              {PARTNERS.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} — {p.group}
-                </option>
-              ))}
-            </select>
-          )}
-          <button onClick={handleLogout} className="text-sm text-slate-500 hover:text-indigo-600">
-            تسجيل الخروج
-          </button>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-800">لوحة الشركاء</h1>
+        <button onClick={handleLogout} className="text-sm text-slate-500 hover:text-indigo-600">
+          تسجيل الخروج
+        </button>
       </div>
 
+      {isAdmin && (
+        <div className="mb-6 flex border-b border-slate-200">
+          <button
+            onClick={() => setActiveTab("partner")}
+            className={`px-6 py-2 text-sm font-medium transition-colors ${
+              activeTab === "partner"
+                ? "border-b-2 border-indigo-600 text-indigo-600"
+                : "text-slate-500 hover:text-indigo-600"
+            }`}
+          >
+            بيانات الشريك
+          </button>
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`px-6 py-2 text-sm font-medium transition-colors ${
+              activeTab === "all"
+                ? "border-b-2 border-indigo-600 text-indigo-600"
+                : "text-slate-500 hover:text-indigo-600"
+            }`}
+          >
+            جدول حصص الشركاء
+          </button>
+        </div>
+      )}
+
       <div className="space-y-6">
-        {isAdmin && (
+        {activeTab === "all" && isAdmin ? (
           <Card>
-            <h2 className="text-lg font-semibold text-slate-800">
-              جدول حصص جميع الشركاء
-            </h2>
+            <h2 className="text-lg font-semibold text-slate-800">جدول حصص جميع الشركاء</h2>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-right text-sm">
                 <thead>
@@ -294,186 +211,68 @@ export default function PartnersPage() {
               </table>
             </div>
           </Card>
-        )}
-        <Card>
-          <h2 className="text-lg font-semibold text-slate-800">هويتك في الشركة</h2>
-          <dl className="mt-4 space-y-2 text-sm">
-            <div>
-              <dt className="text-slate-500">اسم الشريك</dt>
-              <dd className="font-medium">{activePartner.name}</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">المجموعة</dt>
-              <dd className="font-medium">{activePartner.group}</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">نسبة ملكيتك من الشركة</dt>
-              <dd className="font-medium">{activePartner.sharePercent}%</dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">عدد الأسهم التقديرية (من 10,000 سهم)</dt>
-              <dd className="font-medium">{data.shares} سهم</dd>
-            </div>
-          </dl>
-        </Card>
-
-        <Card>
-          <h2 className="text-lg font-semibold text-slate-800">دخلك التقديري</h2>
-          <dl className="mt-4 space-y-2 text-sm">
-            <div>
-              <dt className="text-slate-500">دخلك السنوي</dt>
-              <dd className="text-lg font-bold text-indigo-600">
-                {data.annualIncome.toLocaleString("en-US")} ريال
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">دخلك الإجمالي خلال 8 سنوات</dt>
-              <dd className="text-lg font-bold text-indigo-600">
-                {data.totalIncome8Y.toLocaleString("en-US")} ريال
-              </dd>
-            </div>
-          </dl>
-        </Card>
-
-        <Card>
-          <h2 className="text-lg font-semibold text-slate-800">قيمة حصتك</h2>
-          <dl className="mt-4 space-y-2 text-sm">
-            <div>
-              <dt className="text-slate-500">الثروة الإجمالية نهاية السنة 8 (أرباح + قيمة أرضك)</dt>
-              <dd className="text-lg font-bold text-indigo-600">
-                {data.totalWealthYear8.toLocaleString("en-US")} ريال
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">القيمة التقديرية الحالية للبيع الآن</dt>
-              <dd className="text-lg font-bold text-indigo-600">
-                {data.saleValueNow.toLocaleString("en-US")} ريال
-              </dd>
-              <p className="mt-1 text-xs text-slate-400">مخفّضة 35% لعدم اكتمال دورة المشروع</p>
-            </div>
-          </dl>
-        </Card>
-
-        <Card>
-          <h2 className="text-lg font-semibold text-slate-800">تطور قيمة حصتك من الأرض</h2>
-          <p className="mt-2 text-sm text-slate-500">
-            حصتك من المساحة المتبقية البالغة 22,646 م²
-          </p>
-          <p className="mt-2 text-2xl font-bold text-indigo-600">
-            مساحتك: {data.landAreaSqm.toLocaleString("en-US")} م²
-          </p>
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="px-2 py-2 font-medium text-slate-600">الآن</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">السنة 1</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">السنة 4</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">السنة 8</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-slate-100">
-                  <td className="px-2 py-2 text-slate-600">750 ر/م²</td>
-                  <td className="px-2 py-2 text-slate-600">1,200 ر/م²</td>
-                  <td className="px-2 py-2 text-slate-600">1,800 ر/م²</td>
-                  <td className="px-2 py-2 text-slate-600">2,500 ر/م²</td>
-                </tr>
-                <tr>
-                  <td className="px-2 py-2 font-semibold">{data.landValueNow.toLocaleString("en-US")} ريال</td>
-                  <td className="px-2 py-2 font-semibold">{data.landValueYear1.toLocaleString("en-US")} ريال</td>
-                  <td className="px-2 py-2 font-semibold">{data.landValueYear4.toLocaleString("en-US")} ريال</td>
-                  <td className="px-2 py-2 font-semibold">{data.landValueYear8.toLocaleString("en-US")} ريال</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-6 border-t border-slate-200 pt-6">
-            <div className="rounded-lg bg-indigo-900 px-4 py-4 text-white">
-              <h3 className="font-semibold">إجمالي ثروتك نهاية السنة الثامنة</h3>
-              <p className="mt-1 text-sm text-indigo-200">أرباح المشروع + قيمة حصتك من الأرض</p>
-              <p className="mt-2 text-2xl font-bold">
-                {data.totalWealthYear8.toLocaleString("en-US")} ريال
-              </p>
-            </div>
-            <p className="mt-4 text-xs text-slate-400">
-              تقدير تطور سعر المتر مبني على افتراضات نمو المشروع والمنطقة — يخضع للمراجعة
-            </p>
-          </div>
-          <p className="mt-4 text-xs text-slate-400">{data.landNote}</p>
-        </Card>
-
-        <Card>
-          <h2 className="text-lg font-semibold text-slate-800">كيف تبيع حصتك</h2>
-          <p className="mt-4 whitespace-pre-line text-sm text-slate-600">{sellStepsText}</p>
-          <p className="mt-4 text-sm text-slate-500">
-            ملاحظة: عند البيع تنتقل ملكية الأرض المقابلة (
-            {data.landAreaSqm.toLocaleString("en-US")} م²)
-            مع الحصة تلقائياً للمشتري وفق عقد الشركة.
-          </p>
-        </Card>
-
-        <Card>
-          <h2 className="text-lg font-semibold text-slate-800">
-            جدول تطور ثروتك سنة بسنة
-          </h2>
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="px-2 py-2 font-medium text-slate-600">السنة</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">الدخل السنوي</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">الدخل التراكمي</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">قيمة م²</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">قيمة حصتك من الأرض</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">قيمة حصتك للبيع</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">صافي الثروة الكلية</th>
-                </tr>
-              </thead>
-              <tbody>
-                {wealthRows.map((row) => (
-                  <tr
-                    key={row.year}
-                    className={`border-b border-slate-100 ${
-                      row.year === 1 ? "bg-indigo-50" : ""
-                    }`}
-                  >
-                    <td className="px-2 py-2 font-medium">السنة {row.year}</td>
-                    <td className="px-2 py-2">
-                      {row.annualIncome.toLocaleString("en-US")}
-                    </td>
-                    <td className="px-2 py-2">
-                      {row.cumulativeIncome.toLocaleString("en-US")}
-                    </td>
-                    <td className="px-2 py-2">
-                      {row.pricePerM2.toLocaleString("en-US")} ر/م²
-                    </td>
-                    <td className="px-2 py-2">
-                      {row.landValue.toLocaleString("en-US")}
-                    </td>
-                    <td className="px-2 py-2 font-medium">
-                      {row.saleValue.toLocaleString("en-US")}
-                    </td>
-                    <td className="px-2 py-2 font-bold text-indigo-600">
-                      {row.totalWealth.toLocaleString("en-US")}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-4 text-xs text-slate-500">
-            قيمة البيع تشمل: الدخل التراكمي المحقق + قيمة حصتك من الأرض بسعر
-            السوق التقديري في تلك السنة
-          </p>
-        </Card>
-
-        {!isAdmin && (
-          <div className="pt-4">
-            <Button disabled className="opacity-70" title="قريباً">
-              تحميل ملخص حصتي PDF
-            </Button>
-          </div>
+        ) : activePartner && data && (
+          <>
+            {isAdmin && (
+              <Card>
+                <label className="block text-sm font-medium text-slate-700">اختر الشريك</label>
+                <select
+                  value={selectedPartnerId}
+                  onChange={(e) => setSelectedPartnerId(e.target.value)}
+                  className="mt-2 w-full rounded border border-slate-300 px-3 py-2"
+                >
+                  {PARTNERS.map((p) => (
+                    <option key={p.id} value={p.id}>{p.name} — {p.group}</option>
+                  ))}
+                </select>
+              </Card>
+            )}
+            <Card>
+              <h2 className="text-lg font-semibold text-slate-800">هويتك في الشركة</h2>
+              <dl className="mt-4 space-y-2 text-sm">
+                <div><dt className="text-slate-500">اسم الشريك</dt><dd className="font-medium">{activePartner.name}</dd></div>
+                <div><dt className="text-slate-500">المجموعة</dt><dd className="font-medium">{activePartner.group}</dd></div>
+                <div><dt className="text-slate-500">نسبة ملكيتك</dt><dd className="font-medium">{activePartner.sharePercent}%</dd></div>
+                <div><dt className="text-slate-500">الأسهم</dt><dd className="font-medium">{data.shares} سهم</dd></div>
+              </dl>
+            </Card>
+            <Card>
+              <h2 className="text-lg font-semibold text-slate-800">دخلك التقديري</h2>
+              <dl className="mt-4 space-y-2 text-sm">
+                <div><dt className="text-slate-500">دخلك السنوي</dt><dd className="text-lg font-bold text-indigo-600">{data.annualIncome.toLocaleString("en-US")} ريال</dd></div>
+                <div><dt className="text-slate-500">إجمالي 8 سنوات</dt><dd className="text-lg font-bold text-indigo-600">{data.totalIncome8Y.toLocaleString("en-US")} ريال</dd></div>
+              </dl>
+            </Card>
+            <Card>
+              <h2 className="text-lg font-semibold text-slate-800">تطور قيمة حصتك من الأرض</h2>
+              <p className="mt-2 text-2xl font-bold text-indigo-600">مساحتك: {data.landAreaSqm.toLocaleString("en-US")} م²</p>
+              <div className="mt-6 overflow-x-auto">
+                <table className="w-full text-right text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th>الآن</th><th>سنة 1</th><th>سنة 4</th><th>سنة 8</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="py-2">{data.landValueNow.toLocaleString("en-US")}</td>
+                      <td>{data.landValueYear1.toLocaleString("en-US")}</td>
+                      <td>{data.landValueYear4.toLocaleString("en-US")}</td>
+                      <td>{data.landValueYear8.toLocaleString("en-US")}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-6 rounded-lg bg-indigo-900 p-4 text-white">
+                <h3 className="font-semibold">إجمالي ثروتك نهاية السنة الثامنة</h3>
+                <p className="mt-2 text-2xl font-bold">{data.totalWealthYear8.toLocaleString("en-US")} ريال</p>
+              </div>
+            </Card>
+            <Card>
+              <h2 className="text-lg font-semibold text-slate-800">كيف تبيع حصتك</h2>
+              <p className="mt-4 whitespace-pre-line text-sm text-slate-600">{sellStepsText}</p>
+            </Card>
+          </>
         )}
       </div>
     </div>
