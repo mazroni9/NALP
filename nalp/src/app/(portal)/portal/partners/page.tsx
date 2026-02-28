@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/Button";
 
 import { Card } from "@/components/ui/Card";
 import { PARTNERS, calcPartnerData } from "@/lib/partnersData";
@@ -104,11 +105,6 @@ export default function PartnersPage() {
   );
 
   const activePartner = displayPartner;
-  const pricePerM2ByYear: Record<number, number> = {
-    1: 1_200, 2: 1_350, 3: 1_500, 4: 1_800,
-    5: 1_950, 6: 2_100, 7: 2_300, 8: 2_500,
-  };
-
     
   const sellStepsText = data ? `يحق لك بيع حصتك لأي مستثمر خارجي أو لشريك آخر في أي وقت خلال مدة المشروع.
 خطوات البيع:
