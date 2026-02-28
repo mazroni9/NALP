@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { COMPANY, PARTNERS, calcPartnerData } from "@/lib/partnersData";
+import { ADMIN_PIN, COMPANY, PARTNERS, calcPartnerData } from "@/lib/partnersData";
 import { useState } from "react";
 
 function findPartnerByPin(pin: string) {
@@ -14,18 +14,31 @@ export default function PartnersPage() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [partner, setPartner] = useState<(typeof PARTNERS)[0] | null>(null);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string>("");
 
   const handleLogin = () => {
     setError("");
-    const found = findPartnerByPin(pin);
-    if (found) {
-      setPartner(found);
+    if (pin.trim() === ADMIN_PIN) {
+      setIsAdminMode(true);
+      setPartner(null);
+      setSelectedPartnerId(PARTNERS[0]?.id ?? "");
     } else {
-      setError("رمز غير صحيح، يرجى التواصل مع إدارة الشركة");
+      const found = findPartnerByPin(pin);
+      if (found) {
+        setPartner(found);
+        setIsAdminMode(false);
+      } else {
+        setError("رمز غير صحيح، يرجى التواصل مع إدارة الشركة");
+      }
     }
   };
 
-  if (!partner) {
+  const displayPartner = isAdminMode
+    ? PARTNERS.find((p) => p.id === selectedPartnerId) ?? PARTNERS[0]
+    : partner;
+
+  if (!displayPartner && !isAdminMode) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center p-8" dir="rtl">
         <Card className="w-full max-w-md">
@@ -51,7 +64,49 @@ export default function PartnersPage() {
     );
   }
 
-  const data = calcPartnerData(partner);
+  const data = displayPartner ? calcPartnerData(displayPartner) : null;
+
+  const handleLogout = () => {
+    setPartner(null);
+    setPin("");
+    setError("");
+    setIsAdminMode(false);
+    setSelectedPartnerId("");
+  };
+
+  if (isAdminMode && !displayPartner) {
+    return (
+      <div className="p-8" dir="rtl">
+        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800">
+          ⚙️ وضع المدير — تصفح بيانات جميع الشركاء
+        </div>
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-slate-800">لوحة الشريك</h1>
+          <button onClick={handleLogout} className="text-sm text-slate-500 hover:text-indigo-600">
+            تسجيل الخروج
+          </button>
+        </div>
+        <Card>
+          <label className="block text-sm font-medium text-slate-700">اختر الشريك</label>
+          <select
+            value={selectedPartnerId}
+            onChange={(e) => setSelectedPartnerId(e.target.value)}
+            className="mt-2 w-full rounded border border-slate-300 px-3 py-2"
+          >
+            {PARTNERS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} — {p.group} ({p.sharePercent}%)
+              </option>
+            ))}
+          </select>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!displayPartner || !data) return null;
+
+  const activePartner = displayPartner;
 
   const pricePerM2ByYear: Record<number, number> = {
     1: 1_200,
@@ -99,18 +154,31 @@ export default function PartnersPage() {
 
   return (
     <div className="p-8" dir="rtl">
-      <div className="mb-6 flex items-center justify-between">
+      {isAdminMode && (
+        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800">
+          ⚙️ وضع المدير — تصفح بيانات جميع الشركاء
+        </div>
+      )}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-slate-800">لوحة الشريك</h1>
-        <button
-          onClick={() => {
-            setPartner(null);
-            setPin("");
-            setError("");
-          }}
-          className="text-sm text-slate-500 hover:text-indigo-600"
-        >
-          تسجيل الخروج
-        </button>
+        <div className="flex items-center gap-4">
+          {isAdminMode && (
+            <select
+              value={selectedPartnerId}
+              onChange={(e) => setSelectedPartnerId(e.target.value)}
+              className="rounded border border-slate-300 px-3 py-2 text-sm"
+            >
+              {PARTNERS.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} — {p.group}
+                </option>
+              ))}
+            </select>
+          )}
+          <button onClick={handleLogout} className="text-sm text-slate-500 hover:text-indigo-600">
+            تسجيل الخروج
+          </button>
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -119,15 +187,15 @@ export default function PartnersPage() {
           <dl className="mt-4 space-y-2 text-sm">
             <div>
               <dt className="text-slate-500">اسم الشريك</dt>
-              <dd className="font-medium">{partner.name}</dd>
+              <dd className="font-medium">{activePartner.name}</dd>
             </div>
             <div>
               <dt className="text-slate-500">المجموعة</dt>
-              <dd className="font-medium">{partner.group}</dd>
+              <dd className="font-medium">{activePartner.group}</dd>
             </div>
             <div>
               <dt className="text-slate-500">نسبة ملكيتك من الشركة</dt>
-              <dd className="font-medium">{partner.sharePercent}%</dd>
+              <dd className="font-medium">{activePartner.sharePercent}%</dd>
             </div>
             <div>
               <dt className="text-slate-500">عدد الأسهم التقديرية (من 10,000 سهم)</dt>
@@ -226,7 +294,8 @@ export default function PartnersPage() {
           <h2 className="text-lg font-semibold text-slate-800">كيف تبيع حصتك</h2>
           <p className="mt-4 whitespace-pre-line text-sm text-slate-600">{sellStepsText}</p>
           <p className="mt-4 text-sm text-slate-500">
-            ملاحظة: عند البيع تنتقل ملكية الأرض المقابلة ({data.landAreaSqm.toLocaleString("en-US")} م²)
+            ملاحظة: عند البيع تنتقل ملكية الأرض المقابلة (
+            {data.landAreaSqm.toLocaleString("en-US")} م²)
             مع الحصة تلقائياً للمشتري وفق عقد الشركة.
           </p>
         </Card>
@@ -286,11 +355,13 @@ export default function PartnersPage() {
           </p>
         </Card>
 
-        <div className="pt-4">
-          <Button disabled className="opacity-70" title="قريباً">
-            تحميل ملخص حصتي PDF
-          </Button>
-        </div>
+        {!isAdminMode && (
+          <div className="pt-4">
+            <Button disabled className="opacity-70" title="قريباً">
+              تحميل ملخص حصتي PDF
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

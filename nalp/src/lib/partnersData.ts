@@ -1,3 +1,5 @@
+export const ADMIN_PIN = "NALP-ADMIN-2026";
+
 export const LAND_VALUATION = {
   salableArea: 25_350,
   pricePerMeter: 750,
