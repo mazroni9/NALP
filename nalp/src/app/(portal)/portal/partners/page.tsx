@@ -2,48 +2,47 @@
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { ADMIN_PIN, COMPANY, PARTNERS, calcPartnerData } from "@/lib/partnersData";
+import { COMPANY, PARTNERS, calcPartnerData } from "@/lib/partnersData";
 import { useState } from "react";
 
-function findPartnerByPin(pin: string) {
-  const normalized = pin.trim().toUpperCase();
-  return PARTNERS.find((p) => p.pin.toUpperCase() === normalized);
-}
+const ADMIN_PIN = "NALP-ADMIN-2026";
 
 export default function PartnersPage() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [partner, setPartner] = useState<(typeof PARTNERS)[0] | null>(null);
-  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [selectedPartnerId, setSelectedPartnerId] = useState<string>("");
 
   const handleLogin = () => {
     setError("");
-    const trimmedPin = pin
-      .trim()
-      .replace(/[\u200B-\u200D\uFEFF]/g, "")
-      .replace(/[\u2010-\u2015\uFF0D]/g, "-");
-    // التحقق من كود المدير أولاً (قبل البحث في الشركاء)
-    if (trimmedPin === ADMIN_PIN) {
-      setIsAdminMode(true);
+    const cleanPin = pin.trim();
+
+    console.log("PIN entered:", JSON.stringify(cleanPin));
+    console.log("ADMIN_PIN:", JSON.stringify(ADMIN_PIN));
+    console.log("Match:", cleanPin === ADMIN_PIN);
+
+    if (cleanPin === ADMIN_PIN) {
+      setIsAdmin(true);
       setPartner(null);
       setSelectedPartnerId(PARTNERS[0]?.id ?? "");
       return;
     }
-    const found = findPartnerByPin(pin);
+
+    const found = PARTNERS.find((p) => p.pin === cleanPin);
     if (found) {
       setPartner(found);
-      setIsAdminMode(false);
+      setIsAdmin(false);
     } else {
       setError("رمز غير صحيح، يرجى التواصل مع إدارة الشركة");
     }
   };
 
-  const displayPartner = isAdminMode
+  const displayPartner = isAdmin
     ? PARTNERS.find((p) => p.id === selectedPartnerId) ?? PARTNERS[0]
     : partner;
 
-  if (!displayPartner && !isAdminMode) {
+  if (!displayPartner && !isAdmin) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center p-8" dir="rtl">
         <Card className="w-full max-w-md">
@@ -75,11 +74,11 @@ export default function PartnersPage() {
     setPartner(null);
     setPin("");
     setError("");
-    setIsAdminMode(false);
+    setIsAdmin(false);
     setSelectedPartnerId("");
   };
 
-  if (isAdminMode && !displayPartner) {
+  if (isAdmin && !displayPartner) {
     return (
       <div className="p-8" dir="rtl">
         <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800">
@@ -159,7 +158,7 @@ export default function PartnersPage() {
 
   return (
     <div className="p-8" dir="rtl">
-      {isAdminMode && (
+      {isAdmin && (
         <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-amber-800">
           ⚙️ وضع المدير — تصفح بيانات جميع الشركاء
         </div>
@@ -167,7 +166,7 @@ export default function PartnersPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-slate-800">لوحة الشريك</h1>
         <div className="flex items-center gap-4">
-          {isAdminMode && (
+          {isAdmin && (
             <select
               value={selectedPartnerId}
               onChange={(e) => setSelectedPartnerId(e.target.value)}
@@ -360,7 +359,7 @@ export default function PartnersPage() {
           </p>
         </Card>
 
-        {!isAdminMode && (
+        {!isAdmin && (
           <div className="pt-4">
             <Button disabled className="opacity-70" title="قريباً">
               تحميل ملخص حصتي PDF
