@@ -62,32 +62,32 @@ export function ZoneCards() {
       {ZONES.map((z) => (
         <Card
           key={z.id}
-          className="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+          className="flex min-h-[240px] flex-col transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
         >
           <h3 className="text-lg font-semibold text-slate-900">{z.name}</h3>
-          <dl className="mt-4 space-y-3 text-sm">
-            {z.items.map((item) => (
-              <div key={item.label} className="flex flex-col gap-0.5">
-                <dt className="text-slate-500">{item.label}</dt>
-                <dd className="font-medium text-slate-900">
-                  {formatValue(item.value, "suffix" in item ? item.suffix : undefined)}
-                  {"note" in item && item.note && (
-                    <span className="mr-1 text-xs text-slate-400">({item.note})</span>
-                  )}
-                </dd>
-              </div>
-            ))}
-            <div className="flex items-center justify-between pt-2">
-              <dt className="text-slate-500">Risk</dt>
-              <dd>
-                <span
-                  className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${z.riskClass}`}
-                >
-                  {z.risk}
-                </span>
-              </dd>
+          <div className="mt-4 flex flex-1 flex-col text-sm">
+            <div className="space-y-3">
+              {z.items.map((item) => (
+                <div key={item.label} className="flex flex-col gap-0.5">
+                  <span className="text-slate-500">{item.label}</span>
+                  <span className="font-medium text-slate-900">
+                    {formatValue(item.value, "suffix" in item ? item.suffix : undefined)}
+                    {"note" in item && item.note && (
+                      <span className="mr-1 text-xs text-slate-400">({item.note})</span>
+                    )}
+                  </span>
+                </div>
+              ))}
             </div>
-          </dl>
+            <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3">
+              <span className="text-slate-500">مستوى المخاطرة</span>
+              <span
+                className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${z.riskClass}`}
+              >
+                {z.risk}
+              </span>
+            </div>
+          </div>
         </Card>
       ))}
     </div>
