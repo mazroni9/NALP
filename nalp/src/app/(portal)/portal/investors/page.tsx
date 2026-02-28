@@ -30,7 +30,7 @@ export default function InvestorsPage() {
       annualRevenue: ZONE_A.revenue8Years / 8,
     opexPercent: 25,      opexFixed: 0,
       netAnnual: (ZONE_A.revenue8Years / 8) * 0.7,
-      defaultInvestment: 15000000,
+      defaultInvestment: 1500000,
     },
     B: {
       id: "B",
@@ -39,7 +39,7 @@ export default function InvestorsPage() {
       opexPercent: 0,
       opexFixed: 100000,
       netAnnual: ZONE_B.annualRevenue - 100000,
-      defaultInvestment: 10000000,
+      defaultInvestment: 500000,
     },
     C: {
       id: "C",
@@ -48,7 +48,7 @@ export default function InvestorsPage() {
       opexPercent: 10,
       opexFixed: 0,
       netAnnual: ZONE_C.annualRevenue * 0.9,
-      defaultInvestment: 8000000,
+      defaultInvestment: 5500000,
     },
     D: {
       id: "D",
@@ -57,7 +57,7 @@ export default function InvestorsPage() {
       opexPercent: 15,
       opexFixed: 0,
       netAnnual: ZONE_D.annualRevenue * 0.85,
-      defaultInvestment: 25000000,
+      defaultInvestment: 2500000,
     },
   };
 
