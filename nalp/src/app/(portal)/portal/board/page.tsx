@@ -45,9 +45,24 @@ export default function BoardPage() {
     { sharePercent: 0, shares: 0, annualIncome: 0, total8Y: 0 }
   );
 
-  const top5Partners = [...partnerRows]
-    .sort((a, b) => b.sharePercent - a.sharePercent)
-    .slice(0, 5);
+  const netDistributableAnnual =
+    BOARD_STRUCTURE.annualIncome - BOARD_STRUCTURE.totalAdminCost;
+  const groups = ["أبناء أحمد عتيق", "أبناء عطية", "أبناء عبدالرحمن"] as const;
+  const topByGroup = groups.map((group) => ({
+    group,
+    members: [...partnerRows]
+      .filter((p) => p.group === group)
+      .sort((a, b) => b.shares - a.shares)
+      .slice(0, 5),
+  }));
+  const quarterlyForPartner = (shares: number) =>
+    Math.round((shares / 10_000) * netDistributableAnnual / 4);
+
+  const groupColors: Record<(typeof groups)[number], string> = {
+    "أبناء أحمد عتيق": "bg-blue-50 border-blue-200 text-blue-800",
+    "أبناء عطية": "bg-green-50 border-green-200 text-green-800",
+    "أبناء عبدالرحمن": "bg-violet-50 border-violet-200 text-violet-800",
+  };
 
   const progressPercent =
     (BOARD_STRUCTURE.totalAdminCost / BOARD_STRUCTURE.maxAdminBudget) * 100;
@@ -324,32 +339,49 @@ export default function BoardPage() {
           </div>
 
           <p className="mt-4 text-sm text-slate-600">
-            جدول توزيع ربعي تقديري لأعلى 5 شركاء حصصاً
+            جدول توزيع ربعي تقديري — أعلى 5 من كل مجموعة
           </p>
-          <div className="mt-2 overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="px-2 py-2 font-medium text-slate-600">الاسم</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">الحصة%</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">
-                    التوزيع الربعي (تقديري)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {top5Partners.map((p, i) => (
-                  <tr key={i} className="border-b border-slate-100">
-                    <td className="px-2 py-2">{p.name}</td>
-                    <td className="px-2 py-2">{p.sharePercent}%</td>
-                    <td className="px-2 py-2 font-medium">
-                      {Math.round(p.annualIncome / 4).toLocaleString("en-US")}{" "}
-                      ريال
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-4 space-y-6">
+            {topByGroup.map(({ group, members }) => (
+              <div key={group} className="overflow-hidden rounded-lg border">
+                <h4
+                  className={`border-b px-4 py-2 font-semibold ${groupColors[group]}`}
+                >
+                  {group}
+                </h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-200">
+                        <th className="px-2 py-2 font-medium text-slate-600">
+                          الاسم
+                        </th>
+                        <th className="px-2 py-2 font-medium text-slate-600">
+                          الحصة%
+                        </th>
+                        <th className="px-2 py-2 font-medium text-slate-600">
+                          التوزيع الربعي (تقديري)
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {members.map((p, i) => (
+                        <tr key={i} className="border-b border-slate-100 last:border-b-0">
+                          <td className="px-2 py-2">{p.name}</td>
+                          <td className="px-2 py-2">{p.sharePercent}%</td>
+                          <td className="px-2 py-2 font-medium">
+                            {quarterlyForPartner(p.shares).toLocaleString(
+                              "en-US"
+                            )}{" "}
+                            ريال
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
           </div>
           <p className="mt-2 text-xs text-slate-500">
             {BOARD_STRUCTURE.distributionSchedule}
