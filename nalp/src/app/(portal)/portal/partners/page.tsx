@@ -19,18 +19,23 @@ export default function PartnersPage() {
 
   const handleLogin = () => {
     setError("");
-    if (pin.trim() === ADMIN_PIN) {
+    const trimmedPin = pin
+      .trim()
+      .replace(/[\u200B-\u200D\uFEFF]/g, "")
+      .replace(/[\u2010-\u2015\uFF0D]/g, "-");
+    // التحقق من كود المدير أولاً (قبل البحث في الشركاء)
+    if (trimmedPin === ADMIN_PIN) {
       setIsAdminMode(true);
       setPartner(null);
       setSelectedPartnerId(PARTNERS[0]?.id ?? "");
+      return;
+    }
+    const found = findPartnerByPin(pin);
+    if (found) {
+      setPartner(found);
+      setIsAdminMode(false);
     } else {
-      const found = findPartnerByPin(pin);
-      if (found) {
-        setPartner(found);
-        setIsAdminMode(false);
-      } else {
-        setError("رمز غير صحيح، يرجى التواصل مع إدارة الشركة");
-      }
+      setError("رمز غير صحيح، يرجى التواصل مع إدارة الشركة");
     }
   };
 
