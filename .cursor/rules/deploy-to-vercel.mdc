@@ -13,6 +13,11 @@ alwaysApply: true
 2. **الالتزام**: `git commit -m "وصف التحديث"`
 3. **الرفع**: `git push origin <الفرع>`
 
+## ملف HTML لمنطقة ج
+أي تعديل في منطقة ج (صفحة zone-c، zoneCAreas، roomLayout، ZONE_CONFIGS) يُحدَّث تلقائياً في `public/zone-c-report.html` عند تشغيل:
+- `npm run generate:zone-c-report` (يدوياً)
+- أو `npm run build` (يُنفِّذ التوليد قبل البناء)
+
 ## ملاحظات
 - الفرع الحالي: `staging` (أو `main` حسب الإعداد)
 - الدفع يفعّل النشر على Vercel تلقائياً دون أوامر إضافية

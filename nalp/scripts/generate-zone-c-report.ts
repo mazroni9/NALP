@@ -1,9 +1,27 @@
-<!DOCTYPE html>
+/**
+ * يولد zone-c-report.html من نفس بيانات منطقة ج
+ * يشغّل تلقائياً مع البناء أو يدوياً: npm run generate:zone-c-report
+ */
+import { writeFileSync } from "fs";
+import { join } from "path";
+import { computeZoneCAreas } from "../src/lib/zoneCAreas";
+import { ZONE_CONFIGS } from "../src/lib/nalpLandSketch";
+import { ROOMS_PER_BUILDING } from "../src/lib/roomLayout";
+
+const zone = ZONE_CONFIGS.find((z) => z.id === "c")!;
+const zoneCAreas = computeZoneCAreas();
+const totalRooms = ROOMS_PER_BUILDING["7m"].total + 5 * ROOMS_PER_BUILDING["14m"].total;
+
+const buildingsCost = zoneCAreas.buildingsTotalM2 * 1000;
+const infraCost = (zoneCAreas.parkingsTotalM2 + zoneCAreas.roadM2) * 200;
+const totalCost = buildingsCost + infraCost;
+
+const html = `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>المنطقة ج — منطقة سكن الموظفين والمرافق</title>
+  <title>المنطقة ج — ${zone.title}</title>
   <style>
     @page { size: A4; margin: 2cm; }
     * { box-sizing: border-box; }
@@ -54,8 +72,8 @@
 </head>
 <body>
 
-<h1>المنطقة ج: منطقة سكن الموظفين والمرافق</h1>
-<p><strong>الوصف المختصر:</strong> الجزء الهادئ من الأرض، بيئة معيشية مريحة، مباني سكنية ومرافق مركزية.</p>
+<h1>المنطقة ج: ${zone.title}</h1>
+<p><strong>الوصف المختصر:</strong> ${zone.shortDesc}</p>
 
 <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;">
 
@@ -66,7 +84,7 @@
 
 <h2>٢. الوصف</h2>
 <p>
-  منطقة سكن الموظفين والمرافق تقع في الجزء الهادئ من الأرض، وتوفر بيئة معيشية مريحة للعاملين. تضم مباني سكنية حديثة بطابقين تحقق حوالي 198 غرفة بنمط استوديو.
+  ${zone.description}
 </p>
 
 <h2>٣. تخطيط الغرف لكل مبنى</h2>
@@ -76,10 +94,10 @@
 <div class="summary-box">
   <h4 style="margin-top: 0;">عدد الغرف لكل مبنى</h4>
   <ul>
-    <li><strong>مبنى ١</strong> (٧م): 9 غرفة/طابق — إجمالي 18 غرفة</li>
-    <li><strong>مباني ٢–٦</strong> (١٤م): 18 غرفة/طابق — إجمالي 36 غرفة لكل مبنى</li>
+    <li><strong>مبنى ١</strong> (٧م): ${ROOMS_PER_BUILDING["7m"].perFloor} غرفة/طابق — إجمالي ${ROOMS_PER_BUILDING["7m"].total} غرفة</li>
+    <li><strong>مباني ٢–٦</strong> (١٤م): ${ROOMS_PER_BUILDING["14m"].perFloor} غرفة/طابق — إجمالي ${ROOMS_PER_BUILDING["14m"].total} غرفة لكل مبنى</li>
   </ul>
-  <p><strong>المجموع: 198 غرفة</strong></p>
+  <p><strong>المجموع: ${totalRooms} غرفة</strong></p>
 </div>
 
 <h2>٤. حساب المساحات</h2>
@@ -94,20 +112,20 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>مبنى 1</td><td>7 × 48.5 م</td><td>٣٣٩٫٥</td></tr>
-    <tr><td>مبنى 2</td><td>14 × 48.5 م</td><td>٦٧٩</td></tr>
-    <tr><td>مبنى 3</td><td>14 × 48.5 م</td><td>٦٧٩</td></tr>
-    <tr><td>مبنى 4</td><td>14 × 48.5 م</td><td>٦٧٩</td></tr>
-    <tr><td>مبنى 5</td><td>14 × 48.5 م</td><td>٦٧٩</td></tr>
-    <tr><td>مبنى 6</td><td>14 × 48.5 م</td><td>٦٧٩</td></tr>
+${zoneCAreas.buildings
+  .map(
+    (b) =>
+      `    <tr><td>مبنى ${b.id}</td><td>${b.widthM} × ${b.depthM} م</td><td>${b.areaM2.toLocaleString("ar-SA")}</td></tr>`
+  )
+  .join("\n")}
   </tbody>
 </table>
 
 <div class="summary-box">
-  <p><span>مجموع المباني:</span> <span>٣٬٧٣٤٫٥ م²</span></p>
-  <p><span>ساحات المواقف:</span> <span>٦٬٣٥٣٫٥ م²</span></p>
-  <p><span>طريق ٤م (خلف المباني):</span> <span>٨٣٢ م²</span></p>
-  <p class="total"><span>إجمالي المنطقة ج:</span> <span>١٠٬٩٢٠ م²</span></p>
+  <p><span>مجموع المباني:</span> <span>${zoneCAreas.buildingsTotalM2.toLocaleString("ar-SA")} م²</span></p>
+  <p><span>ساحات المواقف:</span> <span>${zoneCAreas.parkingsTotalM2.toLocaleString("ar-SA")} م²</span></p>
+  <p><span>طريق ٤م (خلف المباني):</span> <span>${zoneCAreas.roadM2.toLocaleString("ar-SA")} م²</span></p>
+  <p class="total"><span>إجمالي المنطقة ج:</span> <span>${zoneCAreas.zoneTotalM2.toLocaleString("ar-SA")} م²</span></p>
 </div>
 
 <h2>٥. تقدير التكاليف</h2>
@@ -115,20 +133,20 @@
   تكلفة المباني: ١٬٠٠٠ ريال/م². تسوية المواقف والشوارع والبنية التحتية (كهرباء، هاتف، مجاري، إلخ): ٢٠٠ ريال/م².
 </p>
 <div class="summary-box">
-  <p><span>تكلفة المباني (٣٬٧٣٤٫٥ م² × ١٬٠٠٠ ر.س):</span> <span>٣٬٧٣٤٬٥٠٠ ر.س</span></p>
-  <p><span>المواقف + الطريق (٦٬٣٥٣٫٥ + ٨٣٢ م² × ٢٠٠ ر.س):</span> <span>١٬٤٣٧٬١٠٠ ر.س</span></p>
-  <p class="total"><span>إجمالي التكلفة التقديرية:</span> <span>٥٬١٧١٬٦٠٠ ر.س</span></p>
+  <p><span>تكلفة المباني (${zoneCAreas.buildingsTotalM2.toLocaleString("ar-SA")} م² × ١٬٠٠٠ ر.س):</span> <span>${buildingsCost.toLocaleString("ar-SA")} ر.س</span></p>
+  <p><span>المواقف + الطريق (${zoneCAreas.parkingsTotalM2.toLocaleString("ar-SA")} + ${zoneCAreas.roadM2.toLocaleString("ar-SA")} م² × ٢٠٠ ر.س):</span> <span>${infraCost.toLocaleString("ar-SA")} ر.س</span></p>
+  <p class="total"><span>إجمالي التكلفة التقديرية:</span> <span>${totalCost.toLocaleString("ar-SA")} ر.س</span></p>
 </div>
 
 <h2>٦. المميزات الرئيسية</h2>
 <ul>
   <li>مباني سكنية حديثة بطابقين (G+2)</li>
-  <li>حوالي 198 غرفة بنمط استوديو</li>
+  <li>حوالي ${totalRooms} غرفة بنمط استوديو</li>
   <li>مبنى ٦ — الطابق الأرضي: مكاتب لقسم الإيواء، سوبرماركت صغير، مغسلة، وخدمات</li>
   <li>ساحات خضراء طولية وممرات مشاة</li>
 </ul>
 
-<h2>٧. جدوى المساحة لـ 198 غرفة</h2>
+<h2>٧. جدوى المساحة لـ ${totalRooms} غرفة</h2>
 <p>
   على الطول ٢٠٨ م: مبنى شرقي ٧م يطل شرقاً، مواقف ٢٥م، مباني وسطية ١٤م (ظهر لظهر — جزء يطل على المواقف وجزء على ساحة الإيواء)، وبين المبنى الشرقي وساحة الإيواء مواقف مهما كان حجمها.
 </p>
@@ -140,3 +158,9 @@
 
 </body>
 </html>
+`;
+
+const outPath = join(__dirname, "..", "public", "zone-c-report.html");
+writeFileSync(outPath, html, "utf-8");
+console.log("✓ تم إنشاء zone-c-report.html بنجاح");
+process.exit(0);
