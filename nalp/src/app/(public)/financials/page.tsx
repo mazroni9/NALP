@@ -17,9 +17,9 @@ export default function FinancialsPage() {
           <span className="inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">
             Public Investor View
           </span>
-          <h1 className="mt-4 text-4xl font-bold text-slate-900">نظرة مالية</h1>
+          <h1 className="mt-4 text-4xl font-bold text-slate-900">لوحة المستثمر</h1>
           <p className="mt-2 text-lg text-slate-600">
-            ملخص استثماري مبسّط لمشروع NALP (8 سنوات)
+            ملخص استثماري لمشروع NALP — 8 سنوات
           </p>
         </header>
 
