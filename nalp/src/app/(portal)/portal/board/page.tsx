@@ -36,16 +36,6 @@ export default function BoardPage() {
     };
   });
 
-  const totals = partnerRows.reduce(
-    (acc, r) => ({
-      sharePercent: acc.sharePercent + r.sharePercent,
-      shares: acc.shares + r.shares,
-      annualIncome: acc.annualIncome + r.annualIncome,
-      total8Y: acc.total8Y + r.total8Y,
-    }),
-    { sharePercent: 0, shares: 0, annualIncome: 0, total8Y: 0 }
-  );
-
   const netDistributableAnnual =
     BOARD_STRUCTURE.annualIncome - BOARD_STRUCTURE.totalAdminCost;
   const groups = ["أبناء أحمد عتيق", "أبناء عطية", "أبناء عبدالرحمن"] as const;
@@ -118,54 +108,7 @@ export default function BoardPage() {
           </dl>
         </Card>
 
-        {/* القسم 2 — جدول حصص جميع الشركاء */}
-        <Card>
-          <h2 className="text-lg font-semibold text-slate-800">
-            جدول حصص جميع الشركاء (لوحة مجلس الإدارة)
-          </h2>
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="px-2 py-2 font-medium text-slate-600">الاسم</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">المجموعة</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">الحصة%</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">الأسهم</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">الدخل السنوي</th>
-                  <th className="px-2 py-2 font-medium text-slate-600">إجمالي 8 سنوات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {partnerRows.map((r, i) => (
-                  <tr key={i} className="border-b border-slate-100">
-                    <td className="px-2 py-2">{r.name}</td>
-                    <td className="px-2 py-2 text-slate-600">{r.group}</td>
-                    <td className="px-2 py-2">{r.sharePercent}</td>
-                    <td className="px-2 py-2">{r.shares.toLocaleString("en-US")}</td>
-                    <td className="px-2 py-2">
-                      {r.annualIncome.toLocaleString("en-US")}
-                    </td>
-                    <td className="px-2 py-2">
-                      {r.total8Y.toLocaleString("en-US")}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="border-t-2 border-slate-300 font-semibold">
-                  <td className="px-2 py-2">الإجمالي</td>
-                  <td className="px-2 py-2">—</td>
-                  <td className="px-2 py-2">{totals.sharePercent.toFixed(2)}%</td>
-                  <td className="px-2 py-2">{totals.shares.toLocaleString("en-US")}</td>
-                  <td className="px-2 py-2">
-                    {totals.annualIncome.toLocaleString("en-US")}
-                  </td>
-                  <td className="px-2 py-2">{totals.total8Y.toLocaleString("en-US")}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </Card>
-
-        {/* القسم 3 — هيكل مجلس الإدارة */}
+        {/* القسم 2 — هيكل مجلس الإدارة */}
         <Card>
           <h2 className="text-lg font-semibold text-slate-800">
             هيكل مجلس الإدارة

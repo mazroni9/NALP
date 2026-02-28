@@ -78,6 +78,33 @@ export default function PartnersPage() {
     setSelectedPartnerId("");
   };
 
+  const GROUP_ORDER = ["أبناء أحمد عتيق", "أبناء عطية", "أبناء عبدالرحمن"] as const;
+  const sortedPartners = [...PARTNERS].sort(
+    (a, b) =>
+      GROUP_ORDER.indexOf(a.group as (typeof GROUP_ORDER)[number]) -
+      GROUP_ORDER.indexOf(b.group as (typeof GROUP_ORDER)[number])
+  );
+  const adminPartnerRows = sortedPartners.map((p) => {
+    const d = calcPartnerData(p);
+    return {
+      name: p.name,
+      group: p.group,
+      sharePercent: p.sharePercent,
+      shares: d.shares,
+      annualIncome: d.annualIncome,
+      total8Y: d.totalIncome8Y,
+    };
+  });
+  const adminTotals = adminPartnerRows.reduce(
+    (acc, r) => ({
+      sharePercent: acc.sharePercent + r.sharePercent,
+      shares: acc.shares + r.shares,
+      annualIncome: acc.annualIncome + r.annualIncome,
+      total8Y: acc.total8Y + r.total8Y,
+    }),
+    { sharePercent: 0, shares: 0, annualIncome: 0, total8Y: 0 }
+  );
+
   if (isAdmin && !displayPartner) {
     return (
       <div className="p-8" dir="rtl">
@@ -90,20 +117,61 @@ export default function PartnersPage() {
             تسجيل الخروج
           </button>
         </div>
-        <Card>
-          <label className="block text-sm font-medium text-slate-700">اختر الشريك</label>
-          <select
-            value={selectedPartnerId}
-            onChange={(e) => setSelectedPartnerId(e.target.value)}
-            className="mt-2 w-full rounded border border-slate-300 px-3 py-2"
-          >
-            {PARTNERS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} — {p.group} ({p.sharePercent}%)
-              </option>
-            ))}
-          </select>
-        </Card>
+        <div className="space-y-6">
+          <Card>
+            <h2 className="text-lg font-semibold text-slate-800">
+              جدول حصص جميع الشركاء
+            </h2>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-right text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="px-2 py-2 font-medium text-slate-600">الاسم</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">المجموعة</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">الحصة%</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">الأسهم</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">الدخل السنوي</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">إجمالي 8 سنوات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminPartnerRows.map((r, i) => (
+                    <tr key={i} className="border-b border-slate-100">
+                      <td className="px-2 py-2">{r.name}</td>
+                      <td className="px-2 py-2 text-slate-600">{r.group}</td>
+                      <td className="px-2 py-2">{r.sharePercent}</td>
+                      <td className="px-2 py-2">{r.shares.toLocaleString("en-US")}</td>
+                      <td className="px-2 py-2">{r.annualIncome.toLocaleString("en-US")}</td>
+                      <td className="px-2 py-2">{r.total8Y.toLocaleString("en-US")}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t-2 border-slate-300 font-semibold">
+                    <td className="px-2 py-2">الإجمالي</td>
+                    <td className="px-2 py-2">—</td>
+                    <td className="px-2 py-2">{adminTotals.sharePercent.toFixed(2)}%</td>
+                    <td className="px-2 py-2">{adminTotals.shares.toLocaleString("en-US")}</td>
+                    <td className="px-2 py-2">{adminTotals.annualIncome.toLocaleString("en-US")}</td>
+                    <td className="px-2 py-2">{adminTotals.total8Y.toLocaleString("en-US")}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </Card>
+          <Card>
+            <label className="block text-sm font-medium text-slate-700">اختر الشريك</label>
+            <select
+              value={selectedPartnerId}
+              onChange={(e) => setSelectedPartnerId(e.target.value)}
+              className="mt-2 w-full rounded border border-slate-300 px-3 py-2"
+            >
+              {PARTNERS.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} — {p.group} ({p.sharePercent}%)
+                </option>
+              ))}
+            </select>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -186,6 +254,47 @@ export default function PartnersPage() {
       </div>
 
       <div className="space-y-6">
+        {isAdmin && (
+          <Card>
+            <h2 className="text-lg font-semibold text-slate-800">
+              جدول حصص جميع الشركاء
+            </h2>
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-right text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="px-2 py-2 font-medium text-slate-600">الاسم</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">المجموعة</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">الحصة%</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">الأسهم</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">الدخل السنوي</th>
+                    <th className="px-2 py-2 font-medium text-slate-600">إجمالي 8 سنوات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminPartnerRows.map((r, i) => (
+                    <tr key={i} className="border-b border-slate-100">
+                      <td className="px-2 py-2">{r.name}</td>
+                      <td className="px-2 py-2 text-slate-600">{r.group}</td>
+                      <td className="px-2 py-2">{r.sharePercent}</td>
+                      <td className="px-2 py-2">{r.shares.toLocaleString("en-US")}</td>
+                      <td className="px-2 py-2">{r.annualIncome.toLocaleString("en-US")}</td>
+                      <td className="px-2 py-2">{r.total8Y.toLocaleString("en-US")}</td>
+                    </tr>
+                  ))}
+                  <tr className="border-t-2 border-slate-300 font-semibold">
+                    <td className="px-2 py-2">الإجمالي</td>
+                    <td className="px-2 py-2">—</td>
+                    <td className="px-2 py-2">{adminTotals.sharePercent.toFixed(2)}%</td>
+                    <td className="px-2 py-2">{adminTotals.shares.toLocaleString("en-US")}</td>
+                    <td className="px-2 py-2">{adminTotals.annualIncome.toLocaleString("en-US")}</td>
+                    <td className="px-2 py-2">{adminTotals.total8Y.toLocaleString("en-US")}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
         <Card>
           <h2 className="text-lg font-semibold text-slate-800">هويتك في الشركة</h2>
           <dl className="mt-4 space-y-2 text-sm">
