@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { COMPANY, PARTNERS, calcPartnerData } from "@/lib/partnersData";
+import { PARTNERS, calcPartnerData } from "@/lib/partnersData";
 import { useState } from "react";
 
 const ADMIN_PIN = "NALP-ADMIN-2026";
@@ -110,20 +109,7 @@ export default function PartnersPage() {
     5: 1_950, 6: 2_100, 7: 2_300, 8: 2_500,
   };
 
-  const wealthRows = data ? Array.from({ length: COMPANY.projectYears }, (_, i) => {
-    const year = i + 1;
-    const annualIncome = data.annualIncome;
-    const cumulativeIncome = annualIncome * year;
-    const pricePerM2 = pricePerM2ByYear[year];
-    const landValue = Math.round(data.landAreaSqm * pricePerM2);
-    const remainingYears = 8 - year;
-    const remainingIncome = remainingYears * annualIncome;
-    const discount = year <= 3 ? 0.35 : year <= 6 ? 0.2 : 0;
-    const saleValue = Math.round((landValue + remainingIncome) * (1 - discount));
-    const totalWealth = cumulativeIncome + landValue;
-    return { year, annualIncome, cumulativeIncome, pricePerM2, landValue, saleValue, totalWealth };
-  }) : [];
-
+    
   const sellStepsText = data ? `يحق لك بيع حصتك لأي مستثمر خارجي أو لشريك آخر في أي وقت خلال مدة المشروع.
 خطوات البيع:
 ① تواصل مع إدارة الشركة لإشعار البيع
