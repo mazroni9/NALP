@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
-import { formatNumber } from "@/lib/formatNumber";
+import { formatSAR } from "@/lib/formatNumber";
 import { ZONE_A, ZONE_B, ZONE_C, ZONE_D } from "@/lib/projectData";
 
 export default function InvestorsPage() {
@@ -93,7 +93,7 @@ export default function InvestorsPage() {
             </div>
             <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
               <p className="text-sm text-emerald-600 font-medium">إجمالي العائد (8 سنوات)</p>
-              <p className="text-2xl font-bold text-emerald-900">{formatNumber(returns.total.income8Years)}</p>
+              <p className="text-2xl font-bold text-emerald-900">{formatSAR(returns.total.income8Years)}</p>
             </div>
           </div>
         </div>
@@ -108,11 +108,11 @@ export default function InvestorsPage() {
           <div className="space-y-3">
             <div className="flex justify-between border-b border-slate-100 pb-2">
               <span className="text-slate-600">عائد 8 سنوات:</span>
-              <span className="font-bold text-slate-900">{formatNumber(returns.zoneA.income8Years)}</span>
+              <span className="font-bold text-slate-900">{formatSAR(returns.zoneA.income8Years)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">متوسط سنوي:</span>
-              <span className="font-bold text-slate-900">{formatNumber(returns.zoneA.annualAverage)}</span>
+              <span className="font-bold text-slate-900">{formatSAR(returns.zoneA.annualAverage)}</span>
             </div>
           </div>
         </Card>
@@ -125,11 +125,11 @@ export default function InvestorsPage() {
           <div className="space-y-3">
             <div className="flex justify-between border-b border-slate-100 pb-2">
               <span className="text-slate-600">عائد 8 سنوات:</span>
-              <span className="font-bold text-slate-900">{formatNumber(returns.zoneB.income8Years)}</span>
+              <span className="font-bold text-slate-900">{formatSAR(returns.zoneB.income8Years)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">متوسط سنوي:</span>
-              <span className="font-bold text-slate-900">{formatNumber(returns.zoneB.annualAverage)}</span>
+              <span className="font-bold text-slate-900">{formatSAR(returns.zoneB.annualAverage)}</span>
             </div>
           </div>
         </Card>
@@ -142,11 +142,11 @@ export default function InvestorsPage() {
           <div className="space-y-3">
             <div className="flex justify-between border-b border-slate-100 pb-2">
               <span className="text-slate-600">عائد 8 سنوات:</span>
-              <span className="font-bold text-slate-900">{formatNumber(returns.zoneC.income8Years)}</span>
+              <span className="font-bold text-slate-900">{formatSAR(returns.zoneC.income8Years)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">متوسط سنوي:</span>
-              <span className="font-bold text-slate-900">{formatNumber(returns.zoneC.annualAverage)}</span>
+              <span className="font-bold text-slate-900">{formatSAR(returns.zoneC.annualAverage)}</span>
             </div>
           </div>
         </Card>
@@ -159,11 +159,11 @@ export default function InvestorsPage() {
           <div className="space-y-3">
             <div className="flex justify-between border-b border-slate-100 pb-2">
               <span className="text-slate-600">عائد 8 سنوات:</span>
-              <span className="font-bold text-slate-900">{formatNumber(returns.zoneD.income8Years)}</span>
+              <span className="font-bold text-slate-900">{formatSAR(returns.zoneD.income8Years)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-600">متوسط سنوي:</span>
-              <span className="font-bold text-slate-900">{formatNumber(returns.zoneD.annualAverage)}</span>
+              <span className="font-bold text-slate-900">{formatSAR(returns.zoneD.annualAverage)}</span>
             </div>
           </div>
         </Card>
@@ -174,15 +174,15 @@ export default function InvestorsPage() {
         <div className="space-y-4">
           <div className="flex justify-between items-center text-lg">
             <span className="text-slate-600">مبلغ الاستثمار:</span>
-            <span className="font-bold text-slate-900">{formatNumber(investmentAmount)}</span>
+            <span className="font-bold text-slate-900">{formatSAR(investmentAmount)}</span>
           </div>
           <div className="flex justify-between items-center text-xl">
             <span className="text-slate-600">إجمالي العائد (8 سنوات):</span>
-            <span className="font-bold text-emerald-600">{formatNumber(returns.total.income8Years)}</span>
+            <span className="font-bold text-emerald-600">{formatSAR(returns.total.income8Years)}</span>
           </div>
           <div className="flex justify-between items-center text-lg">
             <span className="text-slate-600">متوسط العائد السنوي:</span>
-            <span className="font-bold text-slate-900">{formatNumber(returns.total.annualAverage)}</span>
+            <span className="font-bold text-slate-900">{formatSAR(returns.total.annualAverage)}</span>
           </div>
           <div className="flex justify-between items-center text-lg">
             <span className="text-slate-600">نسبة العائد على الاستثمار (ROI):</span>
@@ -206,7 +206,7 @@ export default function InvestorsPage() {
           </li>
           <li className="flex gap-2">
             <span>•</span>
-            <span>إجمالي دخل الملاك خلال 8 سنوات: {formatNumber(totalOwnerIncome8Years)}.</span>
+            <span>إجمالي دخل الملاك خلال 8 سنوات: {formatSAR(totalOwnerIncome8Years)}.</span>
           </li>
           <li className="flex gap-2">
             <span>•</span>
