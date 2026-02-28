@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/portal/dashboard", label: "لوحة المستثمر" },
+  { href: "/portal/investors", label: "حصة المستثمر" },
   { href: "/portal/data-room", label: "غرفة البيانات" },
   { href: "/portal/scenarios", label: "السيناريوهات" },
   { href: "/portal/partners", label: "لوحة الشركاء" },
@@ -20,34 +21,33 @@ export function PortalSidebar() {
         <Link href="/portal" className="mb-6 font-bold text-indigo-600">
           بوابة NALP
         </Link>
-        <nav className="flex flex-1 flex-col gap-1">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`rounded-md px-3 py-2 ${
-                  isActive
-                    ? "bg-indigo-50 font-medium text-indigo-700"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+
+        <nav className="flex-1 space-y-1">
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`block rounded-lg px-3 py-2 text-sm font-medium transition ${
+                pathname === item.href
+                  ? "bg-indigo-50 text-indigo-700"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
-        <div className="space-y-2 border-t border-slate-200 pt-4">
+
+        <div className="mt-auto border-t border-slate-100 pt-4">
           <Link
             href="/financials"
-            className="block rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 hover:text-indigo-600"
+            className="block text-xs text-slate-400 hover:text-indigo-600"
           >
-            نظرة مالية عامة ←
+            ← نظرة مالية عامة
           </Link>
           <Link
             href="/"
-            className="block text-sm text-slate-500 hover:text-indigo-600"
+            className="mt-2 block text-xs text-slate-400 hover:text-indigo-600"
           >
             العودة للموقع الرئيسي
           </Link>
