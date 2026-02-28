@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { PROJECT_TOTALS } from "@/lib/projectData";
 
-const ANNUAL_INCOME = 4_000_000;
-const REF_CAP_RATE = 9;
-const REF_VALUATION = Math.round(ANNUAL_INCOME / (REF_CAP_RATE / 100) / 1e6);
+const REF_CAP_RATE = PROJECT_TOTALS.capRate;
+const REF_VALUATION = Math.round(PROJECT_TOTALS.valuationAtExit / 1e6);
 
 export function ValuationSimulator() {
-  const [capRate, setCapRate] = useState(9);
-  const valuation = Math.round(ANNUAL_INCOME / (capRate / 100));
+  const [capRate, setCapRate] = useState(PROJECT_TOTALS.capRate);
+  const valuation = Math.round(PROJECT_TOTALS.avgAnnualIncome / (capRate / 100));
 
   return (
     <Card>

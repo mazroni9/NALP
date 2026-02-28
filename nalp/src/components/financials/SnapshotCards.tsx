@@ -1,42 +1,43 @@
 "use client";
 
 import { Card } from "@/components/ui/Card";
-
-const CARDS = [
-  {
-    label: "إجمالي دخل ملاك الأرض (8 سنوات)",
-    value: "61.4M",
-    suffix: "SAR",
-    note: "تقديري وفق افتراضات التشغيل",
-    tooltip: "هذه أرقام تقديرية قابلة للتحديث",
-  },
-  {
-    label: "متوسط دخل سنوي تقديري",
-    value: "6.8M",
-    suffix: "SAR",
-    note: "تقديري وفق افتراضات التشغيل",
-    tooltip: "هذه أرقام تقديرية قابلة للتحديث",
-  },
-  {
-    label: "نطاق التقييم بعد 8 سنوات",
-    value: "43–48M",
-    suffix: "SAR",
-    note: "تقديري وفق افتراضات التشغيل",
-    tooltip: "هذه أرقام تقديرية قابلة للتحديث",
-  },
-  {
-    label: "عدد مناطق الدخل",
-    value: "4",
-    suffix: "Zones",
-    note: "تقديري وفق افتراضات التشغيل",
-    tooltip: "هذه أرقام تقديرية قابلة للتحديث",
-  },
-];
+import { PROJECT_TOTALS } from "@/lib/projectData";
 
 export function SnapshotCards() {
+  const cards = [
+    {
+      label: "إجمالي دخل ملاك الأرض (8 سنوات)",
+      value: PROJECT_TOTALS.ownerTotalIncome8Years.toLocaleString("en-US"),
+      suffix: "SAR",
+      note: "تقديري وفق افتراضات التشغيل",
+      tooltip: "هذه أرقام تقديرية قابلة للتحديث",
+    },
+    {
+      label: "متوسط الدخل السنوي",
+      value: PROJECT_TOTALS.avgAnnualIncome.toLocaleString("en-US"),
+      suffix: "SAR",
+      note: "تقديري وفق افتراضات التشغيل",
+      tooltip: "هذه أرقام تقديرية قابلة للتحديث",
+    },
+    {
+      label: "نطاق التقييم بعد 8 سنوات",
+      value: "70M–78M",
+      suffix: "SAR",
+      note: "تقديري وفق افتراضات التشغيل",
+      tooltip: "هذه أرقام تقديرية قابلة للتحديث",
+    },
+    {
+      label: "عدد مناطق الدخل",
+      value: String(PROJECT_TOTALS.zonesCount),
+      suffix: "Zones",
+      note: "تقديري وفق افتراضات التشغيل",
+      tooltip: "هذه أرقام تقديرية قابلة للتحديث",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {CARDS.map((c) => (
+      {cards.map((c) => (
         <Card
           key={c.label}
           className="group relative transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"

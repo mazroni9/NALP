@@ -2,58 +2,158 @@
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import {
+  ZONE_A,
+  ZONE_B,
+  ZONE_C,
+  ZONE_D,
+  PROJECT_TOTALS,
+} from "@/lib/projectData";
 import { useState } from "react";
 
 export interface Scenario {
   id: string;
-  zoneA: { carsPerDay: number; commissionPerSale: number; workingDaysPerYear: number; opexA: number };
+  name: string;
+  zoneA: { carsPerDay: number; commission: number; workingDays: number; opexA: number };
   zoneB: { spotsTotal: number; occupancyB: number; pricePerSpot: number };
   zoneC: { roomsTotal: number; occupancyC: number; roomPrice: number; opexC: number };
-  zoneD: { annualRent: number };
+  zoneD: {
+    constructionCost: number;
+    monthlyRevenue: number;
+    opexPercent: number;
+    preBreakevenShare: number;
+    postBreakevenShare: number;
+    partnershipYears: number;
+  };
   capRate: number;
+  calcYears: number;
 }
 
-const DEFAULT_ZONE_A = { carsPerDay: 10, commissionPerSale: 1500, workingDaysPerYear: 300, opexA: 30 };
-const DEFAULT_ZONE_B = { spotsTotal: 300, occupancyB: 70, pricePerSpot: 30 };
-const DEFAULT_ZONE_C = { roomsTotal: 198, occupancyC: 80, roomPrice: 1325, opexC: 10 };
-const DEFAULT_ZONE_D = { annualRent: 912000 };
-const DEFAULT_CAP_RATE = 9;
-
-function calcResults(s: { zoneA: Scenario["zoneA"]; zoneB: Scenario["zoneB"]; zoneC: Scenario["zoneC"]; zoneD: Scenario["zoneD"]; capRate: number }) {
-  const revenueA = s.zoneA.carsPerDay * s.zoneA.commissionPerSale * s.zoneA.workingDaysPerYear * (1 - s.zoneA.opexA / 100);
-  const revenueB = s.zoneB.spotsTotal * (s.zoneB.occupancyB / 100) * s.zoneB.pricePerSpot * 365;
-  const revenueC = s.zoneC.roomsTotal * (s.zoneC.occupancyC / 100) * s.zoneC.roomPrice * 12 * (1 - s.zoneC.opexC / 100);
-  const revenueD = s.zoneD.annualRent;
-  const totalAnnual = revenueA + revenueB + revenueC + revenueD;
-  const total8Year = totalAnnual * 8;
-  const exitValue = totalAnnual / (s.capRate / 100);
-  return { revenueA, revenueB, revenueC, revenueD, totalAnnual, total8Year, exitValue };
+function calcZoneD(s: Scenario["zoneD"], calcYears: number) {
+  const netMonthly =
+    s.monthlyRevenue * (1 - s.opexPercent / 100);
+  const investorSharePre = 1 - s.preBreakevenShare / 100;
+  const investorMonthlyPre = netMonthly * investorSharePre;
+  const breakevenMonths =
+    investorMonthlyPre > 0 ? s.constructionCost / investorMonthlyPre : 0;
+  const ownerMonthlyPre = netMonthly * (s.preBreakevenShare / 100);
+  const ownerMonthlyPost = netMonthly * (s.postBreakevenShare / 100);
+  const ownerPreBreakeven = ownerMonthlyPre * Math.min(breakevenMonths, calcYears * 12);
+  const monthsPost = Math.max(0, calcYears * 12 - breakevenMonths);
+  const ownerPostBreakeven = ownerMonthlyPost * monthsPost;
+  const ownerTotal = ownerPreBreakeven + ownerPostBreakeven;
+  return {
+    breakevenMonths,
+    ownerPreBreakeven,
+    ownerPostBreakeven,
+    ownerTotal,
+  };
 }
+
+function calcResults(s: {
+  zoneA: Scenario["zoneA"];
+  zoneB: Scenario["zoneB"];
+  zoneC: Scenario["zoneC"];
+  zoneD: Scenario["zoneD"];
+  capRate: number;
+  calcYears: number;
+}) {
+  const ownerA =
+    s.zoneA.carsPerDay *
+    s.zoneA.commission *
+    s.zoneA.workingDays *
+    (1 - s.zoneA.opexA / 100);
+  const ownerB =
+    s.zoneB.spotsTotal *
+    (s.zoneB.occupancyB / 100) *
+    s.zoneB.pricePerSpot *
+    365;
+  const ownerC =
+    s.zoneC.roomsTotal *
+    (s.zoneC.occupancyC / 100) *
+    s.zoneC.roomPrice *
+    12 *
+    (1 - s.zoneC.opexC / 100);
+  const zoneDResult = calcZoneD(s.zoneD, s.calcYears);
+
+  const totalAnnual = ownerA + ownerB + ownerC + zoneDResult.ownerTotal / s.calcYears;
+  const totalOverCalcYears =
+    ownerA * s.calcYears +
+    ownerB * s.calcYears +
+    ownerC * s.calcYears +
+    zoneDResult.ownerTotal;
+  const exitValue = (ownerA + ownerB + ownerC + zoneDResult.ownerTotal / s.calcYears) / (s.capRate / 100);
+
+  return {
+    ownerA,
+    ownerB,
+    ownerC,
+    zoneD: zoneDResult,
+    totalAnnual,
+    totalOverCalcYears,
+    exitValue,
+  };
+}
+
+const INIT_ZONE_A = {
+  carsPerDay: 10,
+  commission: 1500,
+  workingDays: 300,
+  opexA: ZONE_A.opexPercent,
+};
+
+const INIT_ZONE_B = {
+  spotsTotal: 300,
+  occupancyB: 70,
+  pricePerSpot: 30,
+};
+
+const INIT_ZONE_C = {
+  roomsTotal: ZONE_C.totalRooms,
+  occupancyC: ZONE_C.occupancyDefault,
+  roomPrice: ZONE_C.avgRoomPrice,
+  opexC: ZONE_C.opexPercent,
+};
+
+const INIT_ZONE_D = {
+  constructionCost: ZONE_D.constructionCost,
+  monthlyRevenue: ZONE_D.monthlyRevenue,
+  opexPercent: ZONE_D.opexPercent,
+  preBreakevenShare: ZONE_D.preBreakevenSharePercent,
+  postBreakevenShare: ZONE_D.postBreakevenSharePercent,
+  partnershipYears: ZONE_D.partnershipYears,
+};
 
 export default function ScenariosPage() {
-  const [zoneA, setZoneA] = useState(DEFAULT_ZONE_A);
-  const [zoneB, setZoneB] = useState(DEFAULT_ZONE_B);
-  const [zoneC, setZoneC] = useState(DEFAULT_ZONE_C);
-  const [zoneD, setZoneD] = useState(DEFAULT_ZONE_D);
-  const [capRate, setCapRate] = useState(DEFAULT_CAP_RATE);
+  const [zoneA, setZoneA] = useState(INIT_ZONE_A);
+  const [zoneB, setZoneB] = useState(INIT_ZONE_B);
+  const [zoneC, setZoneC] = useState(INIT_ZONE_C);
+  const [zoneD, setZoneD] = useState(INIT_ZONE_D);
+  const [capRate, setCapRate] = useState(PROJECT_TOTALS.capRate);
+  const [calcYears, setCalcYears] = useState(8);
+  const [scenarioName, setScenarioName] = useState("");
 
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [compareA, setCompareA] = useState<string | null>(null);
   const [compareB, setCompareB] = useState<string | null>(null);
 
-  const addScenario = () => {
+  const saveScenario = () => {
     const id = `s-${Date.now()}`;
+    const name = scenarioName.trim() || `سيناريو ${scenarios.length + 1}`;
     setScenarios((prev) => [
       ...prev,
       {
         id,
+        name,
         zoneA: { ...zoneA },
         zoneB: { ...zoneB },
         zoneC: { ...zoneC },
         zoneD: { ...zoneD },
         capRate,
+        calcYears,
       },
     ]);
+    setScenarioName("");
   };
 
   const diff = (a: number, b: number) => ((a - b) / (b || 1)) * 100;
@@ -66,6 +166,7 @@ export default function ScenariosPage() {
     zoneC,
     zoneD,
     capRate,
+    calcYears,
   });
 
   return (
@@ -79,11 +180,11 @@ export default function ScenariosPage() {
         <h2 className="font-semibold">سيناريو جديد</h2>
 
         <div className="mt-6 space-y-8">
-          {/* Zone-A — المزاد */}
+          {/* Zone-A */}
           <section className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
             <h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-800">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-700">أ</span>
-              Zone-A — المزاد
+              {ZONE_A.name}
             </h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
@@ -98,11 +199,11 @@ export default function ScenariosPage() {
                 <p className="mt-1 text-sm text-gray-400">عدد السيارات المعروضة في المزاد يومياً</p>
               </div>
               <div>
-                <label className="block text-sm">متوسط عمولة البيع (ريال)</label>
+                <label className="block text-sm">متوسط العمولة (ريال)</label>
                 <input
                   type="number"
-                  value={zoneA.commissionPerSale}
-                  onChange={(e) => setZoneA((p) => ({ ...p, commissionPerSale: Number(e.target.value) }))}
+                  value={zoneA.commission}
+                  onChange={(e) => setZoneA((p) => ({ ...p, commission: Number(e.target.value) }))}
                   className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
                 />
                 <p className="mt-1 text-sm text-gray-400">متوسط العمولة المحصلة من بيع كل سيارة</p>
@@ -111,8 +212,8 @@ export default function ScenariosPage() {
                 <label className="block text-sm">أيام العمل سنوياً</label>
                 <input
                   type="number"
-                  value={zoneA.workingDaysPerYear}
-                  onChange={(e) => setZoneA((p) => ({ ...p, workingDaysPerYear: Number(e.target.value) }))}
+                  value={zoneA.workingDays}
+                  onChange={(e) => setZoneA((p) => ({ ...p, workingDays: Number(e.target.value) }))}
                   className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
                   min={0}
                   max={365}
@@ -134,22 +235,22 @@ export default function ScenariosPage() {
             </div>
           </section>
 
-          {/* Zone-B — المواقف */}
+          {/* Zone-B */}
           <section className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
             <h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-800">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">ب</span>
-              Zone-B — المواقف
+              {ZONE_B.name}
             </h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <label className="block text-sm">عدد المواقف الإجمالية</label>
+                <label className="block text-sm">عدد المواقف</label>
                 <input
                   type="number"
                   value={zoneB.spotsTotal}
                   readOnly
                   className="mt-1 w-full rounded border border-slate-200 bg-slate-100 px-3 py-2 text-slate-500"
                 />
-                <p className="mt-1 text-sm text-gray-400">ثابت: إجمالي سعة المواقف في المنطقة</p>
+                <p className="mt-1 text-sm text-gray-400">ثابت: إجمالي سعة المواقف</p>
               </div>
               <div>
                 <label className="block text-sm">نسبة الإشغال %</label>
@@ -161,10 +262,10 @@ export default function ScenariosPage() {
                   min={0}
                   max={100}
                 />
-                <p className="mt-1 text-sm text-gray-400">نسبة المواقف المستخدمة من الإجمالي</p>
+                <p className="mt-1 text-sm text-gray-400">نسبة المواقف المستخدمة</p>
               </div>
               <div>
-                <label className="block text-sm">سعر الموقف / يوم (ريال)</label>
+                <label className="block text-sm">سعر الموقف/يوم (ريال)</label>
                 <input
                   type="number"
                   value={zoneB.pricePerSpot}
@@ -176,22 +277,22 @@ export default function ScenariosPage() {
             </div>
           </section>
 
-          {/* Zone-C — السكن */}
+          {/* Zone-C */}
           <section className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
             <h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-800">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">ج</span>
-              Zone-C — السكن
+              {ZONE_C.name}
             </h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
-                <label className="block text-sm">عدد الغرف الإجمالية</label>
+                <label className="block text-sm">عدد الغرف</label>
                 <input
                   type="number"
                   value={zoneC.roomsTotal}
                   readOnly
                   className="mt-1 w-full rounded border border-slate-200 bg-slate-100 px-3 py-2 text-slate-500"
                 />
-                <p className="mt-1 text-sm text-gray-400">ثابت: إجمالي عدد الغرف السكنية</p>
+                <p className="mt-1 text-sm text-gray-400">ثابت: إجمالي عدد الغرف</p>
               </div>
               <div>
                 <label className="block text-sm">نسبة الإشغال %</label>
@@ -203,10 +304,10 @@ export default function ScenariosPage() {
                   min={0}
                   max={100}
                 />
-                <p className="mt-1 text-sm text-gray-400">نسبة الغرف المشغولة من الإجمالي</p>
+                <p className="mt-1 text-sm text-gray-400">نسبة الغرف المشغولة</p>
               </div>
               <div>
-                <label className="block text-sm">متوسط سعر الغرفة / شهر (ريال)</label>
+                <label className="block text-sm">متوسط سعر الغرفة/شهر (ريال)</label>
                 <input
                   type="number"
                   value={zoneC.roomPrice}
@@ -225,81 +326,167 @@ export default function ScenariosPage() {
                   min={0}
                   max={100}
                 />
-                <p className="mt-1 text-sm text-gray-400">نسبة المصاريف التشغيلية من الإيراد</p>
+                <p className="mt-1 text-sm text-gray-400">نسبة المصاريف التشغيلية</p>
               </div>
             </div>
           </section>
 
-          {/* Zone-D — الورش والمعارض */}
+          {/* Zone-D — شراكة استثمارية */}
           <section className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
             <h3 className="mb-4 flex items-center gap-2 font-semibold text-slate-800">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-100 text-teal-700">د</span>
-              Zone-D — الورش والمعارض
+              Zone-D — شراكة استثمارية
             </h3>
-            <div className="max-w-xs">
-              <label className="block text-sm">إيجار سنوي صافي (ريال)</label>
-              <input
-                type="number"
-                value={zoneD.annualRent}
-                onChange={(e) => setZoneD({ annualRent: Number(e.target.value) })}
-                className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
-              />
-              <p className="mt-1 text-sm text-gray-400">ثابت: الإيجار الصافي السنوي لا يتأثر بالإشغال</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <label className="block text-sm">تكلفة الإنشاء (ريال)</label>
+                <input
+                  type="number"
+                  value={zoneD.constructionCost}
+                  onChange={(e) => setZoneD((p) => ({ ...p, constructionCost: Number(e.target.value) }))}
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                />
+                <p className="mt-1 text-sm text-gray-400">تكلفة البناء على المستثمر</p>
+              </div>
+              <div>
+                <label className="block text-sm">الإيراد الشهري (ريال)</label>
+                <input
+                  type="number"
+                  value={zoneD.monthlyRevenue}
+                  onChange={(e) => setZoneD((p) => ({ ...p, monthlyRevenue: Number(e.target.value) }))}
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                />
+                <p className="mt-1 text-sm text-gray-400">إجمالي الإيراد الشهري</p>
+              </div>
+              <div>
+                <label className="block text-sm">OPEX %</label>
+                <input
+                  type="number"
+                  value={zoneD.opexPercent}
+                  onChange={(e) => setZoneD((p) => ({ ...p, opexPercent: Number(e.target.value) }))}
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                  min={0}
+                  max={100}
+                />
+                <p className="mt-1 text-sm text-gray-400">نسبة المصاريف التشغيلية</p>
+              </div>
+              <div>
+                <label className="block text-sm">حد المصاريف الإدارية %</label>
+                <input
+                  type="number"
+                  value={10}
+                  readOnly
+                  className="mt-1 w-full rounded border border-slate-200 bg-slate-100 px-3 py-2 text-slate-500"
+                />
+                <p className="mt-1 text-sm text-gray-400">ثابت: المصاريف الإدارية محدودة بـ 10% ولا تُدرج في OPEX</p>
+              </div>
+              <div>
+                <label className="block text-sm">حصة قبل التعادل %</label>
+                <input
+                  type="number"
+                  value={zoneD.preBreakevenShare}
+                  onChange={(e) => setZoneD((p) => ({ ...p, preBreakevenShare: Number(e.target.value) }))}
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                  min={0}
+                  max={100}
+                />
+                <p className="mt-1 text-sm text-gray-400">حصة مالك الأرض قبل استرداد المستثمر تكلفته</p>
+              </div>
+              <div>
+                <label className="block text-sm">حصة بعد التعادل %</label>
+                <input
+                  type="number"
+                  value={zoneD.postBreakevenShare}
+                  onChange={(e) => setZoneD((p) => ({ ...p, postBreakevenShare: Number(e.target.value) }))}
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                  min={0}
+                  max={100}
+                />
+                <p className="mt-1 text-sm text-gray-400">حصة مالك الأرض بعد التعادل</p>
+              </div>
+              <div>
+                <label className="block text-sm">مدة الشراكة (سنوات)</label>
+                <input
+                  type="number"
+                  value={zoneD.partnershipYears}
+                  onChange={(e) => setZoneD((p) => ({ ...p, partnershipYears: Number(e.target.value) }))}
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                  min={1}
+                />
+                <p className="mt-1 text-sm text-gray-400">مدة اتفاقية الشراكة</p>
+              </div>
             </div>
           </section>
 
-          {/* التقييم (مشترك) */}
+          {/* التقييم المشترك */}
           <section className="rounded-lg border border-slate-200 bg-indigo-50/50 p-4">
             <h3 className="mb-4 font-semibold text-slate-800">قسم التقييم (مشترك)</h3>
-            <div className="max-w-xs">
-              <label className="block text-sm">Cap Rate %</label>
-              <input
-                type="number"
-                value={capRate}
-                onChange={(e) => setCapRate(Number(e.target.value))}
-                className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
-                min={1}
-                max={20}
-                step={0.5}
-              />
-              <p className="mt-1 text-sm text-gray-400">معدل الرسملة المستخدم لحساب قيمة التخارج</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-sm">Cap Rate %</label>
+                <input
+                  type="number"
+                  value={capRate}
+                  onChange={(e) => setCapRate(Number(e.target.value))}
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                  min={1}
+                  max={20}
+                  step={0.5}
+                />
+                <p className="mt-1 text-sm text-gray-400">معدل الرسملة لحساب قيمة التخارج</p>
+              </div>
+              <div>
+                <label className="block text-sm">عدد سنوات الاحتساب</label>
+                <input
+                  type="number"
+                  value={calcYears}
+                  onChange={(e) => setCalcYears(Number(e.target.value))}
+                  className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
+                  min={1}
+                />
+                <p className="mt-1 text-sm text-gray-400">فترة احتساب العائد الإجمالي</p>
+              </div>
             </div>
           </section>
         </div>
 
-        <Button onClick={addScenario} className="mt-6">
-          إضافة سيناريو
-        </Button>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <input
+            type="text"
+            value={scenarioName}
+            onChange={(e) => setScenarioName(e.target.value)}
+            placeholder="اسم السيناريو (اختياري)"
+            className="rounded border border-slate-300 px-3 py-2 text-sm"
+          />
+          <Button onClick={saveScenario}>حفظ السيناريو</Button>
+        </div>
 
         {/* النتائج الفورية */}
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
-            <p className="text-sm opacity-90">إيراد Zone-A السنوي (بعد OPEX)</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.revenueA).toLocaleString("en-US")} ر.س</p>
+            <p className="text-sm opacity-90">دخل مالك الأرض من Zone-A</p>
+            <p className="mt-1 text-lg font-semibold">{Math.round(live.ownerA).toLocaleString("en-US")} ر.س</p>
           </div>
           <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
-            <p className="text-sm opacity-90">إيراد Zone-B السنوي</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.revenueB).toLocaleString("en-US")} ر.س</p>
+            <p className="text-sm opacity-90">دخل مالك الأرض من Zone-B</p>
+            <p className="mt-1 text-lg font-semibold">{Math.round(live.ownerB).toLocaleString("en-US")} ر.س</p>
           </div>
           <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
-            <p className="text-sm opacity-90">إيراد Zone-C السنوي (بعد OPEX)</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.revenueC).toLocaleString("en-US")} ر.س</p>
+            <p className="text-sm opacity-90">دخل مالك الأرض من Zone-C</p>
+            <p className="mt-1 text-lg font-semibold">{Math.round(live.ownerC).toLocaleString("en-US")} ر.س</p>
           </div>
-          <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
-            <p className="text-sm opacity-90">إيراد Zone-D السنوي</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.revenueD).toLocaleString("en-US")} ر.س</p>
+          <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white sm:col-span-2">
+            <p className="text-sm opacity-90">دخل مالك الأرض من Zone-D</p>
+            <p className="mt-1 text-sm">
+              قبل التعادل: {Math.round(live.zoneD.ownerPreBreakeven).toLocaleString("en-US")} ر.س • بعد التعادل: {Math.round(live.zoneD.ownerPostBreakeven).toLocaleString("en-US")} ر.س • وقت التعادل: {live.zoneD.breakevenMonths.toFixed(1)} شهر
+            </p>
+            <p className="mt-1 text-lg font-semibold">الإجمالي: {Math.round(live.zoneD.ownerTotal).toLocaleString("en-US")} ر.س</p>
           </div>
-          <div className="rounded-xl border-2 border-[#1e3a5f] bg-[#1e3a5f] px-4 py-3 text-white sm:col-span-2 lg:col-span-1">
-            <p className="text-sm font-medium opacity-90">الإجمالي السنوي</p>
-            <p className="mt-1 text-xl font-bold">{Math.round(live.totalAnnual).toLocaleString("en-US")} ر.س</p>
+          <div className="rounded-xl border-2 border-[#1e3a5f] bg-[#1e3a5f] px-4 py-3 text-white">
+            <p className="text-sm font-medium opacity-90">الإجمالي خلال {calcYears} سنوات</p>
+            <p className="mt-1 text-xl font-bold">{Math.round(live.totalOverCalcYears).toLocaleString("en-US")} ر.س</p>
           </div>
-        </div>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
-            <p className="text-sm opacity-90">العائد الإجمالي 8 سنوات</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.total8Year).toLocaleString("en-US")} ر.س</p>
-          </div>
-          <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
+          <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white sm:col-span-2">
             <p className="text-sm opacity-90">قيمة التخارج = الإجمالي السنوي ÷ Cap Rate</p>
             <p className="mt-1 text-lg font-semibold">{Math.round(live.exitValue).toLocaleString("en-US")} ر.س</p>
           </div>
@@ -318,7 +505,7 @@ export default function ScenariosPage() {
                   className="flex flex-wrap items-center justify-between gap-2 rounded border border-slate-100 px-3 py-2"
                 >
                   <span className="text-sm">
-                    أ:{Math.round(r.revenueA / 1e6).toFixed(1)}M • ب:{Math.round(r.revenueB / 1e6).toFixed(1)}M • ج:{Math.round(r.revenueC / 1e6).toFixed(1)}M • د:{Math.round(r.revenueD / 1e6).toFixed(1)}M • الإجمالي: {Math.round(r.totalAnnual / 1e6).toFixed(1)}M ر.س
+                    {s.name} — أ:{Math.round(r.ownerA / 1e6).toFixed(1)}M ب:{Math.round(r.ownerB / 1e6).toFixed(1)}M ج:{Math.round(r.ownerC / 1e6).toFixed(1)}M د:{Math.round(r.zoneD.ownerTotal / 1e6).toFixed(1)}M • الإجمالي: {Math.round(r.totalOverCalcYears / 1e6).toFixed(1)}M
                   </span>
                   <div className="flex gap-2">
                     <button
@@ -351,41 +538,41 @@ export default function ScenariosPage() {
                 <thead>
                   <tr className="border-b border-slate-200">
                     <th className="py-2">المعامل</th>
-                    <th className="py-2">أ</th>
-                    <th className="py-2">ب</th>
+                    <th className="py-2">{scA.name}</th>
+                    <th className="py-2">{scB.name}</th>
                     <th className="py-2">الفرق %</th>
                   </tr>
                 </thead>
                 <tbody className="text-slate-600">
                   <tr className="border-b border-slate-100">
-                    <td className="py-2">إيراد أ السنوي</td>
-                    <td>{Math.round(calcResults(scA).revenueA).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).revenueA).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).revenueA, calcResults(scB).revenueA).toFixed(1)}%</td>
+                    <td className="py-2">دخل أ السنوي</td>
+                    <td>{Math.round(calcResults(scA).ownerA).toLocaleString("en-US")}</td>
+                    <td>{Math.round(calcResults(scB).ownerA).toLocaleString("en-US")}</td>
+                    <td>{diff(calcResults(scA).ownerA, calcResults(scB).ownerA).toFixed(1)}%</td>
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-2">إيراد ب السنوي</td>
-                    <td>{Math.round(calcResults(scA).revenueB).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).revenueB).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).revenueB, calcResults(scB).revenueB).toFixed(1)}%</td>
+                    <td className="py-2">دخل ب السنوي</td>
+                    <td>{Math.round(calcResults(scA).ownerB).toLocaleString("en-US")}</td>
+                    <td>{Math.round(calcResults(scB).ownerB).toLocaleString("en-US")}</td>
+                    <td>{diff(calcResults(scA).ownerB, calcResults(scB).ownerB).toFixed(1)}%</td>
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-2">إيراد ج السنوي</td>
-                    <td>{Math.round(calcResults(scA).revenueC).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).revenueC).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).revenueC, calcResults(scB).revenueC).toFixed(1)}%</td>
+                    <td className="py-2">دخل ج السنوي</td>
+                    <td>{Math.round(calcResults(scA).ownerC).toLocaleString("en-US")}</td>
+                    <td>{Math.round(calcResults(scB).ownerC).toLocaleString("en-US")}</td>
+                    <td>{diff(calcResults(scA).ownerC, calcResults(scB).ownerC).toFixed(1)}%</td>
                   </tr>
                   <tr className="border-b border-slate-100">
-                    <td className="py-2">إيراد د السنوي</td>
-                    <td>{Math.round(calcResults(scA).revenueD).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).revenueD).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).revenueD, calcResults(scB).revenueD).toFixed(1)}%</td>
+                    <td className="py-2">دخل د الإجمالي</td>
+                    <td>{Math.round(calcResults(scA).zoneD.ownerTotal).toLocaleString("en-US")}</td>
+                    <td>{Math.round(calcResults(scB).zoneD.ownerTotal).toLocaleString("en-US")}</td>
+                    <td>{diff(calcResults(scA).zoneD.ownerTotal, calcResults(scB).zoneD.ownerTotal).toFixed(1)}%</td>
                   </tr>
                   <tr>
-                    <td className="py-2">الإجمالي السنوي</td>
-                    <td>{Math.round(calcResults(scA).totalAnnual).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).totalAnnual).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).totalAnnual, calcResults(scB).totalAnnual).toFixed(1)}%</td>
+                    <td className="py-2">الإجمالي</td>
+                    <td>{Math.round(calcResults(scA).totalOverCalcYears).toLocaleString("en-US")}</td>
+                    <td>{Math.round(calcResults(scB).totalOverCalcYears).toLocaleString("en-US")}</td>
+                    <td>{diff(calcResults(scA).totalOverCalcYears, calcResults(scB).totalOverCalcYears).toFixed(1)}%</td>
                   </tr>
                 </tbody>
               </table>
