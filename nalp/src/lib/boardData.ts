@@ -71,3 +71,29 @@ export const BOARD_STRUCTURE = {
 
   distributionSchedule: "ربع سنوي (كل 3 أشهر)",
 };
+
+export const foundingDebts = {
+  title: "الديون التأسيسية — تُسدَّد قبل توزيع أي أرباح",
+  totalDebt: 4_600_000,
+  items: [
+    {
+      description: "وكيل استخراج الصك",
+      amount: 400_000,
+      note: "مستحقة للوكيل قبل تأسيس الشركة",
+    },
+    {
+      description: "وكيل مراجعات وإنهاءات ورخص ومتابعات",
+      amount: 200_000,
+      note: "مستحقة للوكيل قبل تأسيس الشركة",
+    },
+    {
+      description: "شراء ربع الدولة",
+      amount: 4_000_000,
+      note: "تكلفة شراء حصة الدولة في الأرض",
+    },
+  ],
+  annualNetIncome: 6_228_303,
+  yearsToPayOff: 0.74,
+  note:
+    "تُخصم هذه الديون من أرباح الشركة بالتساوي على الشركاء بنسبة حصصهم قبل أي توزيع",
+};

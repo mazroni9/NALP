@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import {
   BOARD_STRUCTURE,
+  foundingDebts,
   type BoardMember,
   type ExecutiveMember,
   type ExternalService,
@@ -312,6 +313,65 @@ export default function BoardPage() {
           </div>
         </Card>
 
+        {/* القسم — الديون التأسيسية */}
+        <Card className="border-red-200 bg-red-50">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-red-800">
+            <span>⚠️</span>
+            {foundingDebts.title}
+          </h2>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-right text-sm">
+              <thead>
+                <tr className="border-b border-red-200">
+                  <th className="px-2 py-2 font-medium text-red-800">الوصف</th>
+                  <th className="px-2 py-2 font-medium text-red-800">المبلغ</th>
+                  <th className="px-2 py-2 font-medium text-red-800">ملاحظة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {foundingDebts.items.map((item, i) => (
+                  <tr key={i} className="border-b border-red-100">
+                    <td className="px-2 py-2 text-red-900">{item.description}</td>
+                    <td className="px-2 py-2 font-medium text-red-900">
+                      {item.amount.toLocaleString("en-US")} ريال
+                    </td>
+                    <td className="px-2 py-2 text-red-700">{item.note}</td>
+                  </tr>
+                ))}
+                <tr className="border-t-2 border-red-300 font-bold text-red-900">
+                  <td className="px-2 py-2">الإجمالي</td>
+                  <td className="px-2 py-2">
+                    {foundingDebts.totalDebt.toLocaleString("en-US")} ريال
+                  </td>
+                  <td className="px-2 py-2">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm text-red-800">
+            هذه الديون تُسدَّد بالكامل قبل توزيع أي أرباح على الشركاء — المتوقع
+            سدادها خلال السنة الأولى من التشغيل
+          </p>
+          <div className="mt-4">
+            <div className="flex justify-between text-sm text-red-800">
+              <span>
+                المتبقي للسداد:{" "}
+                {foundingDebts.totalDebt.toLocaleString("en-US")} ريال
+              </span>
+              <span>الإجمالي: {foundingDebts.totalDebt.toLocaleString("en-US")} ريال</span>
+            </div>
+            <div className="mt-2 h-3 overflow-hidden rounded-full bg-red-200">
+              <div
+                className="h-full rounded-full bg-red-600"
+                style={{
+                  width: `${(foundingDebts.totalDebt / foundingDebts.totalDebt) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-red-700">{foundingDebts.note}</p>
+        </Card>
+
         {/* القسم 6 — آلية توزيع الأرباح */}
         <Card>
           <h2 className="text-lg font-semibold text-slate-800">
@@ -327,6 +387,10 @@ export default function BoardPage() {
             <span className="text-slate-400">→</span>
             <span className="rounded bg-indigo-100 px-3 py-1">
               خصم إداري {BOARD_STRUCTURE.adminCostPercent}%
+            </span>
+            <span className="text-slate-400">→</span>
+            <span className="rounded bg-red-100 px-3 py-1">
+              سداد الديون التأسيسية
             </span>
             <span className="text-slate-400">→</span>
             <span className="rounded bg-green-100 px-3 py-1 font-medium">
