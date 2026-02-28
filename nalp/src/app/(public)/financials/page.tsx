@@ -1,65 +1,87 @@
+import {
+  SnapshotCards,
+  AssumptionsPanel,
+  ZoneCards,
+  IncomeChart,
+  ValuationSimulator,
+  ShareBar,
+} from "@/components/financials";
 import { Card } from "@/components/ui/Card";
 
 export default function FinancialsPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="text-3xl font-bold text-slate-800">نظرة مالية</h1>
-      <p className="mt-2 text-slate-600">
-        مقاييس وافتراضات مالية مبسطة.
-      </p>
+    <div className="min-h-screen bg-slate-50" dir="rtl">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* 1) Hero / عنوان الصفحة */}
+        <header className="mb-12">
+          <span className="inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">
+            Public Investor View
+          </span>
+          <h1 className="mt-4 text-4xl font-bold text-slate-900">نظرة مالية</h1>
+          <p className="mt-2 text-lg text-slate-600">
+            ملخص استثماري مبسّط لمشروع NALP (8 سنوات)
+          </p>
+        </header>
 
-      <div className="mt-8 space-y-6">
-        <Card>
-          <h2 className="text-lg font-semibold">الافتراضات الرئيسية</h2>
-          <ul className="mt-4 space-y-2 text-slate-600">
-            <li>• معدلات الإشغال</li>
-            <li>• سعر السرير (ريال)</li>
-            <li>• حد التشغيل (OPEX)</li>
-            <li>• افتراضات سعر خروج الأرض</li>
-          </ul>
-        </Card>
-
-        <Card>
-          <h2 className="text-lg font-semibold">جدول الافتراضات</h2>
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-right text-sm">
-              <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="py-2">المعامل</th>
-                  <th className="py-2">الحالة الأساسية</th>
-                  <th className="py-2">المحافظ</th>
-                </tr>
-              </thead>
-              <tbody className="text-slate-600">
-                <tr className="border-b border-slate-100">
-                  <td className="py-2">الإشغال</td>
-                  <td>85%</td>
-                  <td>70%</td>
-                </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-2">سعر السرير (ريال)</td>
-                  <td>1,200</td>
-                  <td>1,000</td>
-                </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-2">حد التشغيل</td>
-                  <td>25%</td>
-                  <td>30%</td>
-                </tr>
-                <tr>
-                  <td className="py-2">مضاعف الخروج</td>
-                  <td>1.2x</td>
-                  <td>1.0x</td>
-                </tr>
-              </tbody>
-            </table>
+        <section className="space-y-12">
+          {/* 2) Executive Snapshot */}
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">
+              Executive Snapshot
+            </h2>
+            <SnapshotCards />
           </div>
-        </Card>
 
-        <p className="text-sm text-slate-500">
-          للنماذج المالية التفصيلية ومقارنة السيناريوهات، سجّل الدخول إلى
-          بوابة المستثمر.
-        </p>
+          {/* 3) Assumptions Panel */}
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">
+              الافتراضات الرئيسية
+            </h2>
+            <AssumptionsPanel />
+          </div>
+
+          {/* 4) Revenue Breakdown by Zone */}
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">
+              تفصيل الإيرادات حسب المنطقة
+            </h2>
+            <ZoneCards />
+          </div>
+
+          {/* 5) 8-Year Landlord Income Chart */}
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">
+              تدفق دخل ملاك الأرض عبر السنوات (تقديري)
+            </h2>
+            <Card className="p-6">
+              <IncomeChart />
+            </Card>
+          </div>
+
+          {/* 6) Valuation Simulator */}
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">
+              محاكي التقييم
+            </h2>
+            <ValuationSimulator />
+          </div>
+
+          {/* 7) Download / Share Section */}
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">
+              مشاركة وتحميل
+            </h2>
+            <ShareBar />
+          </div>
+        </section>
+
+        {/* 8) Footer Disclaimer */}
+        <footer className="mt-16 border-t border-slate-200 pt-8">
+          <p className="text-center text-sm text-slate-500">
+            الأرقام تقديرية مبنية على افتراضات تشغيلية، وتخضع للتحديث حسب
+            التنفيذ الفعلي والعقود.
+          </p>
+        </footer>
       </div>
     </div>
   );
