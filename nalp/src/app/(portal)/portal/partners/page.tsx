@@ -53,10 +53,41 @@ export default function PartnersPage() {
 
   const data = calcPartnerData(partner);
 
-  const yearIncomes = Array.from({ length: COMPANY.projectYears }, (_, i) => ({
-    year: i + 1,
-    income: data.annualIncome,
-  }));
+  const pricePerM2ByYear: Record<number, number> = {
+    1: 1_200,
+    2: 1_350,
+    3: 1_500,
+    4: 1_800,
+    5: 1_950,
+    6: 2_100,
+    7: 2_300,
+    8: 2_500,
+  };
+
+  const wealthRows = Array.from({ length: COMPANY.projectYears }, (_, i) => {
+    const year = i + 1;
+    const annualIncome = data.annualIncome;
+    const cumulativeIncome = annualIncome * year;
+    const pricePerM2 = pricePerM2ByYear[year];
+    const landValue = Math.round(data.landAreaSqm * pricePerM2);
+    const remainingYears = 8 - year;
+    const remainingIncome = remainingYears * annualIncome;
+    const discount =
+      year <= 3 ? 0.35 : year <= 6 ? 0.2 : 0;
+    const saleValue = Math.round(
+      (landValue + remainingIncome) * (1 - discount)
+    );
+    const totalWealth = cumulativeIncome + landValue;
+    return {
+      year,
+      annualIncome,
+      cumulativeIncome,
+      pricePerM2,
+      landValue,
+      saleValue,
+      totalWealth,
+    };
+  });
 
   const sellStepsText = `يحق لك بيع حصتك لأي مستثمر خارجي أو لشريك آخر في أي وقت خلال مدة المشروع.
 خطوات البيع:
@@ -201,29 +232,58 @@ export default function PartnersPage() {
         </Card>
 
         <Card>
-          <h2 className="text-lg font-semibold text-slate-800">جدول الدخل السنوي</h2>
+          <h2 className="text-lg font-semibold text-slate-800">
+            جدول تطور ثروتك سنة بسنة
+          </h2>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-right text-sm">
               <thead>
                 <tr className="border-b border-slate-200">
-                  {yearIncomes.map((y) => (
-                    <th key={y.year} className="px-2 py-2 font-medium text-slate-600">
-                      السنة {y.year}
-                    </th>
-                  ))}
+                  <th className="px-2 py-2 font-medium text-slate-600">السنة</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">الدخل السنوي</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">الدخل التراكمي</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">قيمة م²</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">قيمة حصتك من الأرض</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">قيمة حصتك للبيع</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">صافي الثروة الكلية</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  {yearIncomes.map((y) => (
-                    <td key={y.year} className="border-b border-slate-100 px-2 py-2">
-                      {y.income.toLocaleString("en-US")}
+                {wealthRows.map((row) => (
+                  <tr
+                    key={row.year}
+                    className={`border-b border-slate-100 ${
+                      row.year === 1 ? "bg-indigo-50" : ""
+                    }`}
+                  >
+                    <td className="px-2 py-2 font-medium">السنة {row.year}</td>
+                    <td className="px-2 py-2">
+                      {row.annualIncome.toLocaleString("en-US")}
                     </td>
-                  ))}
-                </tr>
+                    <td className="px-2 py-2">
+                      {row.cumulativeIncome.toLocaleString("en-US")}
+                    </td>
+                    <td className="px-2 py-2">
+                      {row.pricePerM2.toLocaleString("en-US")} ر/م²
+                    </td>
+                    <td className="px-2 py-2">
+                      {row.landValue.toLocaleString("en-US")}
+                    </td>
+                    <td className="px-2 py-2 font-medium">
+                      {row.saleValue.toLocaleString("en-US")}
+                    </td>
+                    <td className="px-2 py-2 font-bold text-indigo-600">
+                      {row.totalWealth.toLocaleString("en-US")}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
+          <p className="mt-4 text-xs text-slate-500">
+            قيمة البيع تشمل: الدخل التراكمي المحقق + قيمة حصتك من الأرض بسعر
+            السوق التقديري في تلك السنة
+          </p>
         </Card>
 
         <div className="pt-4">
