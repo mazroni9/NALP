@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { COMPANY, PARTNERS, calcPartnerShare } from "@/lib/partnersData";
+import { COMPANY, PARTNERS, calcPartnerData } from "@/lib/partnersData";
 import { useState } from "react";
 
 function findPartnerByPin(pin: string) {
@@ -13,7 +13,7 @@ function findPartnerByPin(pin: string) {
 export default function PartnersPage() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
-  const [partner, setPartner] = useState<typeof PARTNERS[0] | null>(null);
+  const [partner, setPartner] = useState<(typeof PARTNERS)[0] | null>(null);
 
   const handleLogin = () => {
     setError("");
@@ -29,10 +29,10 @@ export default function PartnersPage() {
     return (
       <div className="flex min-h-[50vh] items-center justify-center p-8" dir="rtl">
         <Card className="w-full max-w-md">
-          <h1 className="text-xl font-bold text-slate-800">لوحة الشركاء</h1>
+          <h1 className="text-xl font-bold text-slate-800">لوحة الشركاء — ملاك الأرض</h1>
           <p className="mt-1 text-sm text-slate-600">أدخل رمز الشريك للوصول إلى بياناتك</p>
           <div className="mt-6">
-            <label className="block text-sm font-medium text-slate-700">رمز الشريك</label>
+            <label className="block text-sm font-medium text-slate-700">أدخل رمز الشريك</label>
             <input
               type="text"
               value={pin}
@@ -51,22 +51,20 @@ export default function PartnersPage() {
     );
   }
 
-  const share = calcPartnerShare(partner.sharePercent);
-  const estimatedShares = Math.round(partner.sharePercent * 100); // 10,000 سهم × sharePercent/100
+  const data = calcPartnerData(partner);
 
   const yearIncomes = Array.from({ length: COMPANY.projectYears }, (_, i) => ({
     year: i + 1,
-    income: Math.round(share.annualIncome),
+    income: data.annualIncome,
   }));
 
-  const shareValueNowFormatted = share.shareValueNow.toLocaleString("en-US");
   const sellStepsText = `يحق لك بيع حصتك لأي مستثمر خارجي أو لشريك آخر في أي وقت خلال مدة المشروع.
 خطوات البيع:
 ① تواصل مع إدارة الشركة لإشعار البيع
 ② يُعرض على باقي الشركاء حق الأولوية (15 يوم)
 ③ إذا لم يمارس أحد حق الأولوية → يحق بيعها لطرف ثالث
 ④ يُوثَّق نقل الملكية لدى كاتب العدل وتُحدَّث سجلات الشركة
-القيمة المرجعية للبيع الآن: ${shareValueNowFormatted} ريال`;
+القيمة المرجعية للبيع الآن: ${data.saleValueNow.toLocaleString("en-US")} ريال`;
 
   return (
     <div className="p-8" dir="rtl">
@@ -102,7 +100,7 @@ export default function PartnersPage() {
             </div>
             <div>
               <dt className="text-slate-500">عدد الأسهم التقديرية (من 10,000 سهم)</dt>
-              <dd className="font-medium">{estimatedShares} سهم</dd>
+              <dd className="font-medium">{data.shares} سهم</dd>
             </div>
           </dl>
         </Card>
@@ -113,13 +111,13 @@ export default function PartnersPage() {
             <div>
               <dt className="text-slate-500">دخلك السنوي</dt>
               <dd className="text-lg font-bold text-indigo-600">
-                {share.annualIncome.toLocaleString("en-US")} ريال
+                {data.annualIncome.toLocaleString("en-US")} ريال
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">دخلك الإجمالي خلال 8 سنوات</dt>
               <dd className="text-lg font-bold text-indigo-600">
-                {share.totalIncome8Y.toLocaleString("en-US")} ريال
+                {data.totalIncome8Y.toLocaleString("en-US")} ريال
               </dd>
             </div>
           </dl>
@@ -129,15 +127,15 @@ export default function PartnersPage() {
           <h2 className="text-lg font-semibold text-slate-800">قيمة حصتك</h2>
           <dl className="mt-4 space-y-2 text-sm">
             <div>
-              <dt className="text-slate-500">قيمة حصتك عند التخارج الكامل (نهاية 8 سنوات)</dt>
+              <dt className="text-slate-500">الثروة الإجمالية نهاية السنة 8 (أرباح + قيمة أرضك)</dt>
               <dd className="text-lg font-bold text-indigo-600">
-                {share.shareValueAtExit.toLocaleString("en-US")} ريال
+                {data.totalWealthYear8.toLocaleString("en-US")} ريال
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">القيمة التقديرية الحالية للبيع الآن</dt>
               <dd className="text-lg font-bold text-indigo-600">
-                {share.shareValueNow.toLocaleString("en-US")} ريال
+                {data.saleValueNow.toLocaleString("en-US")} ريال
               </dd>
               <p className="mt-1 text-xs text-slate-400">مخفّضة 35% لعدم اكتمال دورة المشروع</p>
             </div>
