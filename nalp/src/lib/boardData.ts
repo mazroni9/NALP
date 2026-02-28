@@ -28,12 +28,13 @@ export const BOARD_STRUCTURE = {
 
   boardMembers: [
     { role: "رئيس مجلس الإدارة", count: 1, group: "منتخب", annualComp: 60_000 },
-    { role: "عضو مجلس (مجموعة أحمد)", count: 1, group: "أبناء أحمد", annualComp: 30_000 },
+    { role: "عضو مجلس أول (مجموعة أحمد)", count: 1, group: "أبناء أحمد", annualComp: 30_000 },
+    { role: "عضو مجلس ثانٍ (مجموعة أحمد)", count: 1, group: "أبناء أحمد", annualComp: 30_000 },
     { role: "عضو مجلس (مجموعة عطية)", count: 1, group: "أبناء عطية", annualComp: 30_000 },
     { role: "عضو مجلس (مجموعة عبدالرحمن)", count: 1, group: "أبناء عبدالرحمن", annualComp: 30_000 },
     { role: "عضو مستقل (خبير مالي/قانوني)", count: 1, group: "مستقل", annualComp: 30_000 },
   ],
-  totalBoardCost: 180_000,
+  totalBoardCost: 210_000,
 
   executiveTeam: [
     {
@@ -57,13 +58,13 @@ export const BOARD_STRUCTURE = {
   ],
   totalExternalCost: 132_000,
 
-  totalAdminCost: 492_000,
-  adminCostPercent: 7.3,
-  safetyMargin: 183_030,
+  totalAdminCost: 522_000,
+  adminCostPercent: 7.7,
+  safetyMargin: 153_030,
 
   votingRules: [
-    { type: "قرارات عادية (توزيع أرباح، تقارير)", quorum: "أغلبية بسيطة 3/5" },
-    { type: "قرارات مهمة (تعديل عقود، شراكات جديدة)", quorum: "أغلبية مؤهلة 4/5" },
+    { type: "قرارات عادية", quorum: "أغلبية بسيطة 4/6" },
+    { type: "قرارات مهمة", quorum: "أغلبية مؤهلة 5/6" },
     { type: "قرارات مصيرية (بيع الأرض، حل الشركة)", quorum: "إجماع + موافقة 75% من الملاك" },
     { type: "تعديل حصة شريك", quorum: "موافقة الشريك نفسه + 4/5 المجلس" },
   ],
