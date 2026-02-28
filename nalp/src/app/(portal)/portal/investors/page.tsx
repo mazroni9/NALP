@@ -280,7 +280,7 @@ export default function InvestorsPage() {
             <h4 className="font-bold text-indigo-600">نموذج الإيرادات</h4>
             <ul className="space-y-2 text-slate-600">
               {selectedZone === "A" && (
-                <li>• يعتمد على عمولات المزاد (متوسط 1500 ريال لكل سيارة).</li>
+                <li>• يعتمد على عمولات المزاد (يبدأ من متوسط 1500 ريال لكل سيارة بعد مرحلة النمو الأولى).</li>
               )}
               {selectedZone === "B" && (
                 <li>• تأجير مواقف سيارات يومي وشريحة من المواقف الطويلة الأمد.</li>
