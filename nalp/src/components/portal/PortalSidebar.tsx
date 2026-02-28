@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/portal/dashboard", label: "لوحة المستثمر" },
   { href: "/portal/data-room", label: "غرفة البيانات" },
   { href: "/portal/scenarios", label: "السيناريوهات" },
+  { href: "/portal/partners", label: "لوحة الشركاء" },
 ];
 
 export function PortalSidebar() {

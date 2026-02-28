@@ -35,6 +35,16 @@ export default function PortalDashboardPage() {
                 </p>
               </Card>
             </Link>
+            <Link href="/portal/partners">
+              <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
+                <h2 className="text-lg font-semibold text-indigo-600">
+                  لوحة الشركاء — ملاك الأرض
+                </h2>
+                <p className="mt-2 text-slate-600">
+                  تصفح حصتك وبيانات الشركاء.
+                </p>
+              </Card>
+            </Link>
           </div>
         </section>
       </div>
