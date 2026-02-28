@@ -71,7 +71,7 @@ export function calcPartnerData(p: (typeof PARTNERS)[0]) {
   const f = p.sharePercent / 100;
   const landArea = Math.round(22_646 * f);
   return {
-    landValueNow: Math.round(18_632_250 * f),
+    landValueNow: Math.round(landArea * 750),
     landAreaSqm: landArea,
     landValueCurrentPrice: Math.round(landArea * 750),
     landValueYear1: Math.round(landArea * 1_200),
@@ -82,5 +82,11 @@ export function calcPartnerData(p: (typeof PARTNERS)[0]) {
     totalWealthYear8: Math.round(54_002_425 * f) + Math.round(landArea * 2_500),
     saleValueNow: Math.round(18_632_250 * f * 0.65),
     shares: Math.round(10_000 * f),
+    pricePerMeterNow: 750,
+    pricePerMeterYear1: 1_200,
+    pricePerMeterYear4: 1_800,
+    pricePerMeterYear8: 2_500,
+    landNote:
+      "مساحة الأرض المتبقية محسوبة من إجمالي 22,646 م² بعد استقطاع الشارع المستقبلي وحصة المشروع",
   };
 }

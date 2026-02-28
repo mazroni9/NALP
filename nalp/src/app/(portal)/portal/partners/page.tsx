@@ -143,8 +143,61 @@ export default function PartnersPage() {
         </Card>
 
         <Card>
+          <h2 className="text-lg font-semibold text-slate-800">تطور قيمة حصتك من الأرض</h2>
+          <p className="mt-2 text-sm text-slate-500">
+            حصتك من المساحة المتبقية البالغة 22,646 م²
+          </p>
+          <p className="mt-2 text-2xl font-bold text-indigo-600">
+            مساحتك: {data.landAreaSqm.toLocaleString("en-US")} م²
+          </p>
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full text-right text-sm">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="px-2 py-2 font-medium text-slate-600">الآن</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">السنة 1</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">السنة 4</th>
+                  <th className="px-2 py-2 font-medium text-slate-600">السنة 8</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-slate-100">
+                  <td className="px-2 py-2 text-slate-600">750 ر/م²</td>
+                  <td className="px-2 py-2 text-slate-600">1,200 ر/م²</td>
+                  <td className="px-2 py-2 text-slate-600">1,800 ر/م²</td>
+                  <td className="px-2 py-2 text-slate-600">2,500 ر/م²</td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-2 font-semibold">{data.landValueNow.toLocaleString("en-US")} ريال</td>
+                  <td className="px-2 py-2 font-semibold">{data.landValueYear1.toLocaleString("en-US")} ريال</td>
+                  <td className="px-2 py-2 font-semibold">{data.landValueYear4.toLocaleString("en-US")} ريال</td>
+                  <td className="px-2 py-2 font-semibold">{data.landValueYear8.toLocaleString("en-US")} ريال</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-6 border-t border-slate-200 pt-6">
+            <div className="rounded-lg bg-indigo-900 px-4 py-4 text-white">
+              <h3 className="font-semibold">إجمالي ثروتك نهاية السنة الثامنة</h3>
+              <p className="mt-1 text-sm text-indigo-200">أرباح المشروع + قيمة حصتك من الأرض</p>
+              <p className="mt-2 text-2xl font-bold">
+                {data.totalWealthYear8.toLocaleString("en-US")} ريال
+              </p>
+            </div>
+            <p className="mt-4 text-xs text-slate-400">
+              تقدير تطور سعر المتر مبني على افتراضات نمو المشروع والمنطقة — يخضع للمراجعة
+            </p>
+          </div>
+          <p className="mt-4 text-xs text-slate-400">{data.landNote}</p>
+        </Card>
+
+        <Card>
           <h2 className="text-lg font-semibold text-slate-800">كيف تبيع حصتك</h2>
           <p className="mt-4 whitespace-pre-line text-sm text-slate-600">{sellStepsText}</p>
+          <p className="mt-4 text-sm text-slate-500">
+            ملاحظة: عند البيع تنتقل ملكية الأرض المقابلة ({data.landAreaSqm.toLocaleString("en-US")} م²)
+            مع الحصة تلقائياً للمشتري وفق عقد الشركة.
+          </p>
         </Card>
 
         <Card>
