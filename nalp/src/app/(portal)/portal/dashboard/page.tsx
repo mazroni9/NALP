@@ -25,6 +25,18 @@ export default function PortalDashboardPage() {
                 </p>
               </Card>
             </Link>
+
+            <Link href="/portal/investors">
+              <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md bg-indigo-50/30">
+                <h2 className="text-lg font-semibold text-indigo-600">
+                  حساب حصة المستثمر
+                </h2>
+                <p className="mt-2 text-slate-600">
+                  احسب حصتك وعوائدك المتوقعة في المناطق الأربعة.
+                </p>
+              </Card>
+            </Link>
+
             <Link href="/portal/scenarios">
               <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
                 <h2 className="text-lg font-semibold text-indigo-600">
@@ -35,6 +47,7 @@ export default function PortalDashboardPage() {
                 </p>
               </Card>
             </Link>
+
             <Link href="/portal/partners">
               <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
                 <h2 className="text-lg font-semibold text-indigo-600">
@@ -45,6 +58,7 @@ export default function PortalDashboardPage() {
                 </p>
               </Card>
             </Link>
+
             <Link href="/portal/board">
               <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
                 <h2 className="text-lg font-semibold text-indigo-600">
