@@ -38,7 +38,7 @@ export default function ScenariosPage() {
     <div className="p-8">
       <h1 className="text-2xl font-bold text-slate-800">السيناريوهات</h1>
       <p className="mt-1 text-slate-600">
-        إنشاء ومقارنة السيناريوهات المالية. (سيتم حفظها في الخادم لاحقاً)
+        اختبر افتراضات مختلفة للإشغال والأسعار والمصاريف، واعرف كيف تؤثر على العائد الإجمالي للمشروع. أنشئ سيناريوهين أو أكثر لمقارنتهم جنباً إلى جنب.
       </p>
 
       <Card className="mt-8">
@@ -54,6 +54,7 @@ export default function ScenariosPage() {
               min={0}
               max={100}
             />
+            <p className="mt-1 text-sm text-gray-400">نسبة المواقف أو الوحدات المشغولة من الإجمالي</p>
           </div>
           <div>
             <label className="block text-sm">سعر السرير (ريال)</label>
@@ -63,6 +64,7 @@ export default function ScenariosPage() {
               onChange={(e) => setBedRate(Number(e.target.value))}
               className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
             />
+            <p className="mt-1 text-sm text-gray-400">متوسط سعر الإيجار للوحدة (يومي أو شهري حسب المنطقة)</p>
           </div>
           <div>
             <label className="block text-sm">حد التشغيل (%)</label>
@@ -72,6 +74,7 @@ export default function ScenariosPage() {
               onChange={(e) => setOpexCap(Number(e.target.value))}
               className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
             />
+            <p className="mt-1 text-sm text-gray-400">نسبة المصاريف التشغيلية من الإيراد (OPEX)</p>
           </div>
           <div>
             <label className="block text-sm">سعر الخروج (x)</label>
@@ -82,11 +85,35 @@ export default function ScenariosPage() {
               step={0.1}
               className="mt-1 w-full rounded border border-slate-300 px-3 py-2"
             />
+            <p className="mt-1 text-sm text-gray-400">مضاعف التقييم عند التخارج — مثلاً 1.2 تعني قيمة المشروع = الدخل السنوي × 1.2</p>
           </div>
         </div>
         <Button onClick={addScenario} className="mt-4">
           إضافة سيناريو
         </Button>
+
+        {(() => {
+          const grossAnnual = (occupancy / 100) * bedRate * 365;
+          const annualIncome = grossAnnual * (1 - opexCap / 100);
+          const total8Year = annualIncome * 8;
+          const exitValue = annualIncome * exitPrice;
+          return (
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
+                <p className="text-sm opacity-90">العائد السنوي التقديري</p>
+                <p className="mt-1 text-lg font-semibold">{Math.round(annualIncome).toLocaleString("en-US")} ر.س</p>
+              </div>
+              <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
+                <p className="text-sm opacity-90">العائد الإجمالي (8 سنوات)</p>
+                <p className="mt-1 text-lg font-semibold">{Math.round(total8Year).toLocaleString("en-US")} ر.س</p>
+              </div>
+              <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
+                <p className="text-sm opacity-90">قيمة الخروج التقديرية</p>
+                <p className="mt-1 text-lg font-semibold">{Math.round(exitValue).toLocaleString("en-US")} ر.س</p>
+              </div>
+            </div>
+          );
+        })()}
       </Card>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
