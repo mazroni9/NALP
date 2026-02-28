@@ -39,13 +39,19 @@ const ZONES = [
   },
   {
     id: "zone-d",
-    name: "Zone-D (Workshops - Lease Only)",
+    name: "Zone-D (مركز الخدمات المتكاملة — شراكة استثمارية)",
     items: [
-      { label: "إيجار سنوي صافي", value: 912000 },
-      { label: "دخل 8 سنوات", value: 7296000 },
+      { label: "نموذج الإيراد", value: "شراكة استثمارية" },
+      { label: "تكلفة الإنشاء على المستثمر", value: 2500000 },
+      { label: "إيراد Zone-D السنوي الإجمالي", value: 8100000 },
+      { label: "OPEX", value: "15%" },
+      { label: "صافي الإيراد السنوي", value: 6885000 },
+      { label: "دخل مالك الأرض قبل التعادل (10%)", value: 688500, suffix: "/سنة" as const },
+      { label: "دخل مالك الأرض بعد التعادل (50%) × 9.7 سنة", value: 33392250, note: "تقريبي" },
+      { label: "إجمالي دخل مالك الأرض خلال 10 سنوات", value: 34080750, note: "تقريبي" },
     ],
-    risk: "منخفض جدًا",
-    riskClass: "bg-emerald-100 text-emerald-700",
+    risk: "متوسط — شراكة استثمارية",
+    riskClass: "bg-amber-100 text-amber-700",
   },
 ];
 

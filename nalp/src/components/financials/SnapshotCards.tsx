@@ -5,14 +5,14 @@ import { Card } from "@/components/ui/Card";
 const CARDS = [
   {
     label: "إجمالي دخل ملاك الأرض (8 سنوات)",
-    value: "34.6M",
+    value: "61.4M",
     suffix: "SAR",
     note: "تقديري وفق افتراضات التشغيل",
     tooltip: "هذه أرقام تقديرية قابلة للتحديث",
   },
   {
     label: "متوسط دخل سنوي تقديري",
-    value: "4.0M",
+    value: "6.8M",
     suffix: "SAR",
     note: "تقديري وفق افتراضات التشغيل",
     tooltip: "هذه أرقام تقديرية قابلة للتحديث",
