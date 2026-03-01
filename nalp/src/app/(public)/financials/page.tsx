@@ -1,10 +1,11 @@
 import {
   SnapshotCards,
   AssumptionsPanel,
-  ZoneCards,
+  FinancialsZoneCards,
   IncomeChart,
   ValuationSimulator,
   ShareBar,
+  InvestorViewBlock,
 } from "@/components/financials";
 import { Card } from "@/components/ui/Card";
 
@@ -12,19 +13,19 @@ export default function FinancialsPage() {
   return (
     <div className="min-h-screen bg-slate-50" dir="rtl">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* 1) Hero / عنوان الصفحة */}
         <header className="mb-12">
           <span className="inline-block rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">
             Public Investor View
           </span>
-          <h1 className="mt-4 text-4xl font-bold text-slate-900">لوحة المستثمر</h1>
+          <h1 className="mt-4 text-4xl font-bold text-slate-900">
+            لوحة المستثمر — Investor Dashboard
+          </h1>
           <p className="mt-2 text-lg text-slate-600">
-            ملخص استثماري لمشروع NALP — 8 سنوات
+            ملخص استثماري لمشروع NALP — يعتمد على محرك العوائد المركزي
           </p>
         </header>
 
         <section className="space-y-12">
-          {/* 2) Executive Snapshot */}
           <div>
             <h2 className="mb-4 text-xl font-semibold text-slate-800">
               Executive Snapshot
@@ -32,7 +33,20 @@ export default function FinancialsPage() {
             <SnapshotCards />
           </div>
 
-          {/* 3) Assumptions Panel */}
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">
+              تفصيل المناطق (Zone Cards)
+            </h2>
+            <FinancialsZoneCards />
+          </div>
+
+          <div>
+            <h2 className="mb-4 text-xl font-semibold text-slate-800">
+              Investor View — حاسبة المستثمر
+            </h2>
+            <InvestorViewBlock />
+          </div>
+
           <div>
             <h2 className="mb-4 text-xl font-semibold text-slate-800">
               الافتراضات الرئيسية
@@ -40,15 +54,6 @@ export default function FinancialsPage() {
             <AssumptionsPanel />
           </div>
 
-          {/* 4) Revenue Breakdown by Zone */}
-          <div>
-            <h2 className="mb-4 text-xl font-semibold text-slate-800">
-              تفصيل الإيرادات حسب المنطقة
-            </h2>
-            <ZoneCards />
-          </div>
-
-          {/* 5) 8-Year Landlord Income Chart */}
           <div>
             <h2 className="mb-4 text-xl font-semibold text-slate-800">
               تدفق دخل ملاك الأرض عبر السنوات (تقديري)
@@ -58,7 +63,6 @@ export default function FinancialsPage() {
             </Card>
           </div>
 
-          {/* 6) Valuation Simulator */}
           <div>
             <h2 className="mb-4 text-xl font-semibold text-slate-800">
               محاكي التقييم
@@ -66,7 +70,6 @@ export default function FinancialsPage() {
             <ValuationSimulator />
           </div>
 
-          {/* 7) Download / Share Section */}
           <div>
             <h2 className="mb-4 text-xl font-semibold text-slate-800">
               مشاركة وتحميل
@@ -82,7 +85,6 @@ export default function FinancialsPage() {
           </a>
         </section>
 
-        {/* 8) Footer Disclaimer */}
         <footer className="mt-16 border-t border-slate-200 pt-8">
           <p className="text-center text-sm text-slate-500">
             الأرقام تقديرية مبنية على افتراضات تشغيلية، وتخضع للتحديث حسب

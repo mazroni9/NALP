@@ -1,35 +1,35 @@
 "use client";
 
 import { Card } from "@/components/ui/Card";
-import { formatNumber } from "@/lib/formatNumber";
+import { formatNumber, formatSAR } from "@/lib/formatNumber";
 import { PROJECT_TOTALS } from "@/lib/projectData";
 
 export function SnapshotCards() {
   const cards = [
     {
-      label: "إجمالي دخل ملاك الأرض (8 سنوات)",
-      value: formatNumber(PROJECT_TOTALS.ownerTotalIncome8Years),
-      suffix: "SAR",
+      label: "إجمالي دخل 8 سنوات (Owner Total 8Y)",
+      value: formatSAR(PROJECT_TOTALS.ownerTotalIncome8Years),
+      suffix: "",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",
     },
     {
       label: "متوسط الدخل السنوي",
-      value: formatNumber(PROJECT_TOTALS.avgAnnualIncome),
-      suffix: "SAR",
+      value: formatSAR(PROJECT_TOTALS.avgAnnualIncome),
+      suffix: "",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",
     },
     {
-      label: "نطاق التقييم بعد 8 سنوات",
-      value: "70M–78M",
-      suffix: "SAR",
+      label: "التقييم المتوقع (Valuation at Exit)",
+      value: formatSAR(PROJECT_TOTALS.valuationAtExit),
+      suffix: "",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",
     },
     {
-      label: "عدد مناطق الدخل",
-      value: String(PROJECT_TOTALS.zonesCount),
+      label: "عدد المناطق",
+      value: formatNumber(PROJECT_TOTALS.zonesCount, { maximumFractionDigits: 0 }),
       suffix: "Zones",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",
@@ -46,8 +46,10 @@ export function SnapshotCards() {
         >
           <p className="text-sm font-medium text-slate-500">{c.label}</p>
           <p className="mt-2 text-2xl font-bold text-slate-900">
-            {c.value}{" "}
-            <span className="text-base font-normal text-slate-500">{c.suffix}</span>
+            {c.value}
+            {c.suffix && (
+              <span className="mr-1 text-base font-normal text-slate-500">{c.suffix}</span>
+            )}
           </p>
           <p className="mt-2 text-xs text-slate-400">{c.note}</p>
         </Card>
