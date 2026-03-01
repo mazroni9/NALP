@@ -20,6 +20,13 @@ import {
   loadLedgerFromStorage,
   generateBatchId,
 } from "@/lib/calculators/ledgerEngine";
+import {
+  safeReadStorage,
+  safeWriteStorage,
+  safeRemoveStorage,
+  safeCopyToClipboard,
+  safeReload,
+} from "@/lib/safeStorage";
 
 const ZONE_A_MODE_KEY = "NALP_ZONE_A_MODE";
 const isDev = process.env.NODE_ENV === "development";
@@ -42,29 +49,22 @@ export default function InvestorsPage() {
   const [ledgerSummaryState, setLedgerSummaryState] = useState<ReturnType<typeof computeZoneALedgerSummary> | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const stored = localStorage.getItem(ZONE_A_MODE_KEY);
-      if (stored === "forecast" || stored === "actual") {
-        setZoneAMode(stored);
-        if (stored === "actual") setMainTab("budget");
-      }
-    } catch {}
+    const stored = safeReadStorage(ZONE_A_MODE_KEY);
+    if (stored === "forecast" || stored === "actual") {
+      setZoneAMode(stored);
+      if (stored === "actual") setMainTab("budget");
+    }
     setZoneAModeLoaded(true);
   }, []);
 
   const handleZoneAModeChange = (mode: "forecast" | "actual") => {
     setZoneAMode(mode);
     if (mode === "actual") setMainTab("budget");
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(ZONE_A_MODE_KEY, mode);
-      } catch {}
-    }
+    safeWriteStorage(ZONE_A_MODE_KEY, mode);
   };
 
   useEffect(() => {
-    const loaded = loadLedgerFromStorage(REQUIRED_CAPITAL.A);
+    const loaded = loadLedgerFromStorage(REQUIRED_CAPITAL.A, safeReadStorage);
     setLedgerState(loaded);
     setInvestmentAmount(loaded.investmentAmount);
     setLedgerError(null);
@@ -78,13 +78,8 @@ export default function InvestorsPage() {
   }, [selectedZone]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = localStorage.getItem(LEDGER_STORAGE_KEY);
-      setStorageBytes(raw ? new Blob([raw]).size : 0);
-    } catch {
-      setStorageBytes(0);
-    }
+    const raw = safeReadStorage(LEDGER_STORAGE_KEY);
+    setStorageBytes(raw ? new Blob([raw]).size : 0);
   }, [ledgerState]);
 
   const isLedgerValid =
@@ -121,36 +116,23 @@ export default function InvestorsPage() {
       schemaVersion: state.schemaVersion ?? LEDGER_SCHEMA_VERSION,
     };
     setLedgerState(toSave);
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(LEDGER_STORAGE_KEY, JSON.stringify(toSave));
-      } catch {}
-    }
+    safeWriteStorage(LEDGER_STORAGE_KEY, JSON.stringify(toSave));
   }, []);
 
   const handleCopyLedgerJson = () => {
-    if (!ledgerState || typeof navigator === "undefined" || !navigator.clipboard) return;
-    try {
-      navigator.clipboard.writeText(JSON.stringify(ledgerState, null, 2));
-      setCopiedFeedback(true);
-      setTimeout(() => setCopiedFeedback(false), 2000);
-    } catch {}
+    if (!ledgerState) return;
+    safeCopyToClipboard(JSON.stringify(ledgerState, null, 2));
+    setCopiedFeedback(true);
+    setTimeout(() => setCopiedFeedback(false), 2000);
   };
 
   const handleClearCorruptData = () => {
-    if (typeof window === "undefined") return;
-    try {
-      localStorage.removeItem(LEDGER_STORAGE_KEY);
-      window.location.reload();
-    } catch {}
+    safeRemoveStorage(LEDGER_STORAGE_KEY);
+    safeReload();
   };
 
   const handleResetLedgerFromError = () => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.removeItem(LEDGER_STORAGE_KEY);
-      } catch {}
-    }
+    safeRemoveStorage(LEDGER_STORAGE_KEY);
     const def = defaultLedgerState(investmentAmount, REQUIRED_CAPITAL.A);
     setLedgerState(def);
     setLedgerError(null);
@@ -159,13 +141,11 @@ export default function InvestorsPage() {
   };
 
   const handleCopyError = () => {
-    if (!lastError || typeof navigator === "undefined" || !navigator.clipboard) return;
+    if (!lastError) return;
     const text = lastError.stack ? `${lastError.message}\n\n${lastError.stack}` : lastError.message;
-    try {
-      navigator.clipboard.writeText(text);
-      setCopiedFeedback(true);
-      setTimeout(() => setCopiedFeedback(false), 2000);
-    } catch {}
+    safeCopyToClipboard(text);
+    setCopiedFeedback(true);
+    setTimeout(() => setCopiedFeedback(false), 2000);
   };
 
   const updateLedgerInvestment = useCallback(

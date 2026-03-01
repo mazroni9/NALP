@@ -2,16 +2,15 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { safeCopyToClipboard, safeGetLocationHref } from "@/lib/safeStorage";
 
 export function ShareBar() {
   const [copied, setCopied] = useState(false);
 
   const copyLink = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    safeCopyToClipboard(safeGetLocationHref());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (

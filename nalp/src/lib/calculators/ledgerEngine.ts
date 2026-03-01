@@ -193,16 +193,13 @@ export function defaultLedgerState(
   };
 }
 
-export function loadLedgerFromStorage(
+/** Pure parse + migrate. Call with raw from safeReadStorage. JSON.parse in try/catch. */
+export function parseLedgerFromRaw(
+  raw: string | null,
   fallbackInvestment: number = REQUIRED_CAPITAL.A
 ): LedgerState {
-  if (typeof window === "undefined") {
-    return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
-  }
+  if (!raw) return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
   try {
-    const raw = localStorage.getItem(LEDGER_STORAGE_KEY);
-    if (!raw) return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
-
     const parsed = JSON.parse(raw) as unknown;
     if (!parsed || typeof parsed !== "object") {
       return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
@@ -262,6 +259,17 @@ export function loadLedgerFromStorage(
   } catch {
     return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
   }
+}
+
+/**
+ * Load ledger from storage. getItem must be called only from useEffect/handlers (e.g. safeReadStorage).
+ */
+export function loadLedgerFromStorage(
+  fallbackInvestment: number = REQUIRED_CAPITAL.A,
+  getItem: (key: string) => string | null
+): LedgerState {
+  const raw = getItem(LEDGER_STORAGE_KEY);
+  return parseLedgerFromRaw(raw, fallbackInvestment);
 }
 
 export function generateBatchId(): string {

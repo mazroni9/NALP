@@ -1,5 +1,7 @@
 "use client";
 
+import { safeRemoveStorage, safeCopyToClipboard, safeReload } from "@/lib/safeStorage";
+
 interface ErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
@@ -7,19 +9,14 @@ interface ErrorProps {
 
 export default function InvestorsError({ error }: ErrorProps) {
   const handleResetLedger = () => {
-    if (typeof window === "undefined") return;
-    localStorage.removeItem("NALP_ZONE_A_LEDGER_V1");
-    localStorage.removeItem("NALP_ZONE_A_MODE");
-    location.reload();
+    safeRemoveStorage("NALP_ZONE_A_LEDGER_V1");
+    safeRemoveStorage("NALP_ZONE_A_MODE");
+    safeReload();
   };
 
-  const handleCopyError = async () => {
+  const handleCopyError = () => {
     const text = [error.message, error.stack].filter(Boolean).join("\n\n");
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(text);
-      } catch {}
-    }
+    safeCopyToClipboard(text);
   };
 
   return (
