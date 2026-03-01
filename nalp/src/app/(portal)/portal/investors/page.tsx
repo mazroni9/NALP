@@ -38,6 +38,8 @@ export default function InvestorsPage() {
   const [ledgerError, setLedgerError] = useState<string | null>(null);
   const [storageBytes, setStorageBytes] = useState<number>(0);
   const [copiedFeedback, setCopiedFeedback] = useState(false);
+  const [lastError, setLastError] = useState<null | { message: string; stack?: string }>(null);
+  const [ledgerSummaryState, setLedgerSummaryState] = useState<ReturnType<typeof computeZoneALedgerSummary> | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -85,6 +87,33 @@ export default function InvestorsPage() {
     }
   }, [ledgerState]);
 
+  const isLedgerValid =
+    ledgerState &&
+    selectedZone === "A" &&
+    Array.isArray(ledgerState.months) &&
+    ledgerState.months.length > 0;
+
+  useEffect(() => {
+    if (!isLedgerValid || !ledgerState) {
+      setLedgerSummaryState(null);
+      setLastError(null);
+      return;
+    }
+    try {
+      const summary = computeZoneALedgerSummary(ledgerState);
+      setLedgerSummaryState(summary);
+      setLedgerError(null);
+      setLastError(null);
+    } catch (e) {
+      setLedgerError("حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.");
+      setLastError({
+        message: e instanceof Error ? e.message : String(e),
+        stack: e instanceof Error ? e.stack : undefined,
+      });
+      setLedgerSummaryState(null);
+    }
+  }, [isLedgerValid, ledgerState]);
+
   const saveLedger = useCallback((state: LedgerState | null) => {
     if (!state) return;
     const toSave: LedgerState = {
@@ -125,7 +154,18 @@ export default function InvestorsPage() {
     const def = defaultLedgerState(investmentAmount, REQUIRED_CAPITAL.A);
     setLedgerState(def);
     setLedgerError(null);
+    setLastError(null);
     saveLedger(def);
+  };
+
+  const handleCopyError = () => {
+    if (!lastError || typeof navigator === "undefined" || !navigator.clipboard) return;
+    const text = lastError.stack ? `${lastError.message}\n\n${lastError.stack}` : lastError.message;
+    try {
+      navigator.clipboard.writeText(text);
+      setCopiedFeedback(true);
+      setTimeout(() => setCopiedFeedback(false), 2000);
+    } catch {}
   };
 
   const updateLedgerInvestment = useCallback(
@@ -173,23 +213,8 @@ export default function InvestorsPage() {
   const showForecastContent =
     selectedZone !== "A" || (selectedZone === "A" && zoneAMode === "forecast");
 
-  const isLedgerValid =
-    ledgerState &&
-    selectedZone === "A" &&
-    Array.isArray(ledgerState.months) &&
-    ledgerState.months.length > 0;
-
-  let ledgerSummary: ReturnType<typeof computeZoneALedgerSummary> | null = null;
-  let computeError: string | null = null;
-  try {
-    if (isLedgerValid && ledgerState) {
-      ledgerSummary = computeZoneALedgerSummary(ledgerState);
-    }
-  } catch {
-    computeError = "حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.";
-  }
-
-  const showLedgerError = computeError !== null || ledgerError !== null;
+  const ledgerSummary = ledgerSummaryState;
+  const showLedgerError = ledgerError !== null || lastError !== null;
 
   const hasLedgerData =
     isLedgerValid &&
@@ -866,6 +891,24 @@ export default function InvestorsPage() {
       {isDev && selectedZone === "A" && ledgerState && (
         <Card className="p-4 bg-slate-50">
           <h4 className="text-sm font-bold text-slate-600 mb-3">Diagnostics (Dev Only)</h4>
+          {lastError && (
+            <div className="mb-4 p-3 rounded bg-red-50 border border-red-200">
+              <h5 className="text-xs font-bold text-red-700 mb-2">Last Error</h5>
+              <p className="text-xs font-mono text-red-800 mb-2">{lastError.message}</p>
+              {lastError.stack && (
+                <pre className="text-xs font-mono whitespace-pre-wrap text-red-700 overflow-x-auto max-h-40 overflow-y-auto">
+                  {lastError.stack}
+                </pre>
+              )}
+              <button
+                type="button"
+                onClick={handleCopyError}
+                className="mt-2 px-3 py-1 text-xs rounded bg-red-200 hover:bg-red-300"
+              >
+                Copy Error
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono mb-4">
             <div><span className="text-slate-500">schemaVersion:</span> <span>{ledgerState.schemaVersion ?? "missing"}</span></div>
             <div><span className="text-slate-500">ledgerValid:</span> <span>{(Array.isArray(ledgerState.months) && ledgerState.months.length > 0) ? "yes" : "no"}</span></div>
