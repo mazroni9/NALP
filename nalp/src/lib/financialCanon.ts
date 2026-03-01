@@ -134,6 +134,15 @@ const zoneD: ZoneOperational = {
   risk: ZONE_D_RAW.risk,
 };
 
+// ─── REQUIRED CAPITAL (مبالغ ثابتة إدارياً، غير مستمدة من capex/zoneValuation) ─
+export type ZoneId = "A" | "B" | "C" | "D";
+export const REQUIRED_CAPITAL: Record<ZoneId, number> = {
+  A: 5_000_000,
+  B: 1_000_000,
+  C: 5_500_000,
+  D: 2_500_000,
+};
+
 // Zone-D خاص: نسب توزيع قبل/بعد التعادل
 export const ZONE_D_INVESTOR_SHARES = {
   investorSharePre: 1 - ZONE_D_RAW.preBreakevenSharePercent / 100,

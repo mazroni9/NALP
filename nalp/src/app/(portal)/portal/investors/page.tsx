@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { formatSAR } from "@/lib/formatNumber";
-import { ZONE_OPERATIONAL, ZONE_D } from "@/lib/financialCanon";
-
-type ZoneId = "A" | "B" | "C" | "D";
+import {
+  ZONE_OPERATIONAL,
+  ZONE_D,
+  REQUIRED_CAPITAL,
+  type ZoneId,
+} from "@/lib/financialCanon";
 
 export default function InvestorsPage() {
   const [selectedZone, setSelectedZone] = useState<ZoneId>("A");
-  const [investmentAmount, setInvestmentAmount] = useState<number>(5_000_000);
+  const [investmentAmount, setInvestmentAmount] = useState<number>(
+    REQUIRED_CAPITAL.A
+  );
+
+  useEffect(() => {
+    setInvestmentAmount(REQUIRED_CAPITAL[selectedZone]);
+  }, [selectedZone]);
   const [activeTab, setActiveTab] = useState<"company" | "investor">("company");
 
   const zoneData = ZONE_OPERATIONAL;
@@ -123,6 +132,15 @@ export default function InvestorsPage() {
                 * التقييم التقديري للمنطقة (Cap Rate):{" "}
                 {formatSAR(currentZone.zoneValuation)}
               </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setInvestmentAmount(REQUIRED_CAPITAL[selectedZone])
+                }
+                className="mt-3 text-xs text-indigo-600 hover:text-indigo-800 underline"
+              >
+                إعادة تعيين للمبلغ المطلوب
+              </button>
             </div>
 
             <div className="pt-4 border-t border-slate-100">
