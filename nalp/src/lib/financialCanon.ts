@@ -17,6 +17,16 @@ export const LAND = {
     "المساحة الصافية محسوبة بعد احتساب استقطاع شارع مستقبلي بعرض 12.5 م في امتداد 520 م — لم يُعتمد رسمياً بعد",
 };
 
+// ─── ZONE A YEARLY MODEL (Waterfall: OPEX cap 25%, landowner 50% post-breakeven) ─
+export const ZONE_A_YEARLY_MODEL = {
+  carsPerDay: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] as const,
+  avgCommissionPerCar: [500, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200] as const,
+  landOwnerCutPerCarYear1: 100,
+  opexCapPercent: 25,
+  daysPerYear: 365,
+  landOwnerPostBreakevenSharePercent: 50,
+};
+
 // ─── ZONE RAW DATA (كما في projectData) ────────────────────────────────────
 export const ZONE_A_RAW = {
   name: "Zone-A — المزاد",

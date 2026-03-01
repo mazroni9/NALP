@@ -7,6 +7,7 @@
 import {
   ZONE_OPERATIONAL,
   ZONE_D,
+  ZONE_A_YEARLY_MODEL,
   REQUIRED_CAPITAL,
   type ZoneId,
 } from "@/lib/financialCanon";
@@ -21,6 +22,36 @@ export interface CompanyAnnual {
 
 export function getCompanyAnnual(zoneId: ZoneId): CompanyAnnual {
   const z = ZONE_OPERATIONAL[zoneId];
+  if (zoneId === "A") {
+    let sumRevenue = 0;
+    let sumNet = 0;
+    for (let y = 0; y < 10; y++) {
+      const cars = ZONE_A_YEARLY_MODEL.carsPerDay[y];
+      const avg = ZONE_A_YEARLY_MODEL.avgCommissionPerCar[y];
+      const grossRevenue =
+        cars * avg * ZONE_A_YEARLY_MODEL.daysPerYear;
+      const landCutYear1 =
+        y === 0
+          ? cars *
+            ZONE_A_YEARLY_MODEL.landOwnerCutPerCarYear1 *
+            ZONE_A_YEARLY_MODEL.daysPerYear
+          : 0;
+      const operatingIncome = grossRevenue - landCutYear1;
+      const opex =
+        operatingIncome *
+        (ZONE_A_YEARLY_MODEL.opexCapPercent / 100);
+      const profitAfterOpex = operatingIncome - opex;
+      sumRevenue += grossRevenue;
+      sumNet += profitAfterOpex;
+    }
+    const avgRevenue = sumRevenue / 10;
+    const avgNet = sumNet / 10;
+    return {
+      revenue: Math.round(avgRevenue),
+      opex: Math.round(avgRevenue - avgNet),
+      netProfit: Math.round(avgNet),
+    };
+  }
   const revenue = z.annualRevenue;
   const netProfit = z.netAnnual;
   const opex = revenue - netProfit;
@@ -122,6 +153,59 @@ export function buildProjection(
       breakEvenYear,
       breakEvenMonthsLabel: `بعد ${ZONE_D.breakevenMonths} شهر تقريبًا`,
     };
+  }
+
+  if (zoneId === "A") {
+    const reqA = REQUIRED_CAPITAL["A"];
+    const fundingRatio =
+      reqA > 0 ? Math.min(sanitized / reqA, 1) : 0;
+    const investorShare = 0.5 * fundingRatio;
+
+    for (let y = 1; y <= years; y++) {
+      const idx = y - 1;
+      const cars =
+        ZONE_A_YEARLY_MODEL.carsPerDay[
+          Math.min(idx, ZONE_A_YEARLY_MODEL.carsPerDay.length - 1)
+        ];
+      const avg =
+        ZONE_A_YEARLY_MODEL.avgCommissionPerCar[
+          Math.min(idx, ZONE_A_YEARLY_MODEL.avgCommissionPerCar.length - 1)
+        ];
+      const grossRevenue =
+        cars * avg * ZONE_A_YEARLY_MODEL.daysPerYear;
+      const landCutYear1 =
+        y === 1
+          ? cars *
+            ZONE_A_YEARLY_MODEL.landOwnerCutPerCarYear1 *
+            ZONE_A_YEARLY_MODEL.daysPerYear
+          : 0;
+      const operatingIncome = grossRevenue - landCutYear1;
+      const opex =
+        operatingIncome *
+        (ZONE_A_YEARLY_MODEL.opexCapPercent / 100);
+      const profitAfterOpex = operatingIncome - opex;
+      const landOwnerPostShare =
+        cumulativeInvestorProfit >= sanitized
+          ? profitAfterOpex *
+            (ZONE_A_YEARLY_MODEL.landOwnerPostBreakevenSharePercent / 100)
+          : 0;
+      const distributableProfit = profitAfterOpex - landOwnerPostShare;
+      const investorProfit = distributableProfit * investorShare;
+
+      cumulativeInvestorProfit += investorProfit;
+      if (breakEvenYear === -1 && cumulativeInvestorProfit >= sanitized) {
+        breakEvenYear = y;
+      }
+      projections.push({
+        year: y,
+        companyRevenue: grossRevenue,
+        companyNetProfit: distributableProfit,
+        companyOpex: opex,
+        investorProfit,
+        cumulativeInvestorProfit,
+      });
+    }
+    return { projections, breakEvenYear };
   }
 
   const investorShare = 0.5 * fundingRatio;
