@@ -18,14 +18,41 @@ import {
   generateBatchId,
 } from "@/lib/calculators/ledgerEngine";
 
+const ZONE_A_MODE_KEY = "NALP_ZONE_A_MODE";
+
 export default function InvestorsPage() {
   const [selectedZone, setSelectedZone] = useState<ZoneId>("A");
   const [investmentAmount, setInvestmentAmount] = useState<number>(
     REQUIRED_CAPITAL.A
   );
 
+  const [zoneAMode, setZoneAMode] = useState<"forecast" | "actual">("forecast");
+  const [zoneAModeLoaded, setZoneAModeLoaded] = useState(false);
+
   const [ledgerState, setLedgerState] = useState<LedgerState | null>(null);
   const [ledgerLoaded, setLedgerLoaded] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem(ZONE_A_MODE_KEY);
+      if (stored === "forecast" || stored === "actual") {
+        setZoneAMode(stored);
+        if (stored === "actual") setMainTab("ledger");
+      }
+    } catch {}
+    setZoneAModeLoaded(true);
+  }, []);
+
+  const handleZoneAModeChange = (mode: "forecast" | "actual") => {
+    setZoneAMode(mode);
+    if (mode === "actual") setMainTab("ledger");
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(ZONE_A_MODE_KEY, mode);
+      } catch {}
+    }
+  };
 
   useEffect(() => {
     try {
@@ -104,6 +131,9 @@ export default function InvestorsPage() {
       : breakEvenYear !== -1
         ? `السنة ${breakEvenYear}`
         : "تتجاوز 10 سنوات";
+
+  const showForecastContent =
+    selectedZone !== "A" || (selectedZone === "A" && zoneAMode === "forecast");
 
   const ledgerSummary =
     ledgerState && selectedZone === "A"
@@ -206,33 +236,53 @@ export default function InvestorsPage() {
         ))}
       </div>
 
-      {selectedZone === "A" && ledgerLoaded && (
-        <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit">
-          <button
-            onClick={() => setMainTab("calc")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-              mainTab === "calc" ? "bg-white shadow text-indigo-600" : "text-slate-600"
-            }`}
-          >
-            الحاسبة
-          </button>
-          <button
-            onClick={() => setMainTab("ledger")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-              mainTab === "ledger" ? "bg-white shadow text-indigo-600" : "text-slate-600"
-            }`}
-          >
-            دفتر التشغيل
-          </button>
-          <button
-            onClick={() => setMainTab("budget")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-              mainTab === "budget" ? "bg-white shadow text-indigo-600" : "text-slate-600"
-            }`}
-          >
-            الميزانية السنوية
-          </button>
-        </div>
+      {selectedZone === "A" && ledgerLoaded && zoneAModeLoaded && (
+        <Card className="p-4">
+          <p className="text-xs font-medium text-slate-500 mb-2">مصدر الحسابات</p>
+          <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit">
+            <button
+              onClick={() => handleZoneAModeChange("forecast")}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                zoneAMode === "forecast" ? "bg-white shadow text-indigo-600" : "text-slate-600"
+              }`}
+            >
+              توقعات (Forecast)
+            </button>
+            <button
+              onClick={() => handleZoneAModeChange("actual")}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                zoneAMode === "actual" ? "bg-white shadow text-indigo-600" : "text-slate-600"
+              }`}
+            >
+              تشغيل فعلي (دفتر التشغيل)
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            {zoneAMode === "forecast"
+              ? "يعتمد على نموذج تقديري سنوي ثابت للمدخلات."
+              : "يعتمد على إدخالات دفتر التشغيل الشهرية ويؤثر على التعادل والتوزيعات."}
+          </p>
+          {zoneAMode === "actual" && (
+            <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit mt-4">
+              <button
+                onClick={() => setMainTab("ledger")}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                  mainTab === "ledger" ? "bg-white shadow text-indigo-600" : "text-slate-600"
+                }`}
+              >
+                دفتر التشغيل
+              </button>
+              <button
+                onClick={() => setMainTab("budget")}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                  mainTab === "budget" ? "bg-white shadow text-indigo-600" : "text-slate-600"
+                }`}
+              >
+                الميزانية السنوية
+              </button>
+            </div>
+          )}
+        </Card>
       )}
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -285,29 +335,41 @@ export default function InvestorsPage() {
               )}
             </div>
 
-            {hasLedgerData && mainTab === "calc" && (
+            {hasLedgerData && zoneAMode === "forecast" && (
               <p className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
                 يوجد دفتر تشغيل مخصص — نتائج الميزانية السنوية تعتمد على الدفتر.
               </p>
             )}
 
+            {selectedZone === "A" && zoneAMode === "actual" && !hasLedgerData && (
+              <p className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded">
+                وضع التشغيل الفعلي يعتمد على دفتر التشغيل. ابدأ بإضافة دفعات للشهر الحالي.
+              </p>
+            )}
+
             <div className="pt-4 border-t border-slate-100">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-slate-600">نقطة التعادل المتوقعة:</span>
+                <span className="text-sm text-slate-600">
+                  {showForecastContent ? "نقطة التعادل المتوقعة:" : "نقطة التعادل:"}
+                </span>
                 <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
-                  {mainTab === "budget" && ledgerSummary?.breakEvenMonth
-                    ? ledgerSummary.breakEvenMonth
-                    : mainTab === "ledger" && ledgerSummary?.breakEvenMonth
-                      ? ledgerSummary.breakEvenMonth
+                  {selectedZone === "A" && zoneAMode === "actual" && ledgerSummary
+                    ? (ledgerSummary.breakEvenMonth ?? "—")
+                    : selectedZone === "A" && zoneAMode === "actual" && !hasLedgerData
+                      ? "أدخل بيانات شهر واحد على الأقل"
                       : displayBreakEven}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">إجمالي ربح 10 سنوات:</span>
+                <span className="text-sm text-slate-600">
+                  {showForecastContent ? "إجمالي ربح 10 سنوات:" : "إجمالي ربح السنة:"}
+                </span>
                 <span className="font-bold text-indigo-600">
-                  {mainTab === "budget" && ledgerSummary
+                  {selectedZone === "A" && zoneAMode === "actual" && ledgerSummary
                     ? formatSAR(ledgerSummary.yearly.investorProfit)
-                    : formatSAR(projections[9]?.cumulativeInvestorProfit ?? 0)}
+                    : selectedZone === "A" && zoneAMode === "actual" && !hasLedgerData
+                      ? "—"
+                      : formatSAR(projections[9]?.cumulativeInvestorProfit ?? 0)}
                 </span>
               </div>
             </div>
@@ -315,7 +377,7 @@ export default function InvestorsPage() {
         </Card>
 
         <div className="lg:col-span-2 space-y-4">
-          {((selectedZone !== "A") || (selectedZone === "A" && mainTab === "calc")) && (
+          {showForecastContent && (
             <>
               <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit">
                 <button
@@ -392,7 +454,7 @@ export default function InvestorsPage() {
             </>
           )}
 
-          {mainTab === "ledger" && selectedZone === "A" && ledgerState && (
+          {mainTab === "ledger" && selectedZone === "A" && zoneAMode === "actual" && ledgerState && (
             <Card className="p-6">
               <h3 className="text-lg font-bold mb-4">دفتر التشغيل</h3>
               <div className="mb-4">
@@ -492,7 +554,13 @@ export default function InvestorsPage() {
             </Card>
           )}
 
-          {mainTab === "budget" && selectedZone === "A" && ledgerSummary && (
+          {mainTab === "budget" && selectedZone === "A" && zoneAMode === "actual" && !hasLedgerData && (
+            <Card className="p-8 text-center text-slate-500">
+              أدخل بيانات شهر واحد على الأقل في دفتر التشغيل لعرض الميزانية السنوية.
+            </Card>
+          )}
+
+          {mainTab === "budget" && selectedZone === "A" && zoneAMode === "actual" && hasLedgerData && ledgerSummary && (
             <Card className="p-6">
               <h3 className="text-lg font-bold mb-4">الميزانية السنوية</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
