@@ -38,7 +38,7 @@ export default function InvestorsPage() {
       const stored = localStorage.getItem(ZONE_A_MODE_KEY);
       if (stored === "forecast" || stored === "actual") {
         setZoneAMode(stored);
-        if (stored === "actual") setMainTab("ledger");
+        if (stored === "actual") setMainTab("budget");
       }
     } catch {}
     setZoneAModeLoaded(true);
@@ -46,7 +46,7 @@ export default function InvestorsPage() {
 
   const handleZoneAModeChange = (mode: "forecast" | "actual") => {
     setZoneAMode(mode);
-    if (mode === "actual") setMainTab("ledger");
+    if (mode === "actual") setMainTab("budget");
     if (typeof window !== "undefined") {
       try {
         localStorage.setItem(ZONE_A_MODE_KEY, mode);
