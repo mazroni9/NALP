@@ -5,10 +5,10 @@ import { Card } from "@/components/ui/Card";
 import { formatNumber, formatSAR, parseNumber } from "@/lib/formatNumber";
 import {
   ZONE_OPERATIONAL,
-  ZONE_D,
   REQUIRED_CAPITAL,
   type ZoneId,
 } from "@/lib/financialCanon";
+import { buildProjection } from "@/lib/calculators/returnsEngine";
 
 export default function InvestorsPage() {
   const [selectedZone, setSelectedZone] = useState<ZoneId>("A");
@@ -23,62 +23,17 @@ export default function InvestorsPage() {
 
   const zoneData = ZONE_OPERATIONAL;
   const currentZone = zoneData[selectedZone];
-
   const safeInvestment = Math.max(0, investmentAmount);
-  const safeZoneValuation = Math.max(1, currentZone.zoneValuation);
-  const investorSharePercent = Math.min(
-    100,
-    (safeInvestment / safeZoneValuation) * 100
-  );
 
-  const calculateProjections = () => {
-    const years = Array.from({ length: 10 }, (_, i) => i + 1);
-    let cumulativeInvestorProfit = 0;
-    let breakEvenYear = -1;
-
-    const companyRevenue = currentZone.annualRevenue;
-    const companyNetProfit = currentZone.netAnnual;
-    const companyOpex = companyRevenue - companyNetProfit;
-
-    const projections = years.map((year) => {
-      let investorProfit = 0;
-
-      if (selectedZone === "D") {
-        const sharePre = ZONE_D.investorSharePre;
-        const sharePost = ZONE_D.investorSharePost;
-
-        if (cumulativeInvestorProfit < safeInvestment) {
-          investorProfit = companyNetProfit * sharePre;
-        } else {
-          investorProfit = companyNetProfit * sharePost;
-        }
-      } else {
-        investorProfit = companyNetProfit * (investorSharePercent / 100);
-      }
-
-      cumulativeInvestorProfit += investorProfit;
-      if (breakEvenYear === -1 && cumulativeInvestorProfit >= safeInvestment) {
-        breakEvenYear = year;
-      }
-
-      return {
-        year,
-        companyRevenue,
-        companyNetProfit,
-        companyOpex,
-        investorProfit,
-        cumulativeInvestorProfit,
-      };
-    });
-
-    return { projections, breakEvenYear };
-  };
-
-  const { projections, breakEvenYear } = calculateProjections();
+  const {
+    projections,
+    breakEvenYear,
+    breakEvenMonthsLabel,
+  } = buildProjection(selectedZone, investmentAmount, 10);
 
   const displayBreakEven =
-    selectedZone === "D"
-      ? `بعد ${ZONE_D.breakevenMonths} شهر تقريبًا`
+    selectedZone === "D" && breakEvenMonthsLabel
+      ? breakEvenMonthsLabel
       : breakEvenYear !== -1
         ? `السنة ${breakEvenYear}`
         : "تتجاوز 10 سنوات";
@@ -135,6 +90,15 @@ export default function InvestorsPage() {
                 * التقييم التقديري للمنطقة (Cap Rate):{" "}
                 {formatSAR(currentZone.zoneValuation)}
               </p>
+              <p className="mt-1 text-xs text-slate-500">
+                نموذج الصفقة: مشاركة أرباح
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                حصة المستثمر القصوى (A/B/C): 50% عند تمويل 100% من المطلوب
+              </p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                Zone-D: قبل التعادل 90% وبعده 50%
+              </p>
               <button
                 type="button"
                 onClick={() =>
@@ -156,7 +120,7 @@ export default function InvestorsPage() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-600">إجمالي ربح 10 سنوات:</span>
                 <span className="font-bold text-indigo-600">
-                  {formatSAR(projections[9].cumulativeInvestorProfit)}
+                  {formatSAR(projections[9]?.cumulativeInvestorProfit ?? 0)}
                 </span>
               </div>
             </div>
