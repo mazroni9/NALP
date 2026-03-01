@@ -35,6 +35,9 @@ export default function PortalDashboardPage() {
           NALP مجمع سيارات وخدمات لوجستية متعدد مصادر الدخل يجمع بين المزادات،
           التخزين، المواقف، سكن الموظفين، ومركز صيانة متكامل.
         </p>
+        <p className="mt-2 text-base font-semibold text-indigo-600">
+          أربعة محركات دخل مستقلة ضمن مجمع واحد.
+        </p>
         <div className="mt-6 flex flex-wrap gap-4">
           <Link
             href="/portal/investors"
@@ -49,6 +52,21 @@ export default function PortalDashboardPage() {
             استكشف السيناريوهات
           </Link>
         </div>
+      </section>
+
+      {/* فرصة السوق */}
+      <section className="mb-12">
+        <h2 className="mb-4 text-xl font-semibold text-slate-800">
+          فرصة السوق
+        </h2>
+        <Card className="p-5">
+          <p className="text-slate-600 leading-relaxed">
+            سوق السيارات المستعملة يعاني من تشتّت الخدمات وضعف التنظيم وارتفاع تكلفة التشغيل على الأطراف المختلفة.
+          </p>
+          <p className="mt-3 text-slate-600 leading-relaxed">
+            NALP يجمع المزاد والخدمات والسكن والمواقف داخل مجمع واحد لتكوين مصادر دخل متعددة ومترابطة.
+          </p>
+        </Card>
       </section>
 
       {/* B) Executive Snapshot */}
@@ -84,6 +102,26 @@ export default function PortalDashboardPage() {
             </p>
           </Card>
         </div>
+      </section>
+
+      {/* هيكل الاستثمار */}
+      <section className="mb-12">
+        <h2 className="mb-4 text-xl font-semibold text-slate-800">
+          هيكل الاستثمار
+        </h2>
+        <Card className="p-5">
+          <ul className="list-inside list-disc space-y-2 text-slate-600">
+            <li>
+              Zones A/B/C: مشاركة أرباح حتى 50% حسب نسبة التمويل من رأس المال المطلوب.
+            </li>
+            <li>
+              Zone D: Waterfall — 90% قبل التعادل، 50% بعده.
+            </li>
+            <li>
+              رأس المال المطلوب لكل منطقة محدد مسبقًا ويُستخدم لحساب نسبة التمويل.
+            </li>
+          </ul>
+        </Card>
       </section>
 
       {/* C) Zones Overview */}
@@ -183,6 +221,10 @@ export default function PortalDashboardPage() {
           </Link>
         </div>
       </section>
+
+      <p className="mt-12 text-center text-sm text-slate-500">
+        تنبيه: الأرقام المعروضة تقديرية ومبنية على افتراضات تشغيلية قابلة للتغير وليست تعهدًا بالعائد.
+      </p>
     </div>
   );
 }
