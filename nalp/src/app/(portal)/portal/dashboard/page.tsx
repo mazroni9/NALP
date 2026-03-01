@@ -1,77 +1,188 @@
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
+import { formatSAR, formatNumber } from "@/lib/formatNumber";
+import {
+  PROJECT_TOTALS,
+  REQUIRED_CAPITAL,
+  type ZoneId,
+} from "@/lib/financialCanon";
+
+const ZONE_IDS: ZoneId[] = ["A", "B", "C", "D"];
+
+const ZONE_HOW_EARN: Record<ZoneId, string> = {
+  A: "عمولات مزاد السيارات — إيراد من كل عملية بيع",
+  B: "تأجير مواقف — إيراد يومي وشهري من المواقف",
+  C: "سكن موظفين — إيجارات شهرية مستقرة من 198 غرفة",
+  D: "مركز صيانة وخدمات — إيراد من العمليات والتشغيل",
+};
+
+const DEAL_MODEL: Record<ZoneId, string> = {
+  A: "مشاركة أرباح حتى 50% حسب التمويل",
+  B: "مشاركة أرباح حتى 50% حسب التمويل",
+  C: "مشاركة أرباح حتى 50% حسب التمويل",
+  D: "Waterfall: 90% قبل التعادل، 50% بعده",
+};
 
 export default function PortalDashboardPage() {
   return (
-    <div className="p-8">
-      <header className="mb-10">
-        <h1 className="text-2xl font-bold text-slate-800">أدوات المستثمر</h1>
-        <p className="mt-1 text-slate-600">ادرس التفاصيل الكاملة، شغّل السيناريوهات المالية، وتصفح وثائق المشروع.</p>
-      </header>
+    <div className="p-8" dir="rtl">
+      {/* A) Hero Section */}
+      <section className="mb-12">
+        <h1 className="text-3xl font-bold text-slate-800">
+          أدوات المستثمر — نظرة استثمارية
+        </h1>
+        <p className="mt-4 max-w-2xl text-lg text-slate-600 leading-relaxed">
+          NALP مجمع سيارات وخدمات لوجستية متعدد مصادر الدخل يجمع بين المزادات،
+          التخزين، المواقف، سكن الموظفين، ومركز صيانة متكامل.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-4">
+          <Link
+            href="/portal/investors"
+            className="rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-700"
+          >
+            احسب حصتك الآن
+          </Link>
+          <Link
+            href="/portal/scenarios"
+            className="rounded-xl border-2 border-indigo-600 px-6 py-3 text-base font-semibold text-indigo-600 transition hover:bg-indigo-50"
+          >
+            استكشف السيناريوهات
+          </Link>
+        </div>
+      </section>
 
-      <div className="space-y-8">
-        <section>
-          <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-slate-500">
-            أدوات البوابة
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <Link href="/portal/data-room">
-              <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
-                <h2 className="text-lg font-semibold text-indigo-600">
-                  غرفة البيانات
-                </h2>
-                <p className="mt-2 text-slate-600">
-                  تصفح وتنزيل المستندات القانونية والمالية والفنية.
-                </p>
-              </Card>
-            </Link>
+      {/* B) Executive Snapshot */}
+      <section className="mb-12">
+        <h2 className="mb-4 text-xl font-semibold text-slate-800">
+          Executive Snapshot
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="p-4 transition-all hover:shadow-md">
+            <p className="text-sm text-slate-500">إجمالي دخل الملاك 8 سنوات</p>
+            <p className="mt-1 text-xl font-bold text-slate-900">
+              {formatSAR(PROJECT_TOTALS.ownerTotalIncome8Years)}
+            </p>
+          </Card>
+          <Card className="p-4 transition-all hover:shadow-md">
+            <p className="text-sm text-slate-500">متوسط الدخل السنوي</p>
+            <p className="mt-1 text-xl font-bold text-slate-900">
+              {formatSAR(PROJECT_TOTALS.avgAnnualIncome)}
+            </p>
+          </Card>
+          <Card className="p-4 transition-all hover:shadow-md">
+            <p className="text-sm text-slate-500">التقييم المتوقع</p>
+            <p className="mt-1 text-xl font-bold text-slate-900">
+              {formatSAR(PROJECT_TOTALS.valuationAtExit)}
+            </p>
+          </Card>
+          <Card className="p-4 transition-all hover:shadow-md">
+            <p className="text-sm text-slate-500">عدد المناطق</p>
+            <p className="mt-1 text-xl font-bold text-slate-900">
+              {formatNumber(PROJECT_TOTALS.zonesCount, {
+                maximumFractionDigits: 0,
+              })}
+            </p>
+          </Card>
+        </div>
+      </section>
 
-            <Link href="/portal/investors">
-              <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md bg-indigo-50/30">
-                <h2 className="text-lg font-semibold text-indigo-600">
-                  حساب حصة المستثمر
-                </h2>
-                <p className="mt-2 text-slate-600">
-                  احسب حصتك وعوائدك المتوقعة في المناطق الأربعة.
+      {/* C) Zones Overview */}
+      <section className="mb-12">
+        <h2 className="mb-4 text-xl font-semibold text-slate-800">
+          محركات الدخل
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {ZONE_IDS.map((zoneId) => {
+            const required = REQUIRED_CAPITAL[zoneId];
+            return (
+              <Card
+                key={zoneId}
+                className="flex flex-col p-4 transition-all hover:shadow-md"
+              >
+                <h3 className="text-lg font-semibold text-slate-800">
+                  المنطقة {zoneId}
+                </h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  {ZONE_HOW_EARN[zoneId]}
                 </p>
+                <div className="mt-4 flex flex-1 flex-col gap-2 border-t border-slate-100 pt-4">
+                  <p className="text-xs text-slate-500">رأس المال المطلوب</p>
+                  <p className="font-bold text-indigo-600">
+                    {formatSAR(required)}
+                  </p>
+                  <p className="text-xs text-slate-500">نموذج الصفقة</p>
+                  <p className="text-sm font-medium text-slate-700">
+                    {DEAL_MODEL[zoneId]}
+                  </p>
+                </div>
               </Card>
-            </Link>
+            );
+          })}
+        </div>
+      </section>
 
-            <Link href="/portal/scenarios">
-              <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
-                <h2 className="text-lg font-semibold text-indigo-600">
-                  السيناريوهات
-                </h2>
-                <p className="mt-2 text-slate-600">
-                  إنشاء ومقارنة السيناريوهات المالية.
-                </p>
-              </Card>
-            </Link>
+      {/* D) Why Invest */}
+      <section className="mb-12">
+        <h2 className="mb-4 text-xl font-semibold text-slate-800">
+          لماذا الاستثمار في NALP؟
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card className="p-5">
+            <h4 className="font-semibold text-indigo-600">
+              تنويع مصادر الدخل
+            </h4>
+            <p className="mt-2 text-sm text-slate-600">
+              4 مناطق مستقلة تخفّف المخاطر وتوزّع العائد بين المزاد، المواقف،
+              السكن، ومركز الخدمات.
+            </p>
+          </Card>
+          <Card className="p-5">
+            <h4 className="font-semibold text-indigo-600">
+              وضوح الصفقة وشفافية الحسابات
+            </h4>
+            <p className="mt-2 text-sm text-slate-600">
+              نموذج مشاركة أرباح واضح عبر returnsEngine — حسابات شفافة وقابلة
+              للتحقق.
+            </p>
+          </Card>
+          <Card className="p-5">
+            <h4 className="font-semibold text-indigo-600">
+              قابلية التوسع والتشغيل
+            </h4>
+            <p className="mt-2 text-sm text-slate-600">
+              موقع استراتيجي على محور الجبيل–الظهران، مع إمكانية التوسع
+              والتشغيل المستدام.
+            </p>
+          </Card>
+        </div>
+      </section>
 
-            <Link href="/portal/partners">
-              <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
-                <h2 className="text-lg font-semibold text-indigo-600">
-                  لوحة الشركاء — ملاك الأرض
-                </h2>
-                <p className="mt-2 text-slate-600">
-                  تصفح حصتك وبيانات الشركاء.
-                </p>
-              </Card>
-            </Link>
-
-            <Link href="/portal/board">
-              <Card className="h-full cursor-pointer transition hover:border-indigo-200 hover:shadow-md">
-                <h2 className="text-lg font-semibold text-indigo-600">
-                  لوحة مجلس الإدارة
-                </h2>
-                <p className="mt-2 text-slate-600">
-                  هيكل الشركة، حصص الشركاء، التصويت، توزيع الأرباح
-                </p>
-              </Card>
-            </Link>
-          </div>
-        </section>
-      </div>
+      {/* E) Next Steps */}
+      <section>
+        <h2 className="mb-4 text-xl font-semibold text-slate-800">
+          الخطوات التالية
+        </h2>
+        <div className="flex flex-wrap gap-4">
+          <Link
+            href="/portal/investors"
+            className="flex flex-1 min-w-[200px] items-center justify-center rounded-xl bg-indigo-600 px-8 py-4 text-lg font-semibold text-white transition hover:bg-indigo-700"
+          >
+            حاسبة حصة المستثمر
+          </Link>
+          <Link
+            href="/portal/scenarios"
+            className="flex flex-1 min-w-[200px] items-center justify-center rounded-xl border-2 border-slate-300 px-8 py-4 text-lg font-semibold text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50"
+          >
+            السيناريوهات المالية
+          </Link>
+          <Link
+            href="/portal/data-room"
+            className="flex flex-1 min-w-[200px] items-center justify-center rounded-xl border-2 border-slate-300 px-8 py-4 text-lg font-semibold text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50"
+          >
+            غرفة البيانات
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
