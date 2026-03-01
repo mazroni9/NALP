@@ -14,7 +14,10 @@ import {
   type Batch,
   computeZoneALedgerSummary,
   LEDGER_STORAGE_KEY,
+  LEDGER_SCHEMA_VERSION,
   getDefaultLedgerState,
+  defaultLedgerState,
+  loadLedgerFromStorage,
   generateBatchId,
 } from "@/lib/calculators/ledgerEngine";
 
@@ -31,6 +34,7 @@ export default function InvestorsPage() {
 
   const [ledgerState, setLedgerState] = useState<LedgerState | null>(null);
   const [ledgerLoaded, setLedgerLoaded] = useState(false);
+  const [ledgerError, setLedgerError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -55,22 +59,10 @@ export default function InvestorsPage() {
   };
 
   useEffect(() => {
-    try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem(LEDGER_STORAGE_KEY) : null;
-      if (raw) {
-        const parsed = JSON.parse(raw) as LedgerState;
-        setLedgerState(parsed);
-        setInvestmentAmount(parsed.investmentAmount);
-      } else {
-        setLedgerState(
-          getDefaultLedgerState(REQUIRED_CAPITAL.A, REQUIRED_CAPITAL.A)
-        );
-      }
-    } catch {
-      setLedgerState(
-        getDefaultLedgerState(REQUIRED_CAPITAL.A, REQUIRED_CAPITAL.A)
-      );
-    }
+    const loaded = loadLedgerFromStorage(REQUIRED_CAPITAL.A);
+    setLedgerState(loaded);
+    setInvestmentAmount(loaded.investmentAmount);
+    setLedgerError(null);
     setLedgerLoaded(true);
   }, []);
 
@@ -82,13 +74,29 @@ export default function InvestorsPage() {
 
   const saveLedger = useCallback((state: LedgerState | null) => {
     if (!state) return;
-    setLedgerState(state);
+    const toSave: LedgerState = {
+      ...state,
+      schemaVersion: state.schemaVersion ?? LEDGER_SCHEMA_VERSION,
+    };
+    setLedgerState(toSave);
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem(LEDGER_STORAGE_KEY, JSON.stringify(state));
+        localStorage.setItem(LEDGER_STORAGE_KEY, JSON.stringify(toSave));
       } catch {}
     }
   }, []);
+
+  const handleResetLedgerFromError = () => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(LEDGER_STORAGE_KEY);
+      } catch {}
+    }
+    const def = defaultLedgerState(investmentAmount, REQUIRED_CAPITAL.A);
+    setLedgerState(def);
+    setLedgerError(null);
+    saveLedger(def);
+  };
 
   const updateLedgerInvestment = useCallback(
     (amt: number) => {
@@ -135,15 +143,28 @@ export default function InvestorsPage() {
   const showForecastContent =
     selectedZone !== "A" || (selectedZone === "A" && zoneAMode === "forecast");
 
-  const ledgerSummary =
-    ledgerState && selectedZone === "A"
-      ? computeZoneALedgerSummary(ledgerState)
-      : null;
-
-  const hasLedgerData =
+  const isLedgerValid =
     ledgerState &&
     selectedZone === "A" &&
-    ledgerState.months.some((m) => m.batches.length > 0);
+    Array.isArray(ledgerState.months) &&
+    ledgerState.months.length > 0;
+
+  let ledgerSummary: ReturnType<typeof computeZoneALedgerSummary> | null = null;
+  let computeError: string | null = null;
+  try {
+    if (isLedgerValid && ledgerState) {
+      ledgerSummary = computeZoneALedgerSummary(ledgerState);
+    }
+  } catch {
+    computeError = "حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.";
+  }
+
+  const showLedgerError = computeError !== null || ledgerError !== null;
+
+  const hasLedgerData =
+    isLedgerValid &&
+    ledgerState &&
+    ledgerState.months.some((m) => Array.isArray(m.batches) && m.batches.length > 0);
 
   const monthRow =
     ledgerSummary?.perMonth.find((r) => r.month === selectedMonth) ||
@@ -292,6 +313,21 @@ export default function InvestorsPage() {
               </button>
             </div>
           )}
+        </Card>
+      )}
+
+      {selectedZone === "A" && zoneAMode === "actual" && showLedgerError && (
+        <Card className="p-6 border-amber-200 bg-amber-50">
+          <p className="text-amber-800 font-medium mb-3">
+            حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.
+          </p>
+          <button
+            type="button"
+            onClick={handleResetLedgerFromError}
+            className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700"
+          >
+            إعادة تهيئة الدفتر
+          </button>
         </Card>
       )}
 

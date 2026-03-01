@@ -3,7 +3,10 @@
  * Monthly batches → rollups → break-even
  */
 
+import { REQUIRED_CAPITAL } from "@/lib/financialCanon";
+
 export type ZoneId = "A" | "B" | "C" | "D";
+export const LEDGER_SCHEMA_VERSION = 1;
 export type MonthKey = string; // "YYYY-MM"
 
 export interface Batch {
@@ -20,6 +23,7 @@ export interface MonthlyLedger {
 
 export interface LedgerState {
   zoneId: "A";
+  schemaVersion: number;
   investmentAmount: number;
   requiredCapital: number;
   months: MonthlyLedger[];
@@ -77,7 +81,8 @@ function createEmptyQuarter() {
 }
 
 export function computeZoneALedgerSummary(state: LedgerState): LedgerSummary {
-  const { investmentAmount, requiredCapital, months } = state;
+  const { investmentAmount, requiredCapital } = state;
+  const months = Array.isArray(state.months) ? state.months : [];
   const fundingRatio =
     requiredCapital > 0 ? Math.min(investmentAmount / requiredCapital, 1) : 0;
   const investorShareOfOperator = 0.5 * fundingRatio;
@@ -94,8 +99,9 @@ export function computeZoneALedgerSummary(state: LedgerState): LedgerSummary {
   const yearly = createEmptyQuarter();
 
   for (const m of sorted) {
-    const totalCars = m.batches.reduce((s, b) => s + b.count, 0);
-    const gross = m.batches.reduce((s, b) => s + b.count * b.commission, 0);
+    const batches = Array.isArray(m.batches) ? m.batches : [];
+    const totalCars = batches.reduce((s, b) => s + (b?.count ?? 0), 0);
+    const gross = batches.reduce((s, b) => s + (b?.count ?? 0) * (b?.commission ?? 0), 0);
 
     const isPreBreakeven = cumulativeInvestorProfit < investmentAmount;
     const landCut100 = isPreBreakeven ? LAND_CUT_PER_CAR * totalCars : 0;
@@ -165,6 +171,13 @@ export function getDefaultLedgerState(
   investmentAmount: number,
   requiredCapital: number
 ): LedgerState {
+  return defaultLedgerState(investmentAmount, requiredCapital);
+}
+
+export function defaultLedgerState(
+  investmentAmount: number = REQUIRED_CAPITAL.A,
+  requiredCapital: number = REQUIRED_CAPITAL.A
+): LedgerState {
   const y = new Date().getFullYear();
   const months: MonthlyLedger[] = [];
   for (let m = 1; m <= 12; m++) {
@@ -173,10 +186,82 @@ export function getDefaultLedgerState(
   }
   return {
     zoneId: "A",
+    schemaVersion: LEDGER_SCHEMA_VERSION,
     investmentAmount,
     requiredCapital,
     months,
   };
+}
+
+export function loadLedgerFromStorage(
+  fallbackInvestment: number = REQUIRED_CAPITAL.A
+): LedgerState {
+  if (typeof window === "undefined") {
+    return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
+  }
+  try {
+    const raw = localStorage.getItem(LEDGER_STORAGE_KEY);
+    if (!raw) return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
+
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") {
+      return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
+    }
+
+    const p = parsed as Record<string, unknown>;
+    const months = p.months;
+    const investmentAmount =
+      typeof p.investmentAmount === "number"
+        ? p.investmentAmount
+        : fallbackInvestment;
+    const requiredCapital =
+      typeof p.requiredCapital === "number"
+        ? p.requiredCapital
+        : REQUIRED_CAPITAL.A;
+
+    if (!Array.isArray(months) || months.length === 0) {
+      return defaultLedgerState(investmentAmount, requiredCapital);
+    }
+
+    const hasValidMonthKeys = months.every(
+      (m: unknown) =>
+        m && typeof m === "object" && typeof (m as { month?: unknown }).month === "string"
+    );
+    if (!hasValidMonthKeys) {
+      return defaultLedgerState(investmentAmount, requiredCapital);
+    }
+
+    const schemaVersion =
+      typeof p.schemaVersion === "number" ? p.schemaVersion : 0;
+    const migratedMonths = months.map(
+      (m: { month?: string; batches?: unknown[] }, idx: number) => {
+        const rawBatches = Array.isArray(m.batches) ? m.batches : [];
+        const batches = rawBatches.map((b) => {
+          const obj = b && typeof b === "object" ? (b as Record<string, unknown>) : {};
+          return {
+            id: typeof obj.id === "string" ? obj.id : generateBatchId(),
+            count: typeof obj.count === "number" ? obj.count : 0,
+            commission: typeof obj.commission === "number" ? obj.commission : 0,
+            note: typeof obj.note === "string" ? obj.note : undefined,
+          };
+        });
+        return {
+          month: String(m.month ?? `${new Date().getFullYear()}-${String(idx + 1).padStart(2, "0")}`),
+          batches,
+        };
+      }
+    );
+
+    return {
+      zoneId: "A",
+      schemaVersion: schemaVersion > 0 ? schemaVersion : LEDGER_SCHEMA_VERSION,
+      investmentAmount,
+      requiredCapital,
+      months: migratedMonths,
+    };
+  } catch {
+    return defaultLedgerState(fallbackInvestment, REQUIRED_CAPITAL.A);
+  }
 }
 
 export function generateBatchId(): string {
