@@ -147,8 +147,8 @@ const zoneD: ZoneOperational = {
 // ─── REQUIRED CAPITAL (مبالغ ثابتة إدارياً، غير مستمدة من capex/zoneValuation) ─
 export type ZoneId = "A" | "B" | "C" | "D";
 export const REQUIRED_CAPITAL: Record<ZoneId, number> = {
-  A: 5_000_000,
-  B: 1_000_000,
+  A: 1_500_000,
+  B: 500_000,
   C: 5_500_000,
   D: 2_500_000,
 };
