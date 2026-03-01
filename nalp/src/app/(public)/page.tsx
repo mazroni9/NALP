@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { formatNumber } from "@/lib/formatNumber";
 import { LAND } from "@/lib/projectData";
 import Link from "next/link";
 
 const keyNumbers = [
   {
     label: "إجمالي مساحة الأرض",
-    value: `${LAND.totalArea.toLocaleString("en-US")} م²`,
-    subValue: `منها ${LAND.netDevelopableArea.toLocaleString("en-US")} م² صافٍ قابل للتطوير`,
+    value: `${formatNumber(LAND.totalArea)} م²`,
+    subValue: `منها ${formatNumber(LAND.netDevelopableArea)} م² صافٍ قابل للتطوير`,
   },
   { label: "المناطق", value: "4" },
   { label: "المنطقة أ (المزاد)", value: "منصة وعرض" },

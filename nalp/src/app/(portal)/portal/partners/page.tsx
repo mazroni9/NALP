@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/Button";
 
 import { Card } from "@/components/ui/Card";
+import { formatNumber, formatSAR } from "@/lib/formatNumber";
 import { PARTNERS, calcPartnerData } from "@/lib/partnersData";
 import { useState } from "react";
 
@@ -112,7 +113,7 @@ export default function PartnersPage() {
 ② يُعرض على باقي الشركاء حق الأولوية (15 يوم)
 ③ إذا لم يمارس أحد حق الأولوية → يحق بيعها لطرف ثالث
 ④ يُوثَّق نقل الملكية لدى كاتب العدل وتُحدَّث سجلات الشركة
-القيمة المرجعية للبيع الآن: ${data.saleValueNow.toLocaleString("en-US")} ريال` : "";
+القيمة المرجعية للبيع الآن: ${formatSAR(data.saleValueNow)}` : "";
 
   return (
     <div className="p-8" dir="rtl">
@@ -179,19 +180,19 @@ export default function PartnersPage() {
                       <td className="px-3 py-3 font-medium text-slate-800">{r.name}</td>
                       <td className="px-3 py-3 text-slate-600 text-xs">{r.group}</td>
                       <td className="px-3 py-3 text-center text-slate-800 font-medium">{r.sharePercent}%</td>
-                      <td className="px-3 py-3 text-center text-slate-600">{r.shares.toLocaleString("en-US")}</td>
-                      <td className="px-3 py-3 text-center font-bold text-indigo-600">{r.annualIncome.toLocaleString("en-US")}</td>
-                      <td className="px-3 py-3 text-center font-bold text-slate-800">{r.total8Y.toLocaleString("en-US")}</td>
+                      <td className="px-3 py-3 text-center text-slate-600">{formatNumber(r.shares)}</td>
+                      <td className="px-3 py-3 text-center font-bold text-indigo-600">{formatNumber(r.annualIncome)}</td>
+                      <td className="px-3 py-3 text-center font-bold text-slate-800">{formatNumber(r.total8Y)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr className="bg-indigo-50 border-t-2 border-indigo-200 font-bold">
                     <td className="px-3 py-4 text-indigo-900 text-base" colSpan={2}>الإجمالي العام</td>
-                    <td className="px-3 py-4 text-center text-indigo-900 text-base">{adminTotals.sharePercent.toFixed(2)}%</td>
-                    <td className="px-3 py-4 text-center text-indigo-900">{adminTotals.shares.toLocaleString("en-US")}</td>
-                    <td className="px-3 py-4 text-center text-indigo-900">{adminTotals.annualIncome.toLocaleString("en-US")}</td>
-                    <td className="px-3 py-4 text-center text-indigo-900">{adminTotals.total8Y.toLocaleString("en-US")}</td>
+                    <td className="px-3 py-4 text-center text-indigo-900 text-base">{formatNumber(adminTotals.sharePercent, { maximumFractionDigits: 2 })}%</td>
+                    <td className="px-3 py-4 text-center text-indigo-900">{formatNumber(adminTotals.shares)}</td>
+                    <td className="px-3 py-4 text-center text-indigo-900">{formatNumber(adminTotals.annualIncome)}</td>
+                    <td className="px-3 py-4 text-center text-indigo-900">{formatNumber(adminTotals.total8Y)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -226,7 +227,7 @@ export default function PartnersPage() {
                   <div className="flex justify-between"><dt className="text-slate-500">الاسم</dt><dd className="font-bold text-slate-800">{activePartner.name}</dd></div>
                   <div className="flex justify-between"><dt className="text-slate-500">المجموعة</dt><dd className="font-medium px-2 py-0.5 bg-slate-100 rounded text-xs">{activePartner.group}</dd></div>
                   <div className="flex justify-between border-t border-slate-50 pt-2"><dt className="text-slate-500">نسبة الملكية</dt><dd className="font-black text-indigo-600">{activePartner.sharePercent}%</dd></div>
-                  <div className="flex justify-between"><dt className="text-slate-500">عدد الأسهم</dt><dd className="font-bold">{data.shares.toLocaleString()} سهم</dd></div>
+                  <div className="flex justify-between"><dt className="text-slate-500">عدد الأسهم</dt><dd className="font-bold">{formatNumber(data.shares)} سهم</dd></div>
                 </dl>
               </Card>
 
@@ -235,11 +236,11 @@ export default function PartnersPage() {
                 <div className="mt-4 space-y-4">
                   <div>
                     <p className="text-indigo-100 text-xs">الدخل السنوي المتوقع</p>
-                    <p className="text-3xl font-black">{data.annualIncome.toLocaleString()} <span className="text-sm font-normal">ريال</span></p>
+                    <p className="text-3xl font-black">{formatNumber(data.annualIncome)} <span className="text-sm font-normal">ريال</span></p>
                   </div>
                   <div className="pt-2 border-t border-indigo-500">
                     <p className="text-indigo-100 text-xs">إجمالي دخل 8 سنوات</p>
-                    <p className="text-xl font-bold">{data.totalIncome8Y.toLocaleString()} ريال</p>
+                    <p className="text-xl font-bold">{formatNumber(data.totalIncome8Y)} ريال</p>
                   </div>
                 </div>
               </Card>
@@ -250,7 +251,7 @@ export default function PartnersPage() {
               <div className="bg-slate-50 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
                   <p className="text-slate-500 text-xs">مساحة حصتك الصافية</p>
-                  <p className="text-2xl font-black text-indigo-600">{data.landAreaSqm.toLocaleString()} <span className="text-sm font-normal">م²</span></p>
+                  <p className="text-2xl font-black text-indigo-600">{formatNumber(data.landAreaSqm)} <span className="text-sm font-normal">م²</span></p>
                 </div>
                 <div className="hidden md:block h-12 w-px bg-slate-200" />
                 <div className="text-center">
@@ -267,19 +268,19 @@ export default function PartnersPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                   <div className="p-3 bg-white border border-slate-100 rounded-lg">
                     <p className="text-slate-400 text-[10px] mb-1 italic">سعر الشراء</p>
-                    <p className="font-bold text-slate-700">{data.landValueNow.toLocaleString()}</p>
+                    <p className="font-bold text-slate-700">{formatNumber(data.landValueNow)}</p>
                   </div>
                   <div className="p-3 bg-white border border-slate-100 rounded-lg">
                     <p className="text-slate-400 text-[10px] mb-1">نهاية سنة 1</p>
-                    <p className="font-bold text-slate-700">{data.landValueYear1.toLocaleString()}</p>
+                    <p className="font-bold text-slate-700">{formatNumber(data.landValueYear1)}</p>
                   </div>
                   <div className="p-3 bg-white border border-slate-100 rounded-lg">
                     <p className="text-slate-400 text-[10px] mb-1">نهاية سنة 4</p>
-                    <p className="font-bold text-slate-700">{data.landValueYear4.toLocaleString()}</p>
+                    <p className="font-bold text-slate-700">{formatNumber(data.landValueYear4)}</p>
                   </div>
                   <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
                     <p className="text-indigo-600 text-[10px] mb-1 font-bold">نهاية سنة 8</p>
-                    <p className="font-black text-indigo-700">{data.landValueYear8.toLocaleString()}</p>
+                    <p className="font-black text-indigo-700">{formatNumber(data.landValueYear8)}</p>
                   </div>
                 </div>
               </div>
@@ -293,7 +294,7 @@ export default function PartnersPage() {
                   <div className="bg-indigo-500/20 p-2 rounded-lg">📈</div>
                 </div>
                 <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-100 to-white">
-                  {data.totalWealthYear8.toLocaleString()} <span className="text-lg font-normal opacity-80">ريال</span>
+                  {formatNumber(data.totalWealthYear8)} <span className="text-lg font-normal opacity-80">ريال</span>
                 </p>
               </div>
             </Card>

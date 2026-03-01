@@ -1,3 +1,4 @@
+import { formatNumber } from "./formatNumber";
 import { LAND } from "./projectData";
 
 /**
@@ -109,7 +110,7 @@ export const nalpLandSketch: LandSketch = {
   name: "قطعة NALP المرجعية — محور الظهران الجبيل",
   nameEn: "NALP Reference Parcel — Dhahran Jubail Corridor",
   description:
-    `قطعة أرض على طريق الظهران الجبيل. إجمالي مساحة الأرض: ${LAND.totalArea.toLocaleString("en-US")} م² — الصافي القابل للتطوير: ${LAND.netDevelopableArea.toLocaleString("en-US")} م² (${LAND.landLength} م شرق–غرب × ${LAND.landWidth} م). أربع مناطق بعمق 52.5 م (بعد خصم شارع ${LAND.streetWidth} م جنوباً)، توزيع شرق–غرب: أ (المزاد)، ب (إيواء المركبات)، ج (سكن الموظفين والمرافق)، د (استثمارية على الشارع الداخلي 30 م).`,
+    `قطعة أرض على طريق الظهران الجبيل. إجمالي مساحة الأرض: ${formatNumber(LAND.totalArea)} م² — الصافي القابل للتطوير: ${formatNumber(LAND.netDevelopableArea)} م² (${LAND.landLength} م شرق–غرب × ${LAND.landWidth} م). أربع مناطق بعمق 52.5 م (بعد خصم شارع ${LAND.streetWidth} م جنوباً)، توزيع شرق–غرب: أ (المزاد)، ب (إيواء المركبات)، ج (سكن الموظفين والمرافق)، د (استثمارية على الشارع الداخلي 30 م).`,
   sourceFile: "/PROMPT — Auto-Design Architectural Masterplan-برومبت معماري تخطيطي احترافي.docx",
   /** صورة الخريطة المصدر */
   mapImageUrl: "/nalp-land-sketch-map.png",

@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { formatNumber, formatSAR } from "@/lib/formatNumber";
 import {
   ZONE_A,
   ZONE_B,
@@ -465,30 +466,30 @@ export default function ScenariosPage() {
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
             <p className="text-sm opacity-90">دخل مالك الأرض من Zone-A</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.ownerA).toLocaleString("en-US")} ر.س</p>
+            <p className="mt-1 text-lg font-semibold">{formatSAR(Math.round(live.ownerA))}</p>
           </div>
           <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
             <p className="text-sm opacity-90">دخل مالك الأرض من Zone-B</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.ownerB).toLocaleString("en-US")} ر.س</p>
+            <p className="mt-1 text-lg font-semibold">{formatSAR(Math.round(live.ownerB))}</p>
           </div>
           <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white">
             <p className="text-sm opacity-90">دخل مالك الأرض من Zone-C</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.ownerC).toLocaleString("en-US")} ر.س</p>
+            <p className="mt-1 text-lg font-semibold">{formatSAR(Math.round(live.ownerC))}</p>
           </div>
           <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white sm:col-span-2">
             <p className="text-sm opacity-90">دخل مالك الأرض من Zone-D</p>
             <p className="mt-1 text-sm">
-              قبل التعادل: {Math.round(live.zoneD.ownerPreBreakeven).toLocaleString("en-US")} ر.س • بعد التعادل: {Math.round(live.zoneD.ownerPostBreakeven).toLocaleString("en-US")} ر.س • وقت التعادل: {live.zoneD.breakevenMonths.toFixed(1)} شهر
+              قبل التعادل: {formatSAR(Math.round(live.zoneD.ownerPreBreakeven))} • بعد التعادل: {formatSAR(Math.round(live.zoneD.ownerPostBreakeven))} • وقت التعادل: {formatNumber(live.zoneD.breakevenMonths, { maximumFractionDigits: 1 })} شهر
             </p>
-            <p className="mt-1 text-lg font-semibold">الإجمالي: {Math.round(live.zoneD.ownerTotal).toLocaleString("en-US")} ر.س</p>
+            <p className="mt-1 text-lg font-semibold">الإجمالي: {formatSAR(Math.round(live.zoneD.ownerTotal))}</p>
           </div>
           <div className="rounded-xl border-2 border-[#1e3a5f] bg-[#1e3a5f] px-4 py-3 text-white">
             <p className="text-sm font-medium opacity-90">الإجمالي خلال {calcYears} سنوات</p>
-            <p className="mt-1 text-xl font-bold">{Math.round(live.totalOverCalcYears).toLocaleString("en-US")} ر.س</p>
+            <p className="mt-1 text-xl font-bold">{formatSAR(Math.round(live.totalOverCalcYears))}</p>
           </div>
           <div className="rounded-xl bg-[#1e3a5f] px-4 py-3 text-white sm:col-span-2">
             <p className="text-sm opacity-90">قيمة التخارج = الإجمالي السنوي ÷ Cap Rate</p>
-            <p className="mt-1 text-lg font-semibold">{Math.round(live.exitValue).toLocaleString("en-US")} ر.س</p>
+            <p className="mt-1 text-lg font-semibold">{formatSAR(Math.round(live.exitValue))}</p>
           </div>
         </div>
       </Card>
@@ -505,7 +506,7 @@ export default function ScenariosPage() {
                   className="flex flex-wrap items-center justify-between gap-2 rounded border border-slate-100 px-3 py-2"
                 >
                   <span className="text-sm">
-                    {s.name} — أ:{Math.round(r.ownerA / 1e6).toFixed(1)}M ب:{Math.round(r.ownerB / 1e6).toFixed(1)}M ج:{Math.round(r.ownerC / 1e6).toFixed(1)}M د:{Math.round(r.zoneD.ownerTotal / 1e6).toFixed(1)}M • الإجمالي: {Math.round(r.totalOverCalcYears / 1e6).toFixed(1)}M
+                    {s.name} — أ:{formatNumber(r.ownerA / 1e6, { maximumFractionDigits: 1 })}M ب:{formatNumber(r.ownerB / 1e6, { maximumFractionDigits: 1 })}M ج:{formatNumber(r.ownerC / 1e6, { maximumFractionDigits: 1 })}M د:{formatNumber(r.zoneD.ownerTotal / 1e6, { maximumFractionDigits: 1 })}M • الإجمالي: {formatNumber(r.totalOverCalcYears / 1e6, { maximumFractionDigits: 1 })}M
                   </span>
                   <div className="flex gap-2">
                     <button
@@ -546,33 +547,33 @@ export default function ScenariosPage() {
                 <tbody className="text-slate-600">
                   <tr className="border-b border-slate-100">
                     <td className="py-2">دخل أ السنوي</td>
-                    <td>{Math.round(calcResults(scA).ownerA).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).ownerA).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).ownerA, calcResults(scB).ownerA).toFixed(1)}%</td>
+                    <td>{formatNumber(Math.round(calcResults(scA).ownerA))}</td>
+                    <td>{formatNumber(Math.round(calcResults(scB).ownerA))}</td>
+                    <td>{formatNumber(diff(calcResults(scA).ownerA, calcResults(scB).ownerA), { maximumFractionDigits: 1 })}%</td>
                   </tr>
                   <tr className="border-b border-slate-100">
                     <td className="py-2">دخل ب السنوي</td>
-                    <td>{Math.round(calcResults(scA).ownerB).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).ownerB).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).ownerB, calcResults(scB).ownerB).toFixed(1)}%</td>
+                    <td>{formatNumber(Math.round(calcResults(scA).ownerB))}</td>
+                    <td>{formatNumber(Math.round(calcResults(scB).ownerB))}</td>
+                    <td>{formatNumber(diff(calcResults(scA).ownerB, calcResults(scB).ownerB), { maximumFractionDigits: 1 })}%</td>
                   </tr>
                   <tr className="border-b border-slate-100">
                     <td className="py-2">دخل ج السنوي</td>
-                    <td>{Math.round(calcResults(scA).ownerC).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).ownerC).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).ownerC, calcResults(scB).ownerC).toFixed(1)}%</td>
+                    <td>{formatNumber(Math.round(calcResults(scA).ownerC))}</td>
+                    <td>{formatNumber(Math.round(calcResults(scB).ownerC))}</td>
+                    <td>{formatNumber(diff(calcResults(scA).ownerC, calcResults(scB).ownerC), { maximumFractionDigits: 1 })}%</td>
                   </tr>
                   <tr className="border-b border-slate-100">
                     <td className="py-2">دخل د الإجمالي</td>
-                    <td>{Math.round(calcResults(scA).zoneD.ownerTotal).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).zoneD.ownerTotal).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).zoneD.ownerTotal, calcResults(scB).zoneD.ownerTotal).toFixed(1)}%</td>
+                    <td>{formatNumber(Math.round(calcResults(scA).zoneD.ownerTotal))}</td>
+                    <td>{formatNumber(Math.round(calcResults(scB).zoneD.ownerTotal))}</td>
+                    <td>{formatNumber(diff(calcResults(scA).zoneD.ownerTotal, calcResults(scB).zoneD.ownerTotal), { maximumFractionDigits: 1 })}%</td>
                   </tr>
                   <tr>
                     <td className="py-2">الإجمالي</td>
-                    <td>{Math.round(calcResults(scA).totalOverCalcYears).toLocaleString("en-US")}</td>
-                    <td>{Math.round(calcResults(scB).totalOverCalcYears).toLocaleString("en-US")}</td>
-                    <td>{diff(calcResults(scA).totalOverCalcYears, calcResults(scB).totalOverCalcYears).toFixed(1)}%</td>
+                    <td>{formatNumber(Math.round(calcResults(scA).totalOverCalcYears))}</td>
+                    <td>{formatNumber(Math.round(calcResults(scB).totalOverCalcYears))}</td>
+                    <td>{formatNumber(diff(calcResults(scA).totalOverCalcYears, calcResults(scB).totalOverCalcYears), { maximumFractionDigits: 1 })}%</td>
                   </tr>
                 </tbody>
               </table>

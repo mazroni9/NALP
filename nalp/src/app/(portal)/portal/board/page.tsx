@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/Card";
+import { formatNumber } from "@/lib/formatNumber";
 import {
   BOARD_STRUCTURE,
   foundingDebts,
@@ -83,26 +84,26 @@ export default function BoardPage() {
             <div>
               <dt className="text-slate-500">إجمالي الدخل السنوي</dt>
               <dd className="font-bold text-indigo-600">
-                {BOARD_STRUCTURE.annualIncome.toLocaleString("en-US")} ريال
+                {formatNumber(BOARD_STRUCTURE.annualIncome)} ريال
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">الحد الأقصى للمصاريف الإدارية (10%)</dt>
               <dd className="font-medium">
-                {BOARD_STRUCTURE.maxAdminBudget.toLocaleString("en-US")} ريال/سنة
+                {formatNumber(BOARD_STRUCTURE.maxAdminBudget)} ريال/سنة
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">التكلفة الإدارية الفعلية</dt>
               <dd className="font-bold">
-                {BOARD_STRUCTURE.totalAdminCost.toLocaleString("en-US")} ريال (
+                {formatNumber(BOARD_STRUCTURE.totalAdminCost)} ريال (
                 {BOARD_STRUCTURE.adminCostPercent}%)
               </dd>
             </div>
             <div>
               <dt className="text-slate-500">هامش الأمان</dt>
               <dd className="font-bold text-green-600">
-                {BOARD_STRUCTURE.safetyMargin.toLocaleString("en-US")} ريال
+                {formatNumber(BOARD_STRUCTURE.safetyMargin)} ريال
               </dd>
             </div>
           </dl>
@@ -130,7 +131,7 @@ export default function BoardPage() {
                     <td className="px-2 py-2">{m.role}</td>
                     <td className="px-2 py-2 text-slate-600">{m.group}</td>
                     <td className="px-2 py-2">
-                      {m.annualComp.toLocaleString("en-US")} ريال
+                      {formatNumber(m.annualComp)} ريال
                     </td>
                   </tr>
                 ))}
@@ -167,7 +168,7 @@ export default function BoardPage() {
                       <td className="px-2 py-2">{e.role}</td>
                       <td className="px-2 py-2 text-slate-600">{e.duties}</td>
                       <td className="px-2 py-2">
-                        {e.annualComp.toLocaleString("en-US")} ريال
+                        {formatNumber(e.annualComp)} ريال
                       </td>
                     </tr>
                   )
@@ -177,7 +178,7 @@ export default function BoardPage() {
           </div>
           <p className="mt-2 text-sm text-slate-500">
             الإجمالي:{" "}
-            {BOARD_STRUCTURE.totalExecutiveCost.toLocaleString("en-US")} ريال
+            {formatNumber(BOARD_STRUCTURE.totalExecutiveCost)} ريال
           </p>
 
           <h3 className="mt-6 text-sm font-medium text-slate-700">
@@ -199,7 +200,7 @@ export default function BoardPage() {
                     <tr key={i} className="border-b border-slate-100">
                       <td className="px-2 py-2">{s.service}</td>
                       <td className="px-2 py-2">
-                        {s.annualCost.toLocaleString("en-US")} ريال
+                        {formatNumber(s.annualCost)} ريال
                       </td>
                     </tr>
                   )
@@ -209,14 +210,14 @@ export default function BoardPage() {
           </div>
           <p className="mt-2 text-sm text-slate-500">
             الإجمالي:{" "}
-            {BOARD_STRUCTURE.totalExternalCost.toLocaleString("en-US")} ريال
+            {formatNumber(BOARD_STRUCTURE.totalExternalCost)} ريال
           </p>
 
           <div className="mt-6">
             <div className="flex justify-between text-sm">
               <span className="text-slate-600">
-                {BOARD_STRUCTURE.totalAdminCost.toLocaleString("en-US")} من أصل{" "}
-                {BOARD_STRUCTURE.maxAdminBudget.toLocaleString("en-US")} ريال (
+                {formatNumber(BOARD_STRUCTURE.totalAdminCost)} من أصل{" "}
+                {formatNumber(BOARD_STRUCTURE.maxAdminBudget)} ريال (
                 {Math.round(progressPercent)}%)
               </span>
             </div>
@@ -276,7 +277,7 @@ export default function BoardPage() {
                   <tr key={i} className="border-b border-red-100">
                     <td className="px-2 py-2 text-red-900">{item.description}</td>
                     <td className="px-2 py-2 font-medium text-red-900">
-                      {item.amount.toLocaleString("en-US")} ريال
+                      {formatNumber(item.amount)} ريال
                     </td>
                     <td className="px-2 py-2 text-red-700">{item.note}</td>
                   </tr>
@@ -284,7 +285,7 @@ export default function BoardPage() {
                 <tr className="border-t-2 border-red-300 font-bold text-red-900">
                   <td className="px-2 py-2">الإجمالي</td>
                   <td className="px-2 py-2">
-                    {foundingDebts.totalDebt.toLocaleString("en-US")} ريال
+                    {formatNumber(foundingDebts.totalDebt)} ريال
                   </td>
                   <td className="px-2 py-2">—</td>
                 </tr>
@@ -299,9 +300,9 @@ export default function BoardPage() {
             <div className="flex justify-between text-sm text-red-800">
               <span>
                 المتبقي للسداد:{" "}
-                {foundingDebts.totalDebt.toLocaleString("en-US")} ريال
+                {formatNumber(foundingDebts.totalDebt)} ريال
               </span>
-              <span>الإجمالي: {foundingDebts.totalDebt.toLocaleString("en-US")} ريال</span>
+              <span>الإجمالي: {formatNumber(foundingDebts.totalDebt)} ريال</span>
             </div>
             <div className="mt-2 h-3 overflow-hidden rounded-full bg-red-200">
               <div
@@ -377,9 +378,7 @@ export default function BoardPage() {
                           <td className="px-2 py-2">{p.name}</td>
                           <td className="px-2 py-2">{p.sharePercent}%</td>
                           <td className="px-2 py-2 font-medium">
-                            {quarterlyForPartner(p.shares).toLocaleString(
-                              "en-US"
-                            )}{" "}
+                            {formatNumber(quarterlyForPartner(p.shares))}{" "}
                             ريال
                           </td>
                         </tr>

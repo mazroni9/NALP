@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
-import { formatSAR } from "@/lib/formatNumber";
+import { formatNumber, formatSAR, parseNumber } from "@/lib/formatNumber";
 import {
   ZONE_OPERATIONAL,
   ZONE_D,
@@ -20,14 +20,6 @@ export default function InvestorsPage() {
     setInvestmentAmount(REQUIRED_CAPITAL[selectedZone]);
   }, [selectedZone]);
   const [activeTab, setActiveTab] = useState<"company" | "investor">("company");
-
-  const formatWithCommas = (value: number) => {
-    return new Intl.NumberFormat("en-US").format(value);
-  };
-
-  const parseNumber = (value: string) => {
-    return Number(value.replace(/,/g, "")) || 0;
-  };
 
   const zoneData = ZONE_OPERATIONAL;
   const currentZone = zoneData[selectedZone];
@@ -130,7 +122,7 @@ export default function InvestorsPage() {
               </label>
               <input
                 type="text"
-                value={formatWithCommas(investmentAmount)}
+                value={formatNumber(investmentAmount)}
                 onChange={(e) => {
                   const numericValue = parseNumber(e.target.value);
                   if (numericValue >= 0) {

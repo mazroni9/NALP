@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/Card";
+import { formatNumber, formatSAR } from "@/lib/formatNumber";
 import Link from "next/link";
 import { ZONE_CONFIGS, ZONE_DIMENSIONS } from "@/lib/nalpLandSketch";
 import { ZoneSketch } from "@/components/asset-zones/ZoneSketch";
@@ -86,7 +87,7 @@ export default function ZoneCPage() {
                   <tr key={b.id}>
                     <td className="border border-slate-200 px-3 py-2">مبنى {b.id}</td>
                     <td className="border border-slate-200 px-3 py-2">{b.widthM} × {b.depthM} م</td>
-                    <td className="border border-slate-200 px-3 py-2 font-medium">{b.areaM2.toLocaleString("ar-SA")}</td>
+                    <td className="border border-slate-200 px-3 py-2 font-medium">{formatNumber(b.areaM2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -95,19 +96,19 @@ export default function ZoneCPage() {
           <div className="mt-4 space-y-2 rounded-lg bg-slate-50 border border-slate-200 p-4">
             <p className="flex justify-between">
               <span className="font-semibold text-slate-700">مجموع المباني:</span>
-              <span>{zoneCAreas.buildingsTotalM2.toLocaleString("ar-SA")} م²</span>
+              <span>{formatNumber(zoneCAreas.buildingsTotalM2)} م²</span>
             </p>
             <p className="flex justify-between">
               <span className="font-semibold text-slate-700">ساحات المواقف:</span>
-              <span>{zoneCAreas.parkingsTotalM2.toLocaleString("ar-SA")} م²</span>
+              <span>{formatNumber(zoneCAreas.parkingsTotalM2)} م²</span>
             </p>
             <p className="flex justify-between">
               <span className="font-semibold text-slate-700">طريق ٤م (خلف المباني):</span>
-              <span>{zoneCAreas.roadM2.toLocaleString("ar-SA")} م²</span>
+              <span>{formatNumber(zoneCAreas.roadM2)} م²</span>
             </p>
             <p className="flex justify-between pt-2 border-t border-slate-200">
               <span className="font-bold text-slate-800">إجمالي المنطقة ج:</span>
-              <span>{zoneCAreas.zoneTotalM2.toLocaleString("ar-SA")} م²</span>
+              <span>{formatNumber(zoneCAreas.zoneTotalM2)} م²</span>
             </p>
           </div>
         </Card>
@@ -118,17 +119,17 @@ export default function ZoneCPage() {
           </p>
           <div className="space-y-3 rounded-lg bg-slate-50 border border-slate-200 p-4">
             <p className="flex justify-between text-sm">
-              <span className="text-slate-700">تكلفة المباني ({zoneCAreas.buildingsTotalM2.toLocaleString("ar-SA")} م² × ١٬٠٠٠ ر.س):</span>
-              <span className="font-semibold">{(zoneCAreas.buildingsTotalM2 * 1000).toLocaleString("ar-SA")} ر.س</span>
+              <span className="text-slate-700">تكلفة المباني ({formatNumber(zoneCAreas.buildingsTotalM2)} م² × ١٬٠٠٠ ر.س):</span>
+              <span className="font-semibold">{formatSAR(zoneCAreas.buildingsTotalM2 * 1000)}</span>
             </p>
             <p className="flex justify-between text-sm">
-              <span className="text-slate-700">المواقف + الطريق ({zoneCAreas.parkingsTotalM2.toLocaleString("ar-SA")} + {zoneCAreas.roadM2.toLocaleString("ar-SA")} م² × ٢٠٠ ر.س):</span>
-              <span className="font-semibold">{((zoneCAreas.parkingsTotalM2 + zoneCAreas.roadM2) * 200).toLocaleString("ar-SA")} ر.س</span>
+              <span className="text-slate-700">المواقف + الطريق ({formatNumber(zoneCAreas.parkingsTotalM2)} + {formatNumber(zoneCAreas.roadM2)} م² × ٢٠٠ ر.س):</span>
+              <span className="font-semibold">{formatSAR((zoneCAreas.parkingsTotalM2 + zoneCAreas.roadM2) * 200)}</span>
             </p>
             <p className="flex justify-between pt-3 border-t border-slate-200">
               <span className="font-bold text-slate-800">إجمالي التكلفة التقديرية:</span>
               <span className="font-bold text-indigo-700">
-                {(zoneCAreas.buildingsTotalM2 * 1000 + (zoneCAreas.parkingsTotalM2 + zoneCAreas.roadM2) * 200).toLocaleString("ar-SA")} ر.س
+                {formatSAR(zoneCAreas.buildingsTotalM2 * 1000 + (zoneCAreas.parkingsTotalM2 + zoneCAreas.roadM2) * 200)}
               </span>
             </p>
           </div>

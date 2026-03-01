@@ -1,3 +1,4 @@
+import { formatNumber } from "@/lib/formatNumber";
 import type { ZoneDimensions } from "@/lib/nalpLandSketch";
 
 const ZONE_COLORS: Record<string, string> = {
@@ -589,7 +590,7 @@ export function ZoneSketch({
                 dominantBaseline="middle"
                 className="fill-slate-600 text-xl font-semibold"
               >
-                ≈{dims.areaM2.toLocaleString("ar-SA")} م²
+                ≈{formatNumber(dims.areaM2)} م²
               </text>
             </>
           )}

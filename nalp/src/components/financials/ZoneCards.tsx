@@ -1,11 +1,12 @@
 "use client";
 
 import { Card } from "@/components/ui/Card";
+import { formatNumber, formatSAR } from "@/lib/formatNumber";
 import { ZONE_A, ZONE_B, ZONE_C, ZONE_D } from "@/lib/projectData";
 
 function formatValue(value: number | string, suffix?: string): string {
   if (typeof value === "number") {
-    return `${value.toLocaleString("en-US")} SAR${suffix ?? ""}`;
+    return suffix ? `${formatNumber(value)} SAR${suffix}` : formatSAR(value);
   }
   return value;
 }

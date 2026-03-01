@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { formatNumber } from "@/lib/formatNumber";
 import { PROJECT_TOTALS } from "@/lib/projectData";
 
 const REF_CAP_RATE = PROJECT_TOTALS.capRate;
@@ -42,12 +43,12 @@ export function ValuationSimulator() {
         <div className="rounded-lg bg-slate-50 p-4">
           <p className="text-sm text-slate-500">التقييم الناتج</p>
           <p className="mt-1 text-2xl font-bold text-indigo-600">
-            {valuation.toLocaleString("en-US")} SAR
+            {formatNumber(valuation)} SAR
           </p>
         </div>
 
         <p className="text-sm text-slate-500">
-          نطاق مرجعي: عند {REF_CAP_RATE}% ≈ {REF_VALUATION}M SAR
+          نطاق مرجعي: عند {REF_CAP_RATE}% ≈ {formatNumber(REF_VALUATION)}M SAR
         </p>
       </div>
     </Card>

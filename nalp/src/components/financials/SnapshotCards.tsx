@@ -1,20 +1,21 @@
 "use client";
 
 import { Card } from "@/components/ui/Card";
+import { formatNumber } from "@/lib/formatNumber";
 import { PROJECT_TOTALS } from "@/lib/projectData";
 
 export function SnapshotCards() {
   const cards = [
     {
       label: "إجمالي دخل ملاك الأرض (8 سنوات)",
-      value: PROJECT_TOTALS.ownerTotalIncome8Years.toLocaleString("en-US"),
+      value: formatNumber(PROJECT_TOTALS.ownerTotalIncome8Years),
       suffix: "SAR",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",
     },
     {
       label: "متوسط الدخل السنوي",
-      value: PROJECT_TOTALS.avgAnnualIncome.toLocaleString("en-US"),
+      value: formatNumber(PROJECT_TOTALS.avgAnnualIncome),
       suffix: "SAR",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",

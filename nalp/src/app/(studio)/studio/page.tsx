@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { formatNumber } from "@/lib/formatNumber";
 import { LAND } from "@/lib/projectData";
 import {
   nalpLandSketch,
@@ -272,23 +273,23 @@ export default function StudioPage() {
             )}
             <div>
               <p className="text-sm text-slate-600">
-                المساحة الإجمالية للأرض: {area.toLocaleString("ar-SA")} م²
+                المساحة الإجمالية للأرض: {formatNumber(area)} م²
               </p>
               {streetEnabled && (
                 <>
                   <p className="text-sm text-slate-600">
-                    مساحة الشارع الداخلي: {Math.round(streetArea).toLocaleString("ar-SA")} م²
+                    مساحة الشارع الداخلي: {formatNumber(Math.round(streetArea))} م²
                   </p>
                   <p className="text-sm font-medium text-slate-700">
-                    المساحة الصافية بعد خصم الشارع: {Math.round(netArea).toLocaleString("ar-SA")} م²
+                    المساحة الصافية بعد خصم الشارع: {formatNumber(Math.round(netArea))} م²
                   </p>
                 </>
               )}
               <p className="text-sm text-slate-600">
-                المحيط: {perimeter.toLocaleString("ar-SA")} م
+                المحيط: {formatNumber(perimeter)} م
               </p>
               <p className="mt-1 text-xs text-slate-500">
-                المساحة المرجعية: إجمالي مساحة الأرض {LAND.totalArea.toLocaleString("en-US")} م² — الصافي القابل للتطوير: {LAND.netDevelopableArea.toLocaleString("en-US")} م² (520 م شرق–غرب × 65 م شمال–جنوب).
+                المساحة المرجعية: إجمالي مساحة الأرض {formatNumber(LAND.totalArea)} م² — الصافي القابل للتطوير: {formatNumber(LAND.netDevelopableArea)} م² (520 م شرق–غرب × 65 م شمال–جنوب).
               </p>
               {referenceSketchActive && (
                 <p className="mt-2 text-xs text-slate-600">
@@ -297,7 +298,7 @@ export default function StudioPage() {
               )}
               {area > 0 && areaWarning && (
                 <p className="mt-1 text-sm font-medium text-amber-600">
-                  ⚠ بعيد عن المساحة المرجعية (إجمالي {LAND.totalArea.toLocaleString("en-US")} م² — صافي {LAND.netDevelopableArea.toLocaleString("en-US")} م²)
+                  ⚠ بعيد عن المساحة المرجعية (إجمالي {formatNumber(LAND.totalArea)} م² — صافي {formatNumber(LAND.netDevelopableArea)} م²)
                 </p>
               )}
             </div>
@@ -308,7 +309,7 @@ export default function StudioPage() {
           <h2 className="font-semibold">تقسيم المناطق (أربع مناطق)</h2>
           {!sumValid && (
             <p className="mt-1 text-sm font-medium text-amber-600">
-              ⚠ مجموع النسب يجب أن يساوي 100% (حاليًا: {Math.round(totalZonePercent)}%)
+              ⚠ مجموع النسب يجب أن يساوي 100% (حاليًا: {formatNumber(Math.round(totalZonePercent))}%)
             </p>
           )}
           <div className="mt-4 space-y-4">
@@ -333,7 +334,7 @@ export default function StudioPage() {
                     className="mt-1 w-full"
                   />
                   <span className="block text-sm">
-                    {Math.round(norm)}% — مساحة المنطقة {zoneLabel}: {area.toLocaleString("ar-SA")} م²
+                    {formatNumber(Math.round(norm))}% — مساحة المنطقة {zoneLabel}: {formatNumber(area)} م²
                   </span>
                 </div>
               );
@@ -351,12 +352,12 @@ export default function StudioPage() {
                 ].map(({ label, area }) => (
                   <tr key={label}>
                     <td>المنطقة {label}</td>
-                    <td>{area.toLocaleString("ar-SA")}</td>
+                    <td>{formatNumber(area)}</td>
                   </tr>
                 ))}
                 <tr className="border-t border-slate-300 font-medium">
                   <td>المجموع</td>
-                  <td>{(zoneAArea + zoneBArea + zoneCArea + zoneDArea).toLocaleString("ar-SA")}</td>
+                  <td>{formatNumber(zoneAArea + zoneBArea + zoneCArea + zoneDArea)}</td>
                 </tr>
               </tbody>
             </table>
