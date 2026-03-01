@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/ui/Card";
 import { formatNumber, formatSAR, parseNumber } from "@/lib/formatNumber";
 import {
@@ -31,6 +31,13 @@ import {
 const ZONE_A_MODE_KEY = "NALP_ZONE_A_MODE";
 const isDev = process.env.NODE_ENV === "development";
 
+function getMonthRow<T extends { month?: string }>(
+  months: T[],
+  monthKey: string
+): T | null {
+  return months.find((m) => m?.month === monthKey) ?? null;
+}
+
 export default function InvestorsPage() {
   const [selectedZone, setSelectedZone] = useState<ZoneId>("A");
   const [investmentAmount, setInvestmentAmount] = useState<number>(
@@ -46,7 +53,9 @@ export default function InvestorsPage() {
   const [storageBytes, setStorageBytes] = useState<number>(0);
   const [copiedFeedback, setCopiedFeedback] = useState(false);
   const [lastError, setLastError] = useState<null | { message: string; stack?: string }>(null);
-  const [ledgerSummaryState, setLedgerSummaryState] = useState<ReturnType<typeof computeZoneALedgerSummary> | null>(null);
+  const [mainTab, setMainTab] = useState<"calc" | "ledger" | "budget">("calc");
+  const [activeTab, setActiveTab] = useState<"company" | "investor">("company");
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
 
   useEffect(() => {
     const stored = safeReadStorage(ZONE_A_MODE_KEY);
@@ -88,26 +97,28 @@ export default function InvestorsPage() {
     Array.isArray(ledgerState.months) &&
     ledgerState.months.length > 0;
 
-  useEffect(() => {
-    if (!isLedgerValid || !ledgerState) {
-      setLedgerSummaryState(null);
-      setLastError(null);
-      return;
-    }
+  const { summary: ledgerSummary, computeError } = useMemo(() => {
+    if (!isLedgerValid || !ledgerState) return { summary: null, computeError: null };
     try {
-      const summary = computeZoneALedgerSummary(ledgerState);
-      setLedgerSummaryState(summary);
-      setLedgerError(null);
-      setLastError(null);
+      const s = computeZoneALedgerSummary(ledgerState);
+      return { summary: s, computeError: null };
     } catch (e) {
-      setLedgerError("حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.");
-      setLastError({
-        message: e instanceof Error ? e.message : String(e),
-        stack: e instanceof Error ? e.stack : undefined,
-      });
-      setLedgerSummaryState(null);
+      return { summary: null, computeError: e };
     }
   }, [isLedgerValid, ledgerState]);
+
+  useEffect(() => {
+    if (computeError) {
+      setLedgerError("حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.");
+      setLastError({
+        message: computeError instanceof Error ? computeError.message : String(computeError),
+        stack: computeError instanceof Error ? computeError.stack : undefined,
+      });
+    } else {
+      setLedgerError(null);
+      setLastError(null);
+    }
+  }, [computeError]);
 
   const saveLedger = useCallback((state: LedgerState | null) => {
     if (!state) return;
@@ -193,27 +204,38 @@ export default function InvestorsPage() {
   const showForecastContent =
     selectedZone !== "A" || (selectedZone === "A" && zoneAMode === "forecast");
 
-  const ledgerSummary = ledgerSummaryState;
   const showLedgerError = ledgerError !== null || lastError !== null;
+
+  const months = Array.isArray(ledgerState?.months) ? ledgerState.months : [];
+
+  const safeSelectedMonth = (() => {
+    const sm = selectedMonth;
+    if (sm && typeof sm === "string" && sm.trim()) {
+      const exists = months.some((m) => m?.month === sm);
+      if (exists) return sm;
+    }
+    if (months.length > 0 && months[0]?.month) return months[0].month;
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  })();
+
+  const monthRow = getMonthRow(months, safeSelectedMonth);
+
+  const monthSummary = ledgerSummary
+    ? (getMonthRow(ledgerSummary.perMonth, safeSelectedMonth) ??
+       ledgerSummary.perMonth[0] ??
+       null)
+    : null;
 
   const hasLedgerData =
     isLedgerValid &&
     ledgerState &&
-    ledgerState.months.some((m) => Array.isArray(m.batches) && m.batches.length > 0);
-
-  const monthRow =
-    ledgerSummary?.perMonth.find((r) => r.month === selectedMonth) ||
-    ledgerSummary?.perMonth[0] ||
-    null;
+    months.some((m) => Array.isArray(m.batches) && m.batches.length > 0);
 
   const fundingRatio =
     ledgerState && selectedZone === "A" && ledgerState.requiredCapital > 0
       ? Math.min(ledgerState.investmentAmount / ledgerState.requiredCapital, 1)
       : 0;
-
-  const [mainTab, setMainTab] = useState<"calc" | "ledger" | "budget">("calc");
-  const [activeTab, setActiveTab] = useState<"company" | "investor">("company");
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
 
   useEffect(() => {
     if (selectedZone === "A" && ledgerState && ledgerState.months.length > 0) {
@@ -221,18 +243,15 @@ export default function InvestorsPage() {
     }
   }, [selectedZone, ledgerState]);
 
-  const currentMonthLedger =
-    ledgerState?.months.find((m) => m.month === selectedMonth) ?? null;
-
   const addBatch = () => {
-    if (!ledgerState || !currentMonthLedger) return;
+    if (!ledgerState || !monthRow) return;
     const newBatch: Batch = {
       id: generateBatchId(),
       count: 0,
       commission: 0,
     };
     const nextMonths = ledgerState.months.map((m) =>
-      m.month === selectedMonth
+      m.month === safeSelectedMonth
         ? { ...m, batches: [...m.batches, newBatch] }
         : m
     );
@@ -247,9 +266,9 @@ export default function InvestorsPage() {
     field: "count" | "commission" | "note",
     value: number | string
   ) => {
-    if (!ledgerState || !currentMonthLedger) return;
+    if (!ledgerState || !monthRow) return;
     const nextMonths = ledgerState.months.map((m) => {
-      if (m.month !== selectedMonth) return m;
+      if (m.month !== safeSelectedMonth) return m;
       return {
         ...m,
         batches: m.batches.map((b) =>
@@ -261,17 +280,14 @@ export default function InvestorsPage() {
   };
 
   const deleteBatch = (batchId: string) => {
-    if (!ledgerState || !currentMonthLedger) return;
+    if (!ledgerState || !monthRow) return;
     const nextMonths = ledgerState.months.map((m) =>
-      m.month === selectedMonth
+      m.month === safeSelectedMonth
         ? { ...m, batches: m.batches.filter((b) => b.id !== batchId) }
         : m
     );
     saveLedger({ ...ledgerState, months: nextMonths });
   };
-
-  const monthSummary =
-    ledgerSummary?.perMonth.find((p) => p.month === selectedMonth) ?? null;
 
   return (
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
@@ -438,7 +454,9 @@ export default function InvestorsPage() {
                     ? (ledgerSummary.breakEvenMonth ?? "—")
                     : selectedZone === "A" && zoneAMode === "actual" && !hasLedgerData
                       ? "أدخل بيانات شهر واحد على الأقل"
-                      : displayBreakEven}
+                      : selectedZone === "A" && zoneAMode === "actual" && hasLedgerData && !ledgerSummary
+                        ? "—"
+                        : displayBreakEven}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -448,7 +466,7 @@ export default function InvestorsPage() {
                 <span className="font-bold text-indigo-600">
                   {selectedZone === "A" && zoneAMode === "actual" && ledgerSummary
                     ? formatSAR(ledgerSummary.yearly.investorProfit)
-                    : selectedZone === "A" && zoneAMode === "actual" && !hasLedgerData
+                    : selectedZone === "A" && zoneAMode === "actual" && (!hasLedgerData || !ledgerSummary)
                       ? "—"
                       : formatSAR(projections[9]?.cumulativeInvestorProfit ?? 0)}
                 </span>
@@ -565,7 +583,7 @@ export default function InvestorsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentMonthLedger?.batches.map((b) => (
+                    {monthRow?.batches.map((b) => (
                       <tr key={b.id} className="border-b border-slate-100">
                         <td className="px-3 py-2">
                           <input
@@ -623,7 +641,7 @@ export default function InvestorsPage() {
                 إضافة دفعة
               </button>
 
-              {monthSummary && (
+              {monthSummary ? (
                 <div className="mt-6 pt-4 border-t border-slate-200 space-y-1 text-sm">
                   <p>إجمالي السيارات: {formatNumber(monthSummary.totalCars)}</p>
                   <p>Gross: {formatSAR(monthSummary.gross)}</p>
@@ -631,13 +649,39 @@ export default function InvestorsPage() {
                   <p>OPEX (25%): {formatSAR(monthSummary.opex)}</p>
                   <p>ProfitAfterOpex: {formatSAR(monthSummary.profitAfterOpex)}</p>
                 </div>
-              )}
+              ) : hasLedgerData && !ledgerSummary ? (
+                <div className="mt-6 pt-4 border-t border-amber-200 rounded-lg bg-amber-50 p-4">
+                  <p className="text-amber-800 font-medium mb-2">حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.</p>
+                  <button
+                    type="button"
+                    onClick={handleResetLedgerFromError}
+                    className="px-3 py-1.5 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700"
+                  >
+                    إعادة تهيئة الدفتر
+                  </button>
+                </div>
+              ) : null}
             </Card>
           )}
 
           {mainTab === "budget" && selectedZone === "A" && zoneAMode === "actual" && !hasLedgerData && (
             <Card className="p-8 text-center text-slate-500">
               أدخل بيانات شهر واحد على الأقل في دفتر التشغيل لعرض الميزانية السنوية.
+            </Card>
+          )}
+
+          {mainTab === "budget" && selectedZone === "A" && zoneAMode === "actual" && hasLedgerData && !ledgerSummary && (
+            <Card className="p-6 border-amber-200 bg-amber-50">
+              <p className="text-amber-800 font-medium mb-3">
+                حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.
+              </p>
+              <button
+                type="button"
+                onClick={handleResetLedgerFromError}
+                className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700"
+              >
+                إعادة تهيئة الدفتر
+              </button>
             </Card>
           )}
 
@@ -733,7 +777,20 @@ export default function InvestorsPage() {
         </div>
       </div>
 
-      {selectedZone === "A" && zoneAMode === "actual" && ledgerSummary && monthRow ? (
+      {selectedZone === "A" && zoneAMode === "actual" && hasLedgerData && !ledgerSummary ? (
+        <Card className="p-6 border-amber-200 bg-amber-50">
+          <p className="text-amber-800 font-medium mb-3">
+            حدثت مشكلة في بيانات دفتر التشغيل المحفوظة.
+          </p>
+          <button
+            type="button"
+            onClick={handleResetLedgerFromError}
+            className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700"
+          >
+            إعادة تهيئة الدفتر
+          </button>
+        </Card>
+      ) : selectedZone === "A" && zoneAMode === "actual" && ledgerSummary && monthSummary ? (
         <div className="grid md:grid-cols-2 gap-6">
           <Card className="p-6">
             <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -755,39 +812,39 @@ export default function InvestorsPage() {
             <div className="space-y-3 text-sm divide-y divide-slate-100">
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">إجمالي السيارات</span>
-                <span className="font-medium">{formatNumber(monthRow.totalCars)}</span>
+                <span className="font-medium">{formatNumber(monthSummary.totalCars)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">Gross</span>
-                <span className="font-medium">{formatSAR(monthRow.gross)}</span>
+                <span className="font-medium">{formatSAR(monthSummary.gross)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">LandCut100</span>
-                <span className="font-medium">{formatSAR(monthRow.landCut100)}</span>
+                <span className="font-medium">{formatSAR(monthSummary.landCut100)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">OPEX (25%)</span>
-                <span className="font-medium">{formatSAR(monthRow.opex)}</span>
+                <span className="font-medium">{formatSAR(monthSummary.opex)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">ProfitAfterOpex</span>
-                <span className="font-medium text-emerald-600">{formatSAR(monthRow.profitAfterOpex)}</span>
+                <span className="font-medium text-emerald-600">{formatSAR(monthSummary.profitAfterOpex)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">حصة ملاك الأرض (LandOwnerShare50)</span>
-                <span className="font-medium">{formatSAR(monthRow.landOwnerShare50)}</span>
+                <span className="font-medium">{formatSAR(monthSummary.landOwnerShare50)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">ربح المشغل (OperatorProfit)</span>
-                <span className="font-medium">{formatSAR(monthRow.operatorProfit)}</span>
+                <span className="font-medium">{formatSAR(monthSummary.operatorProfit)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">ربح المستثمر (InvestorProfit)</span>
-                <span className="font-medium text-indigo-600">{formatSAR(monthRow.investorProfit)}</span>
+                <span className="font-medium text-indigo-600">{formatSAR(monthSummary.investorProfit)}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">صافي المشغل بعد المستثمر</span>
-                <span className="font-medium">{formatSAR(monthRow.operatorNetAfterInvestor)}</span>
+                <span className="font-medium">{formatSAR(monthSummary.operatorNetAfterInvestor)}</span>
               </div>
             </div>
           </Card>
@@ -796,23 +853,23 @@ export default function InvestorsPage() {
             <div className="space-y-3 text-sm divide-y divide-slate-100">
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">الحالة</span>
-                <span className={`font-medium ${monthRow.isPostBreakeven ? "text-emerald-600" : "text-amber-600"}`}>
-                  {monthRow.isPostBreakeven ? "بعد التعادل" : "قبل التعادل"}
+                <span className={`font-medium ${monthSummary.isPostBreakeven ? "text-emerald-600" : "text-amber-600"}`}>
+                  {monthSummary.isPostBreakeven ? "بعد التعادل" : "قبل التعادل"}
                 </span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">شهر التعادل</span>
-                <span className="font-medium">{ledgerSummary.breakEvenMonth ?? "لم يتحقق بعد"}</span>
+                <span className="font-medium">{ledgerSummary?.breakEvenMonth ?? "لم يتحقق بعد"}</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">LandCut100</span>
-                <span className="font-medium">{monthRow.isPostBreakeven ? "متوقف" : "مفعل"}</span>
+                <span className="font-medium">{monthSummary.isPostBreakeven ? "متوقف" : "مفعل"}</span>
               </div>
               <div className="py-2">
                 <p className="text-slate-600 mb-1">توزيع الربح الحالي:</p>
                 <ul className="space-y-1 text-slate-700">
-                  <li>• ملاك الأرض: {monthRow.isPostBreakeven ? "50%" : "0%"}</li>
-                  <li>• المشغل: {monthRow.isPostBreakeven ? "50%" : "100%"}</li>
+                  <li>• ملاك الأرض: {monthSummary.isPostBreakeven ? "50%" : "0%"}</li>
+                  <li>• المشغل: {monthSummary.isPostBreakeven ? "50%" : "100%"}</li>
                   <li>• المستثمر: 50% من حصة المشغل × نسبة التمويل</li>
                 </ul>
               </div>
