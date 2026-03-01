@@ -22,6 +22,7 @@ import {
 } from "@/lib/calculators/ledgerEngine";
 
 const ZONE_A_MODE_KEY = "NALP_ZONE_A_MODE";
+const isDev = process.env.NODE_ENV === "development";
 
 export default function InvestorsPage() {
   const [selectedZone, setSelectedZone] = useState<ZoneId>("A");
@@ -35,6 +36,8 @@ export default function InvestorsPage() {
   const [ledgerState, setLedgerState] = useState<LedgerState | null>(null);
   const [ledgerLoaded, setLedgerLoaded] = useState(false);
   const [ledgerError, setLedgerError] = useState<string | null>(null);
+  const [storageBytes, setStorageBytes] = useState<number>(0);
+  const [copiedFeedback, setCopiedFeedback] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -72,6 +75,16 @@ export default function InvestorsPage() {
     }
   }, [selectedZone]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem(LEDGER_STORAGE_KEY);
+      setStorageBytes(raw ? new Blob([raw]).size : 0);
+    } catch {
+      setStorageBytes(0);
+    }
+  }, [ledgerState]);
+
   const saveLedger = useCallback((state: LedgerState | null) => {
     if (!state) return;
     const toSave: LedgerState = {
@@ -85,6 +98,23 @@ export default function InvestorsPage() {
       } catch {}
     }
   }, []);
+
+  const handleCopyLedgerJson = () => {
+    if (!ledgerState || typeof navigator === "undefined" || !navigator.clipboard) return;
+    try {
+      navigator.clipboard.writeText(JSON.stringify(ledgerState, null, 2));
+      setCopiedFeedback(true);
+      setTimeout(() => setCopiedFeedback(false), 2000);
+    } catch {}
+  };
+
+  const handleClearCorruptData = () => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.removeItem(LEDGER_STORAGE_KEY);
+      window.location.reload();
+    } catch {}
+  };
 
   const handleResetLedgerFromError = () => {
     if (typeof window !== "undefined") {
@@ -829,6 +859,47 @@ export default function InvestorsPage() {
                 <li>• المنطقة د تتبع نظام توزيع فريد يحمي المستثمر حتى استرداد رأس المال.</li>
               </ul>
             </div>
+          </div>
+        </Card>
+      )}
+
+      {isDev && selectedZone === "A" && ledgerState && (
+        <Card className="p-4 bg-slate-50">
+          <h4 className="text-sm font-bold text-slate-600 mb-3">Diagnostics (Dev Only)</h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono mb-4">
+            <div><span className="text-slate-500">schemaVersion:</span> <span>{ledgerState.schemaVersion ?? "missing"}</span></div>
+            <div><span className="text-slate-500">ledgerValid:</span> <span>{(Array.isArray(ledgerState.months) && ledgerState.months.length > 0) ? "yes" : "no"}</span></div>
+            <div><span className="text-slate-500">monthsCount:</span> <span>{ledgerState.months?.length ?? 0}</span></div>
+            <div><span className="text-slate-500">totalBatches:</span> <span>{Array.isArray(ledgerState.months) ? ledgerState.months.reduce((s, m) => s + (Array.isArray(m.batches) ? m.batches.length : 0), 0) : 0}</span></div>
+            <div><span className="text-slate-500">hasData:</span> <span>{Array.isArray(ledgerState.months) && ledgerState.months.some((m) => Array.isArray(m.batches) && m.batches.some((b) => (b?.count ?? 0) > 0)) ? "yes" : "no"}</span></div>
+            <div><span className="text-slate-500">selectedMonth:</span> <span>{selectedMonth || "—"}</span></div>
+            <div><span className="text-slate-500">breakEvenMonth:</span> <span>{ledgerSummary?.breakEvenMonth ?? "—"}</span></div>
+            <div><span className="text-slate-500">storageKey:</span> <span>{LEDGER_STORAGE_KEY}</span></div>
+            <div><span className="text-slate-500">storageBytes:</span> <span>{storageBytes}</span></div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handleCopyLedgerJson}
+              className="px-3 py-1.5 text-xs rounded bg-slate-200 hover:bg-slate-300"
+            >
+              Copy Ledger JSON
+            </button>
+            <button
+              type="button"
+              onClick={handleResetLedgerFromError}
+              className="px-3 py-1.5 text-xs rounded bg-slate-200 hover:bg-slate-300"
+            >
+              Reset Ledger
+            </button>
+            <button
+              type="button"
+              onClick={handleClearCorruptData}
+              className="px-3 py-1.5 text-xs rounded bg-slate-200 hover:bg-slate-300"
+            >
+              Clear Corrupt Data
+            </button>
+            {copiedFeedback && <span className="text-xs text-emerald-600 self-center">Copied</span>}
           </div>
         </Card>
       )}
