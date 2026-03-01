@@ -145,6 +145,16 @@ export default function InvestorsPage() {
     selectedZone === "A" &&
     ledgerState.months.some((m) => m.batches.length > 0);
 
+  const monthRow =
+    ledgerSummary?.perMonth.find((r) => r.month === selectedMonth) ||
+    ledgerSummary?.perMonth[0] ||
+    null;
+
+  const fundingRatio =
+    ledgerState && selectedZone === "A" && ledgerState.requiredCapital > 0
+      ? Math.min(ledgerState.investmentAmount / ledgerState.requiredCapital, 1)
+      : 0;
+
   const [mainTab, setMainTab] = useState<"calc" | "ledger" | "budget">("calc");
   const [activeTab, setActiveTab] = useState<"company" | "investor">("company");
   const [selectedMonth, setSelectedMonth] = useState<string>("");
@@ -652,41 +662,140 @@ export default function InvestorsPage() {
         </div>
       </div>
 
-      <Card className="p-6 bg-slate-50 border-none shadow-none">
-        <h3 className="text-lg font-bold mb-4 text-slate-800">
-          التفاصيل التشغيلية لمنطقة ({selectedZone})
-        </h3>
-        <div className="grid md:grid-cols-2 gap-8 text-sm">
-          <div className="space-y-3">
-            <h4 className="font-bold text-indigo-600">نموذج الإيرادات</h4>
-            <ul className="space-y-2 text-slate-600">
-              {selectedZone === "A" && (
-                <li>
-                  • يعتمد على عمولات المزاد (يبدأ من متوسط 1500 ريال لكل سيارة بعد مرحلة النمو الأولى).
-                </li>
+      {selectedZone === "A" && zoneAMode === "actual" && ledgerSummary && monthRow ? (
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card className="p-6">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <h3 className="text-lg font-bold text-slate-800">ملخص الشهر:</h3>
+              {ledgerState && (
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                >
+                  {ledgerState.months.map((m) => (
+                    <option key={m.month} value={m.month}>
+                      {m.month}
+                    </option>
+                  ))}
+                </select>
               )}
-              {selectedZone === "B" && (
-                <li>• تأجير مواقف سيارات يومي وشريحة من المواقف الطويلة الأمد.</li>
-              )}
-              {selectedZone === "C" && (
-                <li>• سكن موظفين (198 غرفة) بعقود تشغيلية مستقرة.</li>
-              )}
-              {selectedZone === "D" && (
-                <li>• مركز صيانة وخدمات سيارات متكامل بنظام تشغيل DASM-e.</li>
-              )}
-              <li>• نسبة الإشغال المستهدفة: 80% - 90% خلال السنوات الأولى.</li>
-            </ul>
-          </div>
-          <div className="space-y-3">
-            <h4 className="font-bold text-indigo-600">هيكل المصاريف</h4>
-            <ul className="space-y-2 text-slate-600">
-              <li>• تشمل المصاريف: الصيانة، الحراسة، الفواتير، وفريق الإدارة.</li>
-              <li>• المنطقة أ (المزاد) هي الأعلى تشغيلياً (30%) نظراً لمتطلبات التسويق والتنظيم.</li>
-              <li>• المنطقة د تتبع نظام توزيع فريد يحمي المستثمر حتى استرداد رأس المال.</li>
-            </ul>
-          </div>
+            </div>
+            <div className="space-y-3 text-sm divide-y divide-slate-100">
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">إجمالي السيارات</span>
+                <span className="font-medium">{formatNumber(monthRow.totalCars)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">Gross</span>
+                <span className="font-medium">{formatSAR(monthRow.gross)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">LandCut100</span>
+                <span className="font-medium">{formatSAR(monthRow.landCut100)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">OPEX (25%)</span>
+                <span className="font-medium">{formatSAR(monthRow.opex)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">ProfitAfterOpex</span>
+                <span className="font-medium text-emerald-600">{formatSAR(monthRow.profitAfterOpex)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">حصة ملاك الأرض (LandOwnerShare50)</span>
+                <span className="font-medium">{formatSAR(monthRow.landOwnerShare50)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">ربح المشغل (OperatorProfit)</span>
+                <span className="font-medium">{formatSAR(monthRow.operatorProfit)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">ربح المستثمر (InvestorProfit)</span>
+                <span className="font-medium text-indigo-600">{formatSAR(monthRow.investorProfit)}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">صافي المشغل بعد المستثمر</span>
+                <span className="font-medium">{formatSAR(monthRow.operatorNetAfterInvestor)}</span>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-6">
+            <h3 className="text-lg font-bold mb-4 text-slate-800">حالة الصفقة</h3>
+            <div className="space-y-3 text-sm divide-y divide-slate-100">
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">الحالة</span>
+                <span className={`font-medium ${monthRow.isPostBreakeven ? "text-emerald-600" : "text-amber-600"}`}>
+                  {monthRow.isPostBreakeven ? "بعد التعادل" : "قبل التعادل"}
+                </span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">شهر التعادل</span>
+                <span className="font-medium">{ledgerSummary.breakEvenMonth ?? "لم يتحقق بعد"}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">LandCut100</span>
+                <span className="font-medium">{monthRow.isPostBreakeven ? "متوقف" : "مفعل"}</span>
+              </div>
+              <div className="py-2">
+                <p className="text-slate-600 mb-1">توزيع الربح الحالي:</p>
+                <ul className="space-y-1 text-slate-700">
+                  <li>• ملاك الأرض: {monthRow.isPostBreakeven ? "50%" : "0%"}</li>
+                  <li>• المشغل: {monthRow.isPostBreakeven ? "50%" : "100%"}</li>
+                  <li>• المستثمر: 50% من حصة المشغل × نسبة التمويل</li>
+                </ul>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-600">نسبة التمويل</span>
+                <span className="font-medium">{formatNumber(fundingRatio * 100, { maximumFractionDigits: 1 })}%</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMainTab("ledger")}
+                className="mt-4 text-xs text-indigo-600 hover:text-indigo-800 underline"
+              >
+                عدّل بيانات التشغيل
+              </button>
+            </div>
+          </Card>
         </div>
-      </Card>
+      ) : (
+        <Card className="p-6 bg-slate-50 border-none shadow-none">
+          <h3 className="text-lg font-bold mb-4 text-slate-800">
+            التفاصيل التشغيلية لمنطقة ({selectedZone})
+          </h3>
+          <div className="grid md:grid-cols-2 gap-8 text-sm">
+            <div className="space-y-3">
+              <h4 className="font-bold text-indigo-600">نموذج الإيرادات</h4>
+              <ul className="space-y-2 text-slate-600">
+                {selectedZone === "A" && (
+                  <li>
+                    • يعتمد على عمولات المزاد (يبدأ من متوسط 1500 ريال لكل سيارة بعد مرحلة النمو الأولى).
+                  </li>
+                )}
+                {selectedZone === "B" && (
+                  <li>• تأجير مواقف سيارات يومي وشريحة من المواقف الطويلة الأمد.</li>
+                )}
+                {selectedZone === "C" && (
+                  <li>• سكن موظفين (198 غرفة) بعقود تشغيلية مستقرة.</li>
+                )}
+                {selectedZone === "D" && (
+                  <li>• مركز صيانة وخدمات سيارات متكامل بنظام تشغيل DASM-e.</li>
+                )}
+                <li>• نسبة الإشغال المستهدفة: 80% - 90% خلال السنوات الأولى.</li>
+              </ul>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-bold text-indigo-600">هيكل المصاريف</h4>
+              <ul className="space-y-2 text-slate-600">
+                <li>• تشمل المصاريف: الصيانة، الحراسة، الفواتير، وفريق الإدارة.</li>
+                <li>• المنطقة أ (المزاد) هي الأعلى تشغيلياً (30%) نظراً لمتطلبات التسويق والتنظيم.</li>
+                <li>• المنطقة د تتبع نظام توزيع فريد يحمي المستثمر حتى استرداد رأس المال.</li>
+              </ul>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
