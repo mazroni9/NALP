@@ -21,6 +21,14 @@ export default function InvestorsPage() {
   }, [selectedZone]);
   const [activeTab, setActiveTab] = useState<"company" | "investor">("company");
 
+  const formatWithCommas = (value: number) => {
+    return new Intl.NumberFormat("en-US").format(value);
+  };
+
+  const parseNumber = (value: string) => {
+    return Number(value.replace(/,/g, "")) || 0;
+  };
+
   const zoneData = ZONE_OPERATIONAL;
   const currentZone = zoneData[selectedZone];
 
@@ -121,11 +129,14 @@ export default function InvestorsPage() {
                 مبلغ الاستثمار (ريال)
               </label>
               <input
-                type="number"
-                value={investmentAmount}
-                onChange={(e) =>
-                  setInvestmentAmount(Math.max(0, Number(e.target.value)))
-                }
+                type="text"
+                value={formatWithCommas(investmentAmount)}
+                onChange={(e) => {
+                  const numericValue = parseNumber(e.target.value);
+                  if (numericValue >= 0) {
+                    setInvestmentAmount(numericValue);
+                  }
+                }}
                 className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-2 focus:ring-2 focus:ring-indigo-500"
               />
               <p className="mt-1 text-xs text-slate-400 italic">
