@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { formatNumber } from "@/lib/formatNumber";
-import { PROJECT_TOTALS } from "@/lib/projectData";
-
-const REF_CAP_RATE = PROJECT_TOTALS.capRate;
-const REF_VALUATION = Math.round(PROJECT_TOTALS.valuationAtExit / 1e6);
+import { computeProjectTotalsFromEngine } from "@/lib/calculators/projectTotalsEngine";
 
 export function ValuationSimulator() {
-  const [capRate, setCapRate] = useState(PROJECT_TOTALS.capRate);
-  const valuation = Math.round(PROJECT_TOTALS.avgAnnualIncome / (capRate / 100));
+  const totals = useMemo(() => computeProjectTotalsFromEngine({ years: 8 }), []);
+  const REF_CAP_RATE = totals.capRate;
+  const REF_VALUATION = Math.round(totals.valuationAtExit / 1e6);
+
+  const [capRate, setCapRate] = useState(totals.capRate);
+  const valuation = Math.round(totals.avgAnnualIncome / (capRate / 100));
 
   return (
     <Card>

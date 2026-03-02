@@ -199,7 +199,7 @@ export const ZONE_D = {
   investorSharePost: ZONE_D_INVESTOR_SHARES.investorSharePost,
 };
 
-// ─── PROJECT_TOTALS (ديناميكي بالكامل، بدون hard-coded) ───────────────────
+// ─── PROJECT_TOTALS (legacy brochure — استخدم computeProjectTotalsFromEngine في UI) ─
 const ownerTotalIncome8Years =
   ZONE_A_RAW.ownerIncome8Years +
   ZONE_B_RAW.ownerIncome8Years +

@@ -1,35 +1,38 @@
 "use client";
 
+import { useMemo } from "react";
 import { Card } from "@/components/ui/Card";
 import { formatNumber, formatSAR } from "@/lib/formatNumber";
-import { PROJECT_TOTALS } from "@/lib/projectData";
+import { computeProjectTotalsFromEngine } from "@/lib/calculators/projectTotalsEngine";
 
 export function SnapshotCards() {
+  const totals = useMemo(() => computeProjectTotalsFromEngine({ years: 8 }), []);
+
   const cards = [
     {
       label: "إجمالي دخل 8 سنوات (Owner Total 8Y)",
-      value: formatSAR(PROJECT_TOTALS.ownerTotalIncome8Years),
+      value: formatSAR(totals.ownerTotalIncome8Years),
       suffix: "",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",
     },
     {
       label: "متوسط الدخل السنوي",
-      value: formatSAR(PROJECT_TOTALS.avgAnnualIncome),
+      value: formatSAR(totals.avgAnnualIncome),
       suffix: "",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",
     },
     {
       label: "التقييم المتوقع (Valuation at Exit)",
-      value: formatSAR(PROJECT_TOTALS.valuationAtExit),
+      value: formatSAR(totals.valuationAtExit),
       suffix: "",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",
     },
     {
       label: "عدد المناطق",
-      value: formatNumber(PROJECT_TOTALS.zonesCount, { maximumFractionDigits: 0 }),
+      value: formatNumber(totals.zonesCount, { maximumFractionDigits: 0 }),
       suffix: "Zones",
       note: "تقديري وفق افتراضات التشغيل",
       tooltip: "هذه أرقام تقديرية قابلة للتحديث",

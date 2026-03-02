@@ -3,13 +3,8 @@
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatNumber, formatSAR } from "@/lib/formatNumber";
-import {
-  ZONE_A,
-  ZONE_B,
-  ZONE_C,
-  ZONE_D,
-  PROJECT_TOTALS,
-} from "@/lib/projectData";
+import { ZONE_A, ZONE_B, ZONE_C, ZONE_D } from "@/lib/projectData";
+import { computeProjectTotalsFromEngine } from "@/lib/calculators/projectTotalsEngine";
 import { useState } from "react";
 
 export interface Scenario {
@@ -130,7 +125,9 @@ export default function ScenariosPage() {
   const [zoneB, setZoneB] = useState(INIT_ZONE_B);
   const [zoneC, setZoneC] = useState(INIT_ZONE_C);
   const [zoneD, setZoneD] = useState(INIT_ZONE_D);
-  const [capRate, setCapRate] = useState(PROJECT_TOTALS.capRate);
+  const [capRate, setCapRate] = useState(
+    () => computeProjectTotalsFromEngine({ years: 8 }).capRate
+  );
   const [calcYears, setCalcYears] = useState(8);
   const [scenarioName, setScenarioName] = useState("");
 

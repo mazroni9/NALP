@@ -1,11 +1,9 @@
 import { Card } from "@/components/ui/Card";
 import { formatSAR, formatNumber } from "@/lib/formatNumber";
-import {
-  PROJECT_TOTALS,
-  REQUIRED_CAPITAL,
-  type ZoneId,
-} from "@/lib/financialCanon";
+import { REQUIRED_CAPITAL, type ZoneId } from "@/lib/financialCanon";
+import { computeProjectTotalsFromEngine } from "@/lib/calculators/projectTotalsEngine";
 
+const TOTALS = computeProjectTotalsFromEngine({ years: 8 });
 const ZONE_IDS: ZoneId[] = ["A", "B", "C", "D"];
 
 const ZONE_HOW_EARN: Record<ZoneId, string> = {
@@ -66,25 +64,25 @@ export default function PortalDashboardPage() {
           <Card className="p-4 transition-all hover:shadow-md">
             <p className="text-sm text-slate-500">إجمالي دخل الملاك (8 سنوات)</p>
             <p className="mt-1 text-xl font-bold text-slate-900">
-              {formatSAR(PROJECT_TOTALS.ownerTotalIncome8Years)}
+              {formatSAR(TOTALS.ownerTotalIncome8Years)}
             </p>
           </Card>
           <Card className="p-4 transition-all hover:shadow-md">
             <p className="text-sm text-slate-500">متوسط دخل سنوي</p>
             <p className="mt-1 text-xl font-bold text-slate-900">
-              {formatSAR(PROJECT_TOTALS.avgAnnualIncome)}
+              {formatSAR(TOTALS.avgAnnualIncome)}
             </p>
           </Card>
           <Card className="p-4 transition-all hover:shadow-md">
             <p className="text-sm text-slate-500">التقييم المتوقع (Cap Rate 9%)</p>
             <p className="mt-1 text-xl font-bold text-slate-900">
-              {formatSAR(PROJECT_TOTALS.valuationAtExit)}
+              {formatSAR(TOTALS.valuationAtExit)}
             </p>
           </Card>
           <Card className="p-4 transition-all hover:shadow-md">
             <p className="text-sm text-slate-500">عدد محركات الدخل</p>
             <p className="mt-1 text-xl font-bold text-slate-900">
-              {formatNumber(PROJECT_TOTALS.zonesCount, {
+              {formatNumber(TOTALS.zonesCount, {
                 maximumFractionDigits: 0,
               })}
             </p>

@@ -24,7 +24,7 @@ const CHART_DATA = [
 
 export function IncomeChart() {
   return (
-    <div className="h-80 min-h-[280px] w-full">
+    <div className="h-80 min-h-[280px] min-w-0 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={CHART_DATA}
