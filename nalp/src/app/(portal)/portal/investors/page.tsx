@@ -31,6 +31,12 @@ import {
 const ZONE_A_MODE_KEY = "NALP_ZONE_A_MODE";
 const isDev = process.env.NODE_ENV === "development";
 
+function breakevenLabel(s: "pre" | "breakeven" | "post"): string {
+  if (s === "post") return "بعد التعادل";
+  if (s === "breakeven") return "تعادل";
+  return "قبل التعادل";
+}
+
 function getMonthRow<T extends { month?: string }>(
   months: T[],
   monthKey: string
@@ -524,9 +530,9 @@ export default function InvestorsPage() {
                           <td className="px-4 py-3 text-sm font-medium text-slate-900">سنة {row.year}</td>
                           {activeTab === "company" ? (
                             <>
-                              <td className="px-4 py-3 text-sm text-slate-600">{formatSAR(row.companyRevenue)}</td>
-                              <td className="px-4 py-3 text-sm text-slate-600">{formatSAR(row.companyOpex)}</td>
-                              <td className="px-4 py-3 text-sm font-bold text-emerald-600">{formatSAR(row.companyNetProfit)}</td>
+                              <td className="px-4 py-3 text-sm text-slate-600">{formatSAR(row.grossRevenue)}</td>
+                              <td className="px-4 py-3 text-sm text-slate-600">{formatSAR(row.opex)}</td>
+                              <td className="px-4 py-3 text-sm font-bold text-emerald-600">{formatSAR(row.profitAfterOpex)}</td>
                             </>
                           ) : (
                             <>
@@ -756,6 +762,7 @@ export default function InvestorsPage() {
                       <th className="px-3 py-2">ProfitAfterOpex</th>
                       <th className="px-3 py-2">ربح المستثمر</th>
                       <th className="px-3 py-2">التراكمي</th>
+                      <th className="px-3 py-2">الحالة</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -767,6 +774,19 @@ export default function InvestorsPage() {
                         <td className="px-3 py-2">{formatSAR(p.profitAfterOpex)}</td>
                         <td className="px-3 py-2">{formatSAR(p.investorProfit)}</td>
                         <td className="px-3 py-2 font-bold">{formatSAR(p.cumulativeInvestorProfit)}</td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                              p.breakevenStatus === "post"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : p.breakevenStatus === "breakeven"
+                                  ? "bg-slate-100 text-slate-700"
+                                  : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {breakevenLabel(p.breakevenStatus)}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -853,8 +873,16 @@ export default function InvestorsPage() {
             <div className="space-y-3 text-sm divide-y divide-slate-100">
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">الحالة</span>
-                <span className={`font-medium ${monthSummary.isPostBreakeven ? "text-emerald-600" : "text-amber-600"}`}>
-                  {monthSummary.isPostBreakeven ? "بعد التعادل" : "قبل التعادل"}
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                    monthSummary.breakevenStatus === "post"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : monthSummary.breakevenStatus === "breakeven"
+                        ? "bg-slate-100 text-slate-700"
+                        : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {breakevenLabel(monthSummary.breakevenStatus)}
                 </span>
               </div>
               <div className="flex justify-between py-2">
@@ -863,13 +891,13 @@ export default function InvestorsPage() {
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-slate-600">LandCut100</span>
-                <span className="font-medium">{monthSummary.isPostBreakeven ? "متوقف" : "مفعل"}</span>
+                <span className="font-medium">{monthSummary.breakevenStatus === "post" ? "متوقف" : "مفعل"}</span>
               </div>
               <div className="py-2">
                 <p className="text-slate-600 mb-1">توزيع الربح الحالي:</p>
                 <ul className="space-y-1 text-slate-700">
-                  <li>• ملاك الأرض: {monthSummary.isPostBreakeven ? "50%" : "0%"}</li>
-                  <li>• المشغل: {monthSummary.isPostBreakeven ? "50%" : "100%"}</li>
+                  <li>• ملاك الأرض: {monthSummary.breakevenStatus === "post" ? "50%" : "0%"}</li>
+                  <li>• المشغل: {monthSummary.breakevenStatus === "post" ? "50%" : "100%"}</li>
                   <li>• المستثمر: 50% من حصة المشغل × نسبة التمويل</li>
                 </ul>
               </div>

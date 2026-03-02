@@ -138,7 +138,7 @@ export function InvestorViewBlock() {
               <tr>
                 <th className="px-4 py-3 font-bold text-slate-700">السنة</th>
                 <th className="px-4 py-3 font-bold text-slate-700">
-                  صافي ربح الشركة
+                  ربح المشغل قبل المستثمر
                 </th>
                 <th className="px-4 py-3 font-bold text-slate-700">
                   ربح المستثمر السنوي
@@ -153,7 +153,7 @@ export function InvestorViewBlock() {
                     سنة {row.year}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
-                    {formatSAR(row.companyNetProfit)}
+                    {formatSAR(row.operatorProfit)}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
                     {formatSAR(row.investorProfit)}

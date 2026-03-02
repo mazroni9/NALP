@@ -1,0 +1,10 @@
+{
+  "inputs": { "zoneId": "A", "investmentAmount": 1500000, "years": 10 },
+  "output": {
+    "breakEvenYear": 4,
+    "projectionsSample": [
+      { "year": 1, "companyRevenue": 1825000, "investorProfit": 304166, "cumulativeInvestorProfit": 304166 },
+      { "year": 4, "companyRevenue": 7300000, "investorProfit": 608333, "cumulativeInvestorProfit": 1825000 }
+    ]
+  }
+}

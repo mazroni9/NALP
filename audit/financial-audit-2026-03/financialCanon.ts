@@ -1,6 +1,6 @@
 /**
  * financialCanon.ts — المصدر الوحيد للحقيقة المالية (Single Source of Truth)
- * تستورد منه صفحات financials / investors / scenarios
+ * نسخة تدقيق: 2026-03
  */
 
 export const CAP_RATE = 0.09; // 9%
@@ -27,7 +27,7 @@ export const ZONE_A_YEARLY_MODEL = {
   landOwnerPostBreakevenSharePercent: 50,
 };
 
-// ─── ZONE RAW DATA (كما في projectData) ────────────────────────────────────
+// ─── ZONE RAW DATA ────────────────────────────────────────────────────────
 export const ZONE_A_RAW = {
   name: "Zone-A — المزاد",
   revenue8Years: 33_397_500,
@@ -144,7 +144,6 @@ const zoneD: ZoneOperational = {
   risk: ZONE_D_RAW.risk,
 };
 
-// ─── REQUIRED CAPITAL (مبالغ ثابتة إدارياً، غير مستمدة من capex/zoneValuation) ─
 export type ZoneId = "A" | "B" | "C" | "D";
 export const REQUIRED_CAPITAL: Record<ZoneId, number> = {
   A: 1_500_000,
@@ -153,41 +152,17 @@ export const REQUIRED_CAPITAL: Record<ZoneId, number> = {
   D: 2_500_000,
 };
 
-// Zone-D خاص: نسب توزيع قبل/بعد التعادل
 export const ZONE_D_INVESTOR_SHARES = {
   investorSharePre: 1 - ZONE_D_RAW.preBreakevenSharePercent / 100,
   investorSharePost: ZONE_D_RAW.postBreakevenSharePercent / 100,
   breakevenMonths: ZONE_D_RAW.breakevenMonths,
 };
 
-export const ZONE_OPERATIONAL: Record<"A" | "B" | "C" | "D", ZoneOperational> =
-  {
-    A: zoneA,
-    B: zoneB,
-    C: zoneC,
-    D: zoneD,
-  };
-
-// ─── ZONE OBJECTS (للتوافق مع imports الحالية) ────────────────────────────
-export const ZONE_A = {
-  ...ZONE_A_RAW,
-  annualRevenue: zoneA.annualRevenue,
-  netAnnual: zoneA.netAnnual,
-  zoneValuation: zoneA.zoneValuation,
-};
-
-export const ZONE_B = {
-  ...ZONE_B_RAW,
-  opexPercent: 0,
-  netAnnual: zoneB.netAnnual,
-  zoneValuation: zoneB.zoneValuation,
-};
-
-export const ZONE_C = {
-  ...ZONE_C_RAW,
-  opexFixed: 0,
-  netAnnual: zoneC.netAnnual,
-  zoneValuation: zoneC.zoneValuation,
+export const ZONE_OPERATIONAL: Record<"A" | "B" | "C" | "D", ZoneOperational> = {
+  A: zoneA,
+  B: zoneB,
+  C: zoneC,
+  D: zoneD,
 };
 
 export const ZONE_D = {
@@ -199,7 +174,6 @@ export const ZONE_D = {
   investorSharePost: ZONE_D_INVESTOR_SHARES.investorSharePost,
 };
 
-// ─── PROJECT_TOTALS (ديناميكي بالكامل، بدون hard-coded) ───────────────────
 const ownerTotalIncome8Years =
   ZONE_A_RAW.ownerIncome8Years +
   ZONE_B_RAW.ownerIncome8Years +

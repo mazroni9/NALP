@@ -1,0 +1,20 @@
+{
+  "zoneId": "A",
+  "schemaVersion": 1,
+  "investmentAmount": 1500000,
+  "requiredCapital": 1500000,
+  "months": [
+    {
+      "month": "2025-01",
+      "batches": [
+        { "id": "b-1", "count": 20, "commission": 1500 }
+      ]
+    },
+    {
+      "month": "2025-02",
+      "batches": [
+        { "id": "b-2", "count": 25, "commission": 1600 }
+      ]
+    }
+  ]
+}

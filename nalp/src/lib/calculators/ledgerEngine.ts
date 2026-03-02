@@ -3,7 +3,7 @@
  * Monthly batches → rollups → break-even
  */
 
-import { REQUIRED_CAPITAL } from "@/lib/financialCanon";
+import { REQUIRED_CAPITAL, ZONE_A_YEARLY_MODEL } from "@/lib/financialCanon";
 
 export type ZoneId = "A" | "B" | "C" | "D";
 export const LEDGER_SCHEMA_VERSION = 1;
@@ -41,7 +41,7 @@ export interface MonthSummary {
   investorProfit: number;
   operatorNetAfterInvestor: number;
   cumulativeInvestorProfit: number;
-  isPostBreakeven: boolean;
+  breakevenStatus: "pre" | "breakeven" | "post";
 }
 
 export interface LedgerSummary {
@@ -63,10 +63,6 @@ export interface LedgerSummary {
   };
   breakEvenMonth: MonthKey | null;
 }
-
-const OPEX_CAP = 0.25;
-const LAND_CUT_PER_CAR = 100;
-const LAND_OWNER_POST_SHARE = 0.5;
 
 function createEmptyQuarter() {
   return {
@@ -103,16 +99,17 @@ export function computeZoneALedgerSummary(state: LedgerState): LedgerSummary {
     const totalCars = batches.reduce((s, b) => s + (b?.count ?? 0), 0);
     const gross = batches.reduce((s, b) => s + (b?.count ?? 0) * (b?.commission ?? 0), 0);
 
-    const isPreBreakeven = cumulativeInvestorProfit < investmentAmount;
-    const landCut100 = isPreBreakeven ? LAND_CUT_PER_CAR * totalCars : 0;
+    const isPre = cumulativeInvestorProfit < investmentAmount;
+    const landCut100 = isPre
+      ? ZONE_A_YEARLY_MODEL.landOwnerCutPerCarPreBreakeven * totalCars
+      : 0;
     const operatingIncome = gross - landCut100;
-    const opex = operatingIncome * OPEX_CAP;
+    const opex = operatingIncome * (ZONE_A_YEARLY_MODEL.opexCapPercent / 100);
     const profitAfterOpex = operatingIncome - opex;
 
-    const isPostBreakevenNow = cumulativeInvestorProfit >= investmentAmount;
-    const landOwnerShare50 = isPostBreakevenNow
-      ? profitAfterOpex * LAND_OWNER_POST_SHARE
-      : 0;
+    const landOwnerShare50 = isPre
+      ? 0
+      : profitAfterOpex * (ZONE_A_YEARLY_MODEL.landOwnerPostBreakevenSharePercent / 100);
     const operatorProfit = profitAfterOpex - landOwnerShare50;
     const investorProfit = operatorProfit * investorShareOfOperator;
     const operatorNetAfterInvestor = operatorProfit - investorProfit;
@@ -121,7 +118,15 @@ export function computeZoneALedgerSummary(state: LedgerState): LedgerSummary {
     if (breakEvenMonth === null && cumulativeInvestorProfit >= investmentAmount) {
       breakEvenMonth = m.month;
     }
-    const isPostBreakeven = breakEvenMonth !== null && m.month > breakEvenMonth;
+
+    const breakevenStatus: MonthSummary["breakevenStatus"] =
+      breakEvenMonth === null
+        ? "pre"
+        : m.month === breakEvenMonth
+          ? "breakeven"
+          : m.month > breakEvenMonth
+            ? "post"
+            : "pre";
 
     const summary: MonthSummary = {
       month: m.month,
@@ -135,7 +140,7 @@ export function computeZoneALedgerSummary(state: LedgerState): LedgerSummary {
       investorProfit,
       operatorNetAfterInvestor,
       cumulativeInvestorProfit,
-      isPostBreakeven,
+      breakevenStatus,
     };
     perMonth.push(summary);
 

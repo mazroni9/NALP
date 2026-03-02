@@ -1,6 +1,6 @@
 /**
  * returnsEngine.ts — محرك حسابات العوائد المركزي
- * Zones A/B/C: نموذج مشاركة أرباح 50% عند تمويل 100% من المطلوب
+ * Zones A/B/C: نموذج مشاركة أرباح 50% عند تمويل 100%
  * Zone D: Waterfall — قبل التعادل 90% للمستثمر، بعده 50%
  */
 
@@ -11,6 +11,7 @@ import {
   REQUIRED_CAPITAL,
   type ZoneId,
 } from "@/lib/financialCanon";
+import { calcZoneAWaterfall } from "@/lib/calculators/zoneAWaterfall";
 
 export type { ZoneId };
 
@@ -23,32 +24,31 @@ export interface CompanyAnnual {
 export function getCompanyAnnual(zoneId: ZoneId): CompanyAnnual {
   const z = ZONE_OPERATIONAL[zoneId];
   if (zoneId === "A") {
-    let sumRevenue = 0;
-    let sumNet = 0;
+    let sumGross = 0;
+    let sumOpex = 0;
+    let sumProfitAfterOpex = 0;
+
     for (let y = 0; y < 10; y++) {
-      const cars = ZONE_A_YEARLY_MODEL.carsPerDay[y];
-      const avg = ZONE_A_YEARLY_MODEL.avgCommissionPerCar[y];
-      const grossRevenue =
-        cars * avg * ZONE_A_YEARLY_MODEL.daysPerYear;
-      const landCutYear1 =
-        y === 0
-          ? cars *
-            ZONE_A_YEARLY_MODEL.landOwnerCutPerCarYear1 *
-            ZONE_A_YEARLY_MODEL.daysPerYear
-          : 0;
-      const operatingIncome = grossRevenue - landCutYear1;
-      const opex =
-        operatingIncome *
-        (ZONE_A_YEARLY_MODEL.opexCapPercent / 100);
-      const profitAfterOpex = operatingIncome - opex;
-      sumRevenue += grossRevenue;
-      sumNet += profitAfterOpex;
+      const carsPerDay = ZONE_A_YEARLY_MODEL.carsPerDay[y];
+      const avgCommissionPerCar = ZONE_A_YEARLY_MODEL.avgCommissionPerCar[y];
+      const wf = calcZoneAWaterfall({
+        carsPerDay,
+        avgCommissionPerCar,
+        daysPerYear: ZONE_A_YEARLY_MODEL.daysPerYear,
+        isPreBreakeven: true,
+      });
+      sumGross += wf.grossRevenue;
+      sumOpex += wf.opex;
+      sumProfitAfterOpex += wf.profitAfterOpex;
     }
-    const avgRevenue = sumRevenue / 10;
-    const avgNet = sumNet / 10;
+
+    const avgGross = sumGross / 10;
+    const avgOpex = sumOpex / 10;
+    const avgNet = sumProfitAfterOpex / 10;
+
     return {
-      revenue: Math.round(avgRevenue),
-      opex: Math.round(avgRevenue - avgNet),
+      revenue: Math.round(avgGross),
+      opex: Math.round(avgOpex),
       netProfit: Math.round(avgNet),
     };
   }
@@ -60,6 +60,8 @@ export function getCompanyAnnual(zoneId: ZoneId): CompanyAnnual {
 
 export interface InvestorAnnualResult {
   investorProfit: number;
+  investorProfitPre?: number;
+  investorProfitPost?: number;
   sharePre?: number;
   sharePost?: number;
   breakevenMonths?: number;
@@ -79,6 +81,8 @@ export function getInvestorAnnual(
     const sharePost = ZONE_D.investorSharePost;
     return {
       investorProfit: companyNet * sharePre,
+      investorProfitPre: companyNet * sharePre,
+      investorProfitPost: companyNet * sharePost,
       sharePre,
       sharePost,
       breakevenMonths: ZONE_D.breakevenMonths,
@@ -92,11 +96,21 @@ export function getInvestorAnnual(
 
 export interface ProjectionRow {
   year: number;
-  companyRevenue: number;
-  companyNetProfit: number;
-  companyOpex: number;
+
+  grossRevenue: number;
+  landCut100: number;
+  operatingIncome: number;
+  opex: number;
+  profitAfterOpex: number;
+
+  landOwnerShare50: number;
+  operatorProfit: number;
   investorProfit: number;
+  operatorNetAfterInvestor: number;
+
   cumulativeInvestorProfit: number;
+
+  breakevenStatus: "pre" | "breakeven" | "post";
 }
 
 export interface BuildProjectionResult {
@@ -128,23 +142,36 @@ export function buildProjection(
     const sharePost = ZONE_D.investorSharePost;
 
     for (let y = 1; y <= years; y++) {
-      let investorProfit: number;
-      if (cumulativeInvestorProfit < sanitized) {
-        investorProfit = companyNet * sharePre;
-      } else {
-        investorProfit = companyNet * sharePost;
-      }
+      const investorProfit =
+        cumulativeInvestorProfit < sanitized
+          ? companyNet * sharePre
+          : companyNet * sharePost;
       cumulativeInvestorProfit += investorProfit;
       if (breakEvenYear === -1 && cumulativeInvestorProfit >= sanitized) {
         breakEvenYear = y;
       }
+
+      const breakevenStatus: ProjectionRow["breakevenStatus"] =
+        breakEvenYear === -1 ? "pre" : y === breakEvenYear ? "breakeven" : y > breakEvenYear ? "post" : "pre";
+
+      const operatorProfit = companyNet;
+      const operatorNetAfterInvestor = companyNet - investorProfit;
+
       projections.push({
         year: y,
-        companyRevenue,
-        companyNetProfit: companyNet,
-        companyOpex,
+        grossRevenue: companyRevenue,
+        landCut100: 0,
+        operatingIncome: companyRevenue,
+        opex: companyOpex,
+        profitAfterOpex: companyNet,
+
+        landOwnerShare50: 0,
+        operatorProfit,
         investorProfit,
+        operatorNetAfterInvestor,
+
         cumulativeInvestorProfit,
+        breakevenStatus,
       });
     }
 
@@ -157,72 +184,87 @@ export function buildProjection(
 
   if (zoneId === "A") {
     const reqA = REQUIRED_CAPITAL["A"];
-    const fundingRatio =
-      reqA > 0 ? Math.min(sanitized / reqA, 1) : 0;
-    const investorShare = 0.5 * fundingRatio;
+    const fr = reqA > 0 ? Math.min(sanitized / reqA, 1) : 0;
+    const investorShareOfOperator = 0.5 * fr;
 
     for (let y = 1; y <= years; y++) {
       const idx = y - 1;
-      const cars =
-        ZONE_A_YEARLY_MODEL.carsPerDay[
-          Math.min(idx, ZONE_A_YEARLY_MODEL.carsPerDay.length - 1)
-        ];
-      const avg =
-        ZONE_A_YEARLY_MODEL.avgCommissionPerCar[
-          Math.min(idx, ZONE_A_YEARLY_MODEL.avgCommissionPerCar.length - 1)
-        ];
-      const grossRevenue =
-        cars * avg * ZONE_A_YEARLY_MODEL.daysPerYear;
-      const landCutYear1 =
-        y === 1
-          ? cars *
-            ZONE_A_YEARLY_MODEL.landOwnerCutPerCarYear1 *
-            ZONE_A_YEARLY_MODEL.daysPerYear
-          : 0;
-      const operatingIncome = grossRevenue - landCutYear1;
-      const opex =
-        operatingIncome *
-        (ZONE_A_YEARLY_MODEL.opexCapPercent / 100);
-      const profitAfterOpex = operatingIncome - opex;
-      const landOwnerPostShare =
-        cumulativeInvestorProfit >= sanitized
-          ? profitAfterOpex *
-            (ZONE_A_YEARLY_MODEL.landOwnerPostBreakevenSharePercent / 100)
-          : 0;
-      const distributableProfit = profitAfterOpex - landOwnerPostShare;
-      const investorProfit = distributableProfit * investorShare;
+      const carsPerDay =
+        ZONE_A_YEARLY_MODEL.carsPerDay[Math.min(idx, ZONE_A_YEARLY_MODEL.carsPerDay.length - 1)];
+      const avgCommissionPerCar =
+        ZONE_A_YEARLY_MODEL.avgCommissionPerCar[Math.min(idx, ZONE_A_YEARLY_MODEL.avgCommissionPerCar.length - 1)];
+
+      const isPre = cumulativeInvestorProfit < sanitized;
+
+      const wf = calcZoneAWaterfall({
+        carsPerDay,
+        avgCommissionPerCar,
+        daysPerYear: ZONE_A_YEARLY_MODEL.daysPerYear,
+        isPreBreakeven: isPre,
+      });
+
+      const investorProfit = wf.operatorProfit * investorShareOfOperator;
+      const operatorNetAfterInvestor = wf.operatorProfit - investorProfit;
 
       cumulativeInvestorProfit += investorProfit;
+
       if (breakEvenYear === -1 && cumulativeInvestorProfit >= sanitized) {
         breakEvenYear = y;
       }
+
+      const breakevenStatus: ProjectionRow["breakevenStatus"] =
+        breakEvenYear === -1 ? "pre" : y === breakEvenYear ? "breakeven" : y > breakEvenYear ? "post" : "pre";
+
       projections.push({
         year: y,
-        companyRevenue: grossRevenue,
-        companyNetProfit: distributableProfit,
-        companyOpex: opex,
-        investorProfit,
-        cumulativeInvestorProfit,
+        grossRevenue: Math.round(wf.grossRevenue),
+        landCut100: Math.round(wf.landCut100),
+        operatingIncome: Math.round(wf.operatingIncome),
+        opex: Math.round(wf.opex),
+        profitAfterOpex: Math.round(wf.profitAfterOpex),
+
+        landOwnerShare50: Math.round(wf.landOwnerShare50),
+        operatorProfit: Math.round(wf.operatorProfit),
+        investorProfit: Math.round(investorProfit),
+        operatorNetAfterInvestor: Math.round(operatorNetAfterInvestor),
+
+        cumulativeInvestorProfit: Math.round(cumulativeInvestorProfit),
+        breakevenStatus,
       });
     }
+
     return { projections, breakEvenYear };
   }
 
   const investorShare = 0.5 * fundingRatio;
   const investorProfitPerYear = companyNet * investorShare;
+  const operatorProfit = companyNet;
+  const operatorNetAfterInvestor = companyNet - investorProfitPerYear;
 
   for (let y = 1; y <= years; y++) {
     cumulativeInvestorProfit += investorProfitPerYear;
     if (breakEvenYear === -1 && cumulativeInvestorProfit >= sanitized) {
       breakEvenYear = y;
     }
+
+    const breakevenStatus: ProjectionRow["breakevenStatus"] =
+      breakEvenYear === -1 ? "pre" : y === breakEvenYear ? "breakeven" : y > breakEvenYear ? "post" : "pre";
+
     projections.push({
       year: y,
-      companyRevenue,
-      companyNetProfit: companyNet,
-      companyOpex,
+      grossRevenue: companyRevenue,
+      landCut100: 0,
+      operatingIncome: companyRevenue,
+      opex: companyOpex,
+      profitAfterOpex: companyNet,
+
+      landOwnerShare50: 0,
+      operatorProfit,
       investorProfit: investorProfitPerYear,
+      operatorNetAfterInvestor,
+
       cumulativeInvestorProfit,
+      breakevenStatus,
     });
   }
 
