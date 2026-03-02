@@ -33,6 +33,26 @@ export default function FinancialsPage() {
             <SnapshotCards />
           </div>
 
+          <div className="mt-10 mb-6">
+            <h3 className="mb-2 text-lg font-semibold">
+              How Zone-A Works (in 90 seconds)
+            </h3>
+            <p>
+              Zone-A is the commission engine of the project. Revenue scales with daily car volume and average commission, while operating expenses are capped at 25%.
+            </p>
+            <p className="mt-2">Before breakeven:</p>
+            <p>• Landowners receive 100 SAR per car.</p>
+            <p>• Operating income is calculated and OPEX is applied (max 25%).</p>
+            <p className="mt-2">After breakeven:</p>
+            <p>• The 100 SAR per car stops.</p>
+            <p>• Landowners receive 50% of profit after OPEX.</p>
+            <p>• The operator receives 50%.</p>
+            <p>• The investor participates through the operator share based on funding ratio.</p>
+            <p className="mt-2">
+              All figures are engine-derived and governed by the Financial Canon.
+            </p>
+          </div>
+
           <div>
             <h2 className="mb-4 text-xl font-semibold text-slate-800">
               تفصيل المناطق (Zone Cards)
