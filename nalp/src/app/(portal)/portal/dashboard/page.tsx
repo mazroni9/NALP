@@ -195,33 +195,6 @@ export default function PortalDashboardPage() {
         </div>
       </section>
 
-      {/* E) Next Steps */}
-      <section>
-        <h2 className="mb-4 text-xl font-semibold text-slate-800">
-          الخطوات التالية
-        </h2>
-        <div className="flex flex-wrap gap-4">
-          <Link
-            href="/portal/investors"
-            className="flex flex-1 min-w-[200px] items-center justify-center rounded-xl bg-indigo-600 px-8 py-4 text-lg font-semibold text-white transition hover:bg-indigo-700"
-          >
-            حاسبة حصة المستثمر
-          </Link>
-          <Link
-            href="/portal/scenarios"
-            className="flex flex-1 min-w-[200px] items-center justify-center rounded-xl border-2 border-slate-300 px-8 py-4 text-lg font-semibold text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50"
-          >
-            السيناريوهات المالية
-          </Link>
-          <Link
-            href="/portal/data-room"
-            className="flex flex-1 min-w-[200px] items-center justify-center rounded-xl border-2 border-slate-300 px-8 py-4 text-lg font-semibold text-slate-700 transition hover:border-indigo-400 hover:bg-indigo-50"
-          >
-            غرفة البيانات
-          </Link>
-        </div>
-      </section>
-
       <p className="mt-12 text-center text-sm text-slate-500">
         تنبيه: الأرقام المعروضة تقديرية ومبنية على افتراضات تشغيلية قابلة للتغير وليست تعهدًا بالعائد.
       </p>
