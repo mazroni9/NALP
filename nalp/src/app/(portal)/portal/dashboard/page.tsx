@@ -38,18 +38,18 @@ export default function PortalDashboardPage() {
         <p className="mt-2 text-base font-semibold text-indigo-600">
           أربعة محركات دخل مستقلة ضمن مجمع واحد.
         </p>
-        <div className="mt-6 flex flex-wrap gap-4">
-          <Link
-            href="/portal/investors"
-            className="rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-700"
-          >
-            احسب حصتك الآن
-          </Link>
+        <div className="mt-6 flex flex-col gap-2">
           <Link
             href="/portal/scenarios"
-            className="rounded-xl border-2 border-indigo-600 px-6 py-3 text-base font-semibold text-indigo-600 transition hover:bg-indigo-50"
+            className="w-fit rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-700"
           >
             استكشف السيناريوهات
+          </Link>
+          <Link
+            href="/portal/investors"
+            className="text-sm underline text-slate-500 transition hover:text-indigo-600"
+          >
+            انتقل إلى حاسبة حصة المستثمر
           </Link>
         </div>
       </section>
