@@ -24,6 +24,9 @@ export function PublicNavbar() {
             <Link href="/contact" className="text-slate-600 hover:text-indigo-600">
               تواصل
             </Link>
+            <Link href="/explain" className="text-slate-600 hover:text-indigo-600">
+              استوديو الشرح
+            </Link>
             <Link
               href="/portal"
               className="rounded-md bg-indigo-100 px-3 py-2 text-sm font-semibold text-[#1e3a5f] hover:bg-indigo-200"
