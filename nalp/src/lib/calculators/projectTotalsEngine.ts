@@ -64,8 +64,9 @@ export function computeProjectTotalsFromEngine(options?: {
       continue;
     }
 
+    // B/C/D: owner = land owner share from 3-layer waterfall (engine-derived)
     const ownerIncome = slice.reduce(
-      (s, r) => s + (r.profitAfterOpex ?? 0),
+      (s, r) => s + (r.landOwnerShare50 ?? 0),
       0
     );
     perZone[z].ownerIncome8Years = Math.round(ownerIncome);

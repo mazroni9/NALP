@@ -9,9 +9,12 @@ import {
   ZONE_D,
   ZONE_A_YEARLY_MODEL,
   REQUIRED_CAPITAL,
+  WATERFALL_PREFERRED_RETURN_RATE_DECIMAL,
+  WATERFALL_RESIDUAL_SPLIT,
   type ZoneId,
 } from "@/lib/financialCanon";
 import { calcZoneAWaterfall } from "@/lib/calculators/zoneAWaterfall";
+import { computeWaterfall3Layer } from "@/lib/calculators/waterfall";
 
 export type { ZoneId };
 
@@ -125,9 +128,6 @@ export function buildProjection(
   years = 10
 ): BuildProjectionResult {
   const sanitized = Math.max(0, investmentAmount);
-  const required = REQUIRED_CAPITAL[zoneId];
-  const fundingRatio = required > 0 ? Math.min(sanitized / required, 1) : 0;
-
   const z = ZONE_OPERATIONAL[zoneId];
   const companyRevenue = z.annualRevenue;
   const companyNet = z.netAnnual;
@@ -137,25 +137,28 @@ export function buildProjection(
   let breakEvenYear = -1;
   const projections: ProjectionRow[] = [];
 
-  if (zoneId === "D") {
-    const sharePre = ZONE_D.investorSharePre;
-    const sharePost = ZONE_D.investorSharePost;
+  if (zoneId === "B" || zoneId === "C" || zoneId === "D") {
+    let cumulativeCapitalReturned = 0;
 
     for (let y = 1; y <= years; y++) {
-      const investorProfit =
-        cumulativeInvestorProfit < sanitized
-          ? companyNet * sharePre
-          : companyNet * sharePost;
-      cumulativeInvestorProfit += investorProfit;
-      if (breakEvenYear === -1 && cumulativeInvestorProfit >= sanitized) {
+      const wf = computeWaterfall3Layer({
+        profitAfterOpex: companyNet,
+        investmentAmount: sanitized,
+        preferredReturnRateDecimal: WATERFALL_PREFERRED_RETURN_RATE_DECIMAL,
+        residualSplit: { ...WATERFALL_RESIDUAL_SPLIT },
+        cumulativeCapitalReturned,
+      });
+
+      const returnOfCapital = wf.steps.find((s) => s.name === "Return of Capital")?.amount ?? 0;
+      cumulativeCapitalReturned += returnOfCapital;
+      cumulativeInvestorProfit += wf.investorIncome;
+
+      if (breakEvenYear === -1 && cumulativeCapitalReturned >= sanitized) {
         breakEvenYear = y;
       }
 
       const breakevenStatus: ProjectionRow["breakevenStatus"] =
         breakEvenYear === -1 ? "pre" : y === breakEvenYear ? "breakeven" : y > breakEvenYear ? "post" : "pre";
-
-      const operatorProfit = companyNet;
-      const operatorNetAfterInvestor = companyNet - investorProfit;
 
       projections.push({
         year: y,
@@ -165,12 +168,12 @@ export function buildProjection(
         opex: companyOpex,
         profitAfterOpex: companyNet,
 
-        landOwnerShare50: 0,
-        operatorProfit,
-        investorProfit,
-        operatorNetAfterInvestor,
+        landOwnerShare50: Math.round(wf.landOwnerIncome),
+        operatorProfit: Math.round(wf.operatorIncome),
+        investorProfit: Math.round(wf.investorIncome),
+        operatorNetAfterInvestor: Math.round(wf.operatorIncome),
 
-        cumulativeInvestorProfit,
+        cumulativeInvestorProfit: Math.round(cumulativeInvestorProfit),
         breakevenStatus,
       });
     }
@@ -178,7 +181,7 @@ export function buildProjection(
     return {
       projections,
       breakEvenYear,
-      breakEvenMonthsLabel: `بعد ${ZONE_D.breakevenMonths} شهر تقريبًا`,
+      breakEvenMonthsLabel: zoneId === "D" ? `بعد ${ZONE_D.breakevenMonths} شهر تقريبًا` : undefined,
     };
   }
 
@@ -236,37 +239,5 @@ export function buildProjection(
     return { projections, breakEvenYear };
   }
 
-  const investorShare = 0.5 * fundingRatio;
-  const investorProfitPerYear = companyNet * investorShare;
-  const operatorProfit = companyNet;
-  const operatorNetAfterInvestor = companyNet - investorProfitPerYear;
-
-  for (let y = 1; y <= years; y++) {
-    cumulativeInvestorProfit += investorProfitPerYear;
-    if (breakEvenYear === -1 && cumulativeInvestorProfit >= sanitized) {
-      breakEvenYear = y;
-    }
-
-    const breakevenStatus: ProjectionRow["breakevenStatus"] =
-      breakEvenYear === -1 ? "pre" : y === breakEvenYear ? "breakeven" : y > breakEvenYear ? "post" : "pre";
-
-    projections.push({
-      year: y,
-      grossRevenue: companyRevenue,
-      landCut100: 0,
-      operatingIncome: companyRevenue,
-      opex: companyOpex,
-      profitAfterOpex: companyNet,
-
-      landOwnerShare50: 0,
-      operatorProfit,
-      investorProfit: investorProfitPerYear,
-      operatorNetAfterInvestor,
-
-      cumulativeInvestorProfit,
-      breakevenStatus,
-    });
-  }
-
-  return { projections, breakEvenYear };
+  return { projections, breakEvenYear: -1 };
 }

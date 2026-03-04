@@ -153,6 +153,16 @@ export const REQUIRED_CAPITAL: Record<ZoneId, number> = {
   D: 2_500_000,
 };
 
+// ─── WATERFALL B/C/D (3-layer: Return of Capital → Preferred Return → Residual) ─
+export const WATERFALL_PREFERRED_RETURN_RATE_DECIMAL = 0.1; // 10%
+export const WATERFALL_RESIDUAL_SPLIT = {
+  land: 0.4,
+  investor: 0.4,
+  operator: 0.2,
+} as const;
+export const WATERFALL_ZONES = ["B", "C", "D"] as const;
+export type WaterfallZoneId = (typeof WATERFALL_ZONES)[number];
+
 // Zone-D خاص: نسب توزيع قبل/بعد التعادل
 export const ZONE_D_INVESTOR_SHARES = {
   investorSharePre: 1 - ZONE_D_RAW.preBreakevenSharePercent / 100,

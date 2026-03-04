@@ -44,15 +44,24 @@ Note:
 - `landCut100` applies only during **pre-breakeven** periods.
 - `landOwnerShare50` applies only during **post-breakeven** periods.
 
-Zones B / C / D (Temporary assumption)
---------------------------------------
+Zones B / C / D (Waterfall model)
+---------------------------------
 
-Until a formal “owner/operator waterfall” is defined for these zones, the engine treats:
+Zones B/C/D now use a 3-layer waterfall between landowners, investors, and operator:
 
-- **OwnerIncome = profitAfterOpex**
+1. **Layer 1 — Return of Capital**  
+   Profit is first used to return investor capital (until fully returned).
+2. **Layer 2 — Preferred Return**  
+   Preferred return is calculated **annually on unreturned capital** (remaining investor capital):  
+   `Preferred Return = outstandingCapital × preferredReturnRateDecimal`
+3. **Layer 3 — Residual Split**  
+   Any remaining profit is split by a fixed residual split (land / investor / operator).
 
-This represents a temporary 100% owner assumption (no operator split modeled yet).  
-Once a formal waterfall exists, the engine will be extended accordingly.
+For Owner Income (A) in B/C/D:
+
+- **OwnerIncome = land’s share from the residual layer (engine-derived)**.
+
+If `investmentAmount = 0` (no investor scenario), the investor bucket is zeroed and the investor’s residual share is reassigned to the operator.
 
 Breakeven Policy (A)
 --------------------
@@ -62,12 +71,11 @@ Breakeven is applied using a clean rule:
 - The breakeven period itself is treated as **pre-breakeven** financially.
 - **Post-breakeven rules begin from the next period.**
 
-This policy is consistent across:
-
-- Monthly ledger (Zone A)
-- Yearly projections (Zone A / Zone D)
-
+This policy is applied directly for Zone A (operational breakeven).  
 UI may label the breakeven period as “Breakeven” for clarity, but calculations follow the rule above.
+
+For Zones B/C/D, the engine’s `breakEvenYear` corresponds to the **capital payback year**  
+(the year in which investor capital has been fully returned via the waterfall), not an operational pricing breakeven.
 
 Totals Engine
 -------------
