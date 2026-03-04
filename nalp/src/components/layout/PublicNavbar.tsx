@@ -24,20 +24,14 @@ export function PublicNavbar() {
             <Link href="/contact" className="text-slate-600 hover:text-indigo-600">
               تواصل
             </Link>
-            <Link href="/explain" className="text-slate-600 hover:text-indigo-600">
-              استوديو الشرح
-            </Link>
             <Link
               href="/portal"
               className="rounded-md bg-indigo-100 px-3 py-2 text-sm font-semibold text-[#1e3a5f] hover:bg-indigo-200"
             >
               أدوات المستثمر ←
             </Link>
-            <Link
-              href="/studio"
-              className="rounded-md bg-amber-100 px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-200"
-            >
-              استوديو التصميم
+            <Link href="/explain" className="text-slate-600 hover:text-indigo-600">
+              استوديو الشرح
             </Link>
           </div>
         </div>
