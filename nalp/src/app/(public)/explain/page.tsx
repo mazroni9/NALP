@@ -238,6 +238,81 @@ function buildPrompt(opts: PromptOptions): string {
   return [script, "", onScreen, "", "Shot list:", ...shots].join("\n");
 }
 
+// Extract simple on-screen cues (lines that look like bullets or mention On-screen)
+function extractOnScreenCues(prompt: string): string[] {
+  return prompt
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(
+      (l) =>
+        !!l &&
+        (l.toLowerCase().includes("on-screen") ||
+          l.toLowerCase().includes("on-screen text") ||
+          l.startsWith("- ") ||
+          l.startsWith("•"))
+    );
+}
+
+// Build a basic shot list from numbered lines (e.g. "1) ...")
+function extractShotList(
+  prompt: string,
+  duration: ExplainDuration
+): { scene: string; visual: string; onScreenText: string; durationSec: number }[] {
+  const lines = prompt.split("\n").map((l) => l.trim());
+  const shotLines = lines.filter((l) => /^\d+\)/.test(l));
+
+  const perScene =
+    duration === "30s" ? 5 : duration === "60s" ? 10 : duration === "90s" ? 12 : 20;
+
+  return shotLines.map((line, idx) => {
+    const visual = line.replace(/^\d+\)\s*/, "");
+    return {
+      scene: `Scene ${idx + 1}`,
+      visual,
+      onScreenText: "",
+      durationSec: perScene,
+    };
+  });
+}
+
+function formatVttTime(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = Math.floor(totalSeconds % 60);
+  const ms = 0;
+  return `${h.toString().padStart(2, "0")}:${m
+    .toString()
+    .padStart(2, "0")}:${s.toString().padStart(2, "0")}.${ms
+    .toString()
+    .padStart(3, "0")}`;
+}
+
+// Very simple VTT captions from script sentences
+function buildVttCaptions(script: string): string {
+  const sentences = script
+    .split(/(?<=[\.!\?؟])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const lines: string[] = ["WEBVTT", ""];
+  let t = 0;
+  const perSentence = 3;
+
+  sentences.forEach((sentence, idx) => {
+    const start = t;
+    const end = t + perSentence;
+    lines.push(
+      String(idx + 1),
+      `${formatVttTime(start)} --> ${formatVttTime(end)}`,
+      sentence,
+      ""
+    );
+    t = end;
+  });
+
+  return lines.join("\n");
+}
+
 // ─── Page Component ────────────────────────────────────────────────────────
 
 type TabId = "PROMPT" | "LIBRARY";
@@ -340,6 +415,48 @@ export default function ExplainPage() {
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
     );
+  };
+
+  const handleExportPackage = () => {
+    if (!prompt.trim()) return;
+
+    const scriptText = prompt;
+    const onScreenCues = extractOnScreenCues(prompt);
+    const shotList = extractShotList(prompt, duration);
+    const captions = buildVttCaptions(scriptText);
+
+    const pkg = {
+      meta: {
+        zone,
+        audience,
+        language,
+        duration,
+        style,
+        includeNumbers,
+        createdAt: new Date().toISOString(),
+      },
+      script: scriptText,
+      onScreenCues,
+      shotList,
+      captions,
+    };
+
+    try {
+      const blob = new Blob([JSON.stringify(pkg, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const id = Date.now();
+      a.href = url;
+      a.download = `explain_package_${id}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silent failure in export
+    }
   };
 
   const updateAssetField = <K extends keyof ExplainAsset>(
@@ -559,6 +676,15 @@ export default function ExplainPage() {
                   disabled={!prompt}
                 >
                   Save to Library
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportPackage}
+                  disabled={!prompt}
+                >
+                  Export Package
                 </Button>
                 {copyFeedback && (
                   <span className="text-xs text-emerald-600">
