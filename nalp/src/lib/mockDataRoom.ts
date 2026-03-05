@@ -26,11 +26,11 @@ export const mockDataRoomCategories: DataRoomCategory[] = [
       { id: "l1", name: "NDA Template.pdf", type: "PDF", size: "120 KB", updated: "2024-01-15" },
       {
         id: "l2",
-        name: "صك المزرعة السابق (أرض المشروع).pdf",
+        name: "صك المزرعة (أرض المشروع).pdf",
         type: "PDF",
         size: "2.1 MB",
         updated: "2026-03-02",
-        href: "/صك المزرعه السابق.pdf",
+        href: "/صك المزرعه.pdf",
       },
     ],
   },
