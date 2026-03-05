@@ -26,7 +26,20 @@ export default function DataRoomPage() {
                   key={f.id}
                   className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-2"
                 >
-                  <span className="font-medium">{f.name}</span>
+                  <span className="font-medium">
+                    {f.href ? (
+                      <a
+                        href={f.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 hover:underline"
+                      >
+                        {f.name}
+                      </a>
+                    ) : (
+                      f.name
+                    )}
+                  </span>
                   <span className="text-sm text-slate-500">
                     {f.type} • {f.size} • {f.updated}
                   </span>

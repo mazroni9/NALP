@@ -9,6 +9,7 @@ export interface DataRoomFile {
   type: string;
   size: string;
   updated: string;
+  href?: string;
 }
 
 export interface DataRoomCategory {
@@ -23,7 +24,14 @@ export const mockDataRoomCategories: DataRoomCategory[] = [
     title: "Legal & Compliance",
     files: [
       { id: "l1", name: "NDA Template.pdf", type: "PDF", size: "120 KB", updated: "2024-01-15" },
-      { id: "l2", name: "Land Title Document.pdf", type: "PDF", size: "2.1 MB", updated: "2024-02-01" },
+      {
+        id: "l2",
+        name: "صك المزرعة السابق (أرض المشروع).pdf",
+        type: "PDF",
+        size: "2.1 MB",
+        updated: "2026-03-02",
+        href: "/صك المزرعه السابق.pdf",
+      },
     ],
   },
   {
