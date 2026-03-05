@@ -35,21 +35,21 @@ export default function FinancialsPage() {
 
           <div className="mt-10 mb-6">
             <h3 className="mb-2 text-lg font-semibold">
-              How Zone-A Works (in 90 seconds)
+              كيف تعمل المنطقة A (في 90 ثانية)
             </h3>
             <p>
-              Zone-A is the commission engine of the project. Revenue scales with daily car volume and average commission, while operating expenses are capped at 25%.
+              المنطقة A هي محرك العمولات في المشروع. يزداد الدخل مع زيادة عدد السيارات اليومية ومتوسط العمولة، بينما تُحدد المصاريف التشغيلية بسقف 25٪.
             </p>
-            <p className="mt-2">Before breakeven:</p>
-            <p>• Landowners receive 100 SAR per car.</p>
-            <p>• Operating income is calculated and OPEX is applied (max 25%).</p>
-            <p className="mt-2">After breakeven:</p>
-            <p>• The 100 SAR per car stops.</p>
-            <p>• Landowners receive 50% of profit after OPEX.</p>
-            <p>• The operator receives 50%.</p>
-            <p>• The investor participates through the operator share based on funding ratio.</p>
+            <p className="mt-2">قبل التعادل:</p>
+            <p>• يحصل ملاك الأرض على 100 ريال لكل سيارة.</p>
+            <p>• يُحسب دخل التشغيل ثم تُطبَّق المصاريف التشغيلية (OPEX) بحد أقصى 25٪.</p>
+            <p className="mt-2">بعد التعادل:</p>
+            <p>• يتوقف دفع 100 ريال لكل سيارة.</p>
+            <p>• يحصل ملاك الأرض على 50٪ من الربح بعد المصاريف التشغيلية.</p>
+            <p>• يحصل المشغّل على 50٪.</p>
+            <p>• يشارك المستثمر من خلال حصة المشغّل بناءً على نسبة التمويل.</p>
             <p className="mt-2">
-              All figures are engine-derived and governed by the Financial Canon.
+              جميع الأرقام مشتقة من المحرك المالي ومحكومة بوثيقة Financial Canon.
             </p>
           </div>
 
