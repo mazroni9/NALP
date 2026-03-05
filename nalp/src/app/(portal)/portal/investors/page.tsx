@@ -465,18 +465,33 @@ export default function InvestorsPage() {
                         : displayBreakEven}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-slate-600">
-                  {showForecastContent ? "إجمالي ربح 10 سنوات:" : "إجمالي ربح السنة:"}
-                </span>
-                <span className="font-bold text-indigo-600">
-                  {selectedZone === "A" && zoneAMode === "actual" && ledgerSummary
-                    ? formatSAR(ledgerSummary.yearly.investorProfit)
-                    : selectedZone === "A" && zoneAMode === "actual" && (!hasLedgerData || !ledgerSummary)
-                      ? "—"
-                      : formatSAR(projections[9]?.cumulativeInvestorProfit ?? 0)}
-                </span>
-              </div>
+              {showForecastContent ? (
+                <>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-slate-600">إجمالي ربح 5 سنوات:</span>
+                    <span className="font-bold text-indigo-600">
+                      {formatSAR(projections[4]?.cumulativeInvestorProfit ?? 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">إجمالي ربح 10 سنوات:</span>
+                    <span className="font-bold text-indigo-600">
+                      {formatSAR(projections[9]?.cumulativeInvestorProfit ?? 0)}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">إجمالي ربح السنة:</span>
+                  <span className="font-bold text-indigo-600">
+                    {selectedZone === "A" && zoneAMode === "actual" && ledgerSummary
+                      ? formatSAR(ledgerSummary.yearly.investorProfit)
+                      : selectedZone === "A" && zoneAMode === "actual" && (!hasLedgerData || !ledgerSummary)
+                        ? "—"
+                        : "—"}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </Card>

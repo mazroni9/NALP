@@ -38,6 +38,7 @@ export function InvestorViewBlock() {
         ? `السنة ${breakEvenYear}`
         : "تتجاوز 10 سنوات";
 
+  const year5Row = projections.find((row) => row.year === 5);
   const lastRow = projections[9];
 
   return (
@@ -118,6 +119,12 @@ export function InvestorViewBlock() {
         <div className="rounded-lg bg-slate-50 p-3">
           <p className="text-xs text-slate-500">نقطة التعادل</p>
           <p className="text-sm font-bold text-emerald-600">{displayBreakEven}</p>
+        </div>
+        <div className="rounded-lg bg-indigo-50 p-3 sm:col-span-2 lg:col-span-1">
+          <p className="text-xs text-indigo-600">إجمالي ربح 5 سنوات</p>
+          <p className="text-lg font-bold text-indigo-700">
+            {formatSAR(year5Row?.cumulativeInvestorProfit ?? 0)}
+          </p>
         </div>
         <div className="rounded-lg bg-indigo-50 p-3 sm:col-span-2 lg:col-span-1">
           <p className="text-xs text-indigo-600">إجمالي ربح 10 سنوات</p>
