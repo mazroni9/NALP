@@ -23,6 +23,7 @@ export const mockDataRoomCategories: DataRoomCategory[] = [
     id: "legal",
     title: "Legal & Compliance",
     files: [
+      // عند رفع الملف في public أضف href مثل: href: "/NDA-Template.pdf"
       { id: "l1", name: "NDA Template.pdf", type: "PDF", size: "120 KB", updated: "2024-01-15" },
       {
         id: "l2",
@@ -46,6 +47,7 @@ export const mockDataRoomCategories: DataRoomCategory[] = [
     id: "technical",
     title: "Technical & Design",
     files: [
+      // عند رفع الملفات في public أضف href لكلٍ منها
       { id: "t1", name: "Masterplan Concept.pdf", type: "PDF", size: "5.2 MB", updated: "2024-02-10" },
       { id: "t2", name: "Zone A Schematic.pdf", type: "PDF", size: "3.8 MB", updated: "2024-02-12" },
     ],

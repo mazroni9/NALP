@@ -12,7 +12,7 @@ export default function DataRoomPage() {
     <div className="p-8">
       <h1 className="text-2xl font-bold text-slate-800">غرفة البيانات</h1>
       <p className="mt-1 text-slate-600">
-        تصفح المستندات حسب الفئة. (سيتم الربط بخزانة حقيقية لاحقاً)
+        تصفح المستندات حسب الفئة. المستندات المرتبطة بملف يمكن فتحها أو تحميلها؛ البطاقات الأخرى معلمة «قيد الإعداد» حتى يتم رفع الملف.
       </p>
       <div className="mt-8 space-y-6">
         {mockDataRoomCategories.map((cat) => (
@@ -24,9 +24,9 @@ export default function DataRoomPage() {
               {cat.files.map((f) => (
                 <li
                   key={f.id}
-                  className="flex items-center justify-between rounded-md border border-slate-100 px-3 py-2"
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-slate-100 px-3 py-2"
                 >
-                  <span className="font-medium">
+                  <span className="font-medium flex items-center gap-2 flex-wrap">
                     {f.href ? (
                       <a
                         href={f.href}
@@ -37,7 +37,12 @@ export default function DataRoomPage() {
                         {f.name}
                       </a>
                     ) : (
-                      f.name
+                      <>
+                        {f.name}
+                        <span className="text-xs font-normal text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                          قيد الإعداد — سيتم ربط الملف عند توفره
+                        </span>
+                      </>
                     )}
                   </span>
                   <span className="text-sm text-slate-500">
