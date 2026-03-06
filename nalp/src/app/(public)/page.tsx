@@ -53,11 +53,25 @@ export default function HomePage() {
             مقطع تعريفي يوضّح فكرة مشروع NALP ومركز النابية للخدمات اللوجستية على أرض الواقع.
           </p>
           <div className="mt-6 mx-auto max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-slate-700 bg-black aspect-video">
-            <video className="w-full h-full" controls preload="metadata" playsInline>
-              <source src="/مركز النابية.mp4" type="video/mp4" />
-              متصفحك لا يدعم تشغيل الفيديو.
-            </video>
+            <iframe
+              src="https://app.videogen.io/view/ckpesci"
+              title="مركز النابية — عرض مرئي للمشروع"
+              className="w-full h-full"
+              allowFullScreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            />
           </div>
+          <p className="mt-2 text-xs text-slate-400">
+            إن لم يظهر الفيديو،
+            <a
+              href="https://app.videogen.io/view/ckpesci"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-300 hover:underline ml-1"
+            >
+              افتح الرابط في نافذة جديدة
+            </a>
+          </p>
         </div>
       </section>
 
