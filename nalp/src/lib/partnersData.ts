@@ -1,3 +1,6 @@
+import { computeProjectTotalsFromEngine } from "@/lib/calculators/projectTotalsEngine";
+import { computeDistributionTimeline } from "@/lib/distributionTimeline";
+
 export const ADMIN_PIN = "NALP-ADMIN-2026";
 
 export const LAND_VALUATION = {
@@ -13,14 +16,24 @@ export const LAND_VALUATION = {
   pricePerMeterYear8: 2_500,
 };
 
+const _engineTotals = computeProjectTotalsFromEngine({ years: 8 });
+const _distribution = computeDistributionTimeline({ years: 8 });
+const _TOTAL_DISTRIBUTABLE_8Y = _distribution.distributableByYear.reduce(
+  (sum, v) => sum + v,
+  0
+);
+const _AVG_DISTRIBUTABLE_ANNUAL = Math.round(
+  _TOTAL_DISTRIBUTABLE_8Y / (_distribution.distributableByYear.length || 1)
+);
+
 export const COMPANY = {
   name: "شركة النابية للسيارات والخدمات اللوجستية المساهمة المقفلة",
   shortName: "NALP",
-  totalIncome8Years: 54_002_425,
-  avgAnnualIncome: 6_750_303,
-  valuationAtExit: 75_003_367,
+  totalIncome8Years: _engineTotals.ownerTotalIncome8Years,
+  avgAnnualIncome: _engineTotals.avgAnnualIncome,
+  valuationAtExit: _engineTotals.valuationAtExit,
   projectYears: 8,
-  capRate: 9,
+  capRate: _engineTotals.capRate,
   totalShares: 10_000,
 };
 
@@ -82,6 +95,7 @@ export const PARTNERS = partnersRaw.map((p, i) => ({
 export function calcPartnerData(p: (typeof PARTNERS)[0]) {
   const f = p.sharePercent / 100;
   const landArea = Math.round(22_646 * f);
+  const income8Y = Math.round(_TOTAL_DISTRIBUTABLE_8Y * f);
   return {
     landValueNow: Math.round(landArea * 750),
     landAreaSqm: landArea,
@@ -89,9 +103,9 @@ export function calcPartnerData(p: (typeof PARTNERS)[0]) {
     landValueYear1: Math.round(landArea * 1_200),
     landValueYear4: Math.round(landArea * 1_800),
     landValueYear8: Math.round(landArea * 2_500),
-    annualIncome: Math.round(6_750_303 * f),
-    totalIncome8Y: Math.round(54_002_425 * f),
-    totalWealthYear8: Math.round(54_002_425 * f) + Math.round(landArea * 2_500),
+    annualIncome: Math.round(_AVG_DISTRIBUTABLE_ANNUAL * f),
+    totalIncome8Y: income8Y,
+    totalWealthYear8: income8Y + Math.round(landArea * 2_500),
     saleValueNow: Math.round(18_632_250 * f * 0.65),
     shares: Math.round(10_000 * f),
     pricePerMeterNow: 750,

@@ -9,6 +9,8 @@ import {
   type VotingRule,
 } from "@/lib/boardData";
 import { PARTNERS, calcPartnerData } from "@/lib/partnersData";
+import { computeDistributionTimeline } from "@/lib/distributionTimeline";
+import { computeProjectTotalsFromEngine } from "@/lib/calculators/projectTotalsEngine";
 
 const COMPANY_NAME =
   "شركة النابية للسيارات والخدمات اللوجستية المساهمة المقفلة";
@@ -24,6 +26,9 @@ function sortPartnersByGroup() {
 }
 
 export default function BoardPage() {
+  const totals = computeProjectTotalsFromEngine({ years: 8 });
+  const timeline = computeDistributionTimeline({ years: 8 });
+
   const sortedPartners = sortPartnersByGroup();
   const partnerRows = sortedPartners.map((p) => {
     const d = calcPartnerData(p);
@@ -37,8 +42,11 @@ export default function BoardPage() {
     };
   });
 
+  const totalDistributable8Y = timeline.distributableByYear.reduce((a, b) => a + b, 0);
   const netDistributableAnnual =
-    BOARD_STRUCTURE.annualIncome - BOARD_STRUCTURE.totalAdminCost;
+    timeline.distributableByYear.length > 0
+      ? Math.round(totalDistributable8Y / timeline.distributableByYear.length)
+      : Math.max(0, totals.avgAnnualIncome - BOARD_STRUCTURE.totalAdminCost);
   const groups = ["أبناء أحمد عتيق", "أبناء عطية", "أبناء عبدالرحمن"] as const;
   const topByGroup = groups.map((group) => ({
     group,
@@ -82,9 +90,9 @@ export default function BoardPage() {
               <dd className="font-medium">41 شريكاً</dd>
             </div>
             <div>
-              <dt className="text-slate-500">إجمالي الدخل السنوي</dt>
+              <dt className="text-slate-500">إجمالي دخل الملاك السنوي (من المحرك)</dt>
               <dd className="font-bold text-indigo-600">
-                {formatNumber(BOARD_STRUCTURE.annualIncome)} ريال
+                {formatNumber(totals.avgAnnualIncome)} ريال
               </dd>
             </div>
             <div>
@@ -316,6 +324,34 @@ export default function BoardPage() {
           <p className="mt-2 text-xs text-red-700">{foundingDebts.note}</p>
         </Card>
 
+        {/* متى يتحقق أول ربح للشركاء وسنة الاستقرار */}
+        <Card className="border-emerald-200 bg-emerald-50/50">
+          <h2 className="text-lg font-semibold text-slate-800">
+            متى يتحقق أول ربح لملاك الموقع؟
+          </h2>
+          <div className="mt-4 grid gap-3 text-sm">
+            <p className="text-slate-700">
+              <strong>أول ربح موزَّع للشركاء:</strong> يتحقق في{" "}
+              <strong className="text-emerald-700">
+                السنة {timeline.firstProfitYear}
+              </strong>{" "}
+              بمبلغ تقديري{" "}
+              <strong className="text-emerald-700">
+                {formatNumber(timeline.firstProfitAmount)} ريال
+              </strong>{" "}
+              (بعد خصم OPEX ثم مصاريف مجلس الإدارة ثم سداد الديون التأسيسية).
+            </p>
+            <p className="text-slate-700">
+              <strong>استقرار التوزيع:</strong> يبدأ التوزيع المستقر في{" "}
+              <strong className="text-emerald-700">السنة {timeline.stabilizationYear}</strong>{" "}
+              أي بعد سداد الديون التأسيسية بالكامل؛ من هذه السنة يُخصم فقط مصاريف المجلس (حد أقصى 10٪) ثم يُوزَّع الباقي على الشركاء كل 3 أشهر بحسب الحصة٪.
+            </p>
+            <p className="text-xs text-slate-500">
+              الأرقام مشتقة من المحرك المالي (دخل الملاك من المناطق أ، ب، ج، د) ولا تشمل المستثمرين الخارجيين.
+            </p>
+          </div>
+        </Card>
+
         {/* القسم 6 — آلية توزيع الأرباح */}
         <Card>
           <h2 className="text-lg font-semibold text-slate-800">
@@ -347,7 +383,7 @@ export default function BoardPage() {
           </div>
 
           <p className="mt-4 text-sm text-slate-600">
-            جدول توزيع ربعي تقديري — أعلى 5 من كل مجموعة
+            جدول توزيع ربعي تقديري — أعلى 5 من كل مجموعة. الأرقام مبنية على متوسط صافي الموزَّع للشركاء (بعد خصم الديون التأسيسية ومصاريف مجلس الإدارة) من المحرك المالي.
           </p>
           <div className="mt-4 space-y-6">
             {topByGroup.map(({ group, members }) => (

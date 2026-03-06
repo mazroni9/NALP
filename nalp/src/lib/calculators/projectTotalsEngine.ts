@@ -93,3 +93,30 @@ export function computeProjectTotalsFromEngine(options?: {
     perZone,
   };
 }
+
+/**
+ * دخل ملاك الأرض (إجمالي المشروع) لكل سنة — من المحرك فقط.
+ */
+export function getProjectOwnerIncomeByYear(
+  options?: { years?: number; mode?: ProjectTotalsMode }
+): number[] {
+  const years = options?.years ?? 8;
+  const mode = options?.mode ?? PROJECT_TOTALS_DEFAULT_MODE;
+  const zones: ZoneId[] = ["A", "B", "C", "D"];
+  const byYear: number[] = Array.from({ length: years }, () => 0);
+
+  for (const z of zones) {
+    const investmentAmount =
+      mode === "operationalBaseline" ? REQUIRED_CAPITAL[z] : 0;
+    const { projections } = buildProjection(z, investmentAmount, years);
+    const slice = projections.slice(0, years);
+    slice.forEach((r, i) => {
+      const owner =
+        z === "A"
+          ? (r.landCut100 ?? 0) + (r.landOwnerShare50 ?? 0)
+          : (r.landOwnerShare50 ?? 0);
+      byYear[i] += owner;
+    });
+  }
+  return byYear.map((v) => Math.round(v));
+}

@@ -519,6 +519,11 @@ export default function InvestorsPage() {
               </div>
 
               <Card className="overflow-hidden">
+                {activeTab === "company" && selectedZone === "A" && (
+                  <p className="px-4 pt-3 text-xs text-slate-500 border-b border-slate-100">
+                    صافي الربح = حصة ملاك الأرض + ربح المشغّل (قبل المستثمر). ربح المستثمر يُستخرج من ربح المشغّل حسب نسبة التمويل — نفس الأرقام في تبويب «أرباحي كمستثمر» وبلوك Investor View.
+                  </p>
+                )}
                 <div className="overflow-x-auto">
                   <table className="w-full text-right">
                     <thead className="bg-slate-50 border-b border-slate-200">
@@ -528,7 +533,14 @@ export default function InvestorsPage() {
                           <>
                             <th className="px-4 py-3 text-sm font-bold text-slate-700">الإيراد</th>
                             <th className="px-4 py-3 text-sm font-bold text-slate-700">المصاريف</th>
-                            <th className="px-4 py-3 text-sm font-bold text-slate-700 text-emerald-700">صافي الربح</th>
+                            <th className="px-4 py-3 text-sm font-bold text-slate-700 text-emerald-700">صافي الربح (شركة)</th>
+                            {selectedZone === "A" && (
+                              <>
+                                <th className="px-4 py-3 text-sm font-bold text-slate-700">حصة المالك</th>
+                                <th className="px-4 py-3 text-sm font-bold text-slate-700">ربح المشغّل</th>
+                                <th className="px-4 py-3 text-sm font-bold text-slate-700 text-indigo-600">ربح المستثمر</th>
+                              </>
+                            )}
                           </>
                         ) : (
                           <>
@@ -548,6 +560,13 @@ export default function InvestorsPage() {
                               <td className="px-4 py-3 text-sm text-slate-600">{formatSAR(row.grossRevenue)}</td>
                               <td className="px-4 py-3 text-sm text-slate-600">{formatSAR(row.opex)}</td>
                               <td className="px-4 py-3 text-sm font-bold text-emerald-600">{formatSAR(row.profitAfterOpex)}</td>
+                              {selectedZone === "A" && (
+                                <>
+                                  <td className="px-4 py-3 text-sm text-slate-600">{formatSAR(row.landOwnerShare50)}</td>
+                                  <td className="px-4 py-3 text-sm text-slate-600">{formatSAR(row.operatorProfit)}</td>
+                                  <td className="px-4 py-3 text-sm font-bold text-indigo-600">{formatSAR(row.investorProfit)}</td>
+                                </>
+                              )}
                             </>
                           ) : (
                             <>

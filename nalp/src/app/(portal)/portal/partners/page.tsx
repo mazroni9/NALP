@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatNumber, formatSAR } from "@/lib/formatNumber";
 import { PARTNERS, calcPartnerData } from "@/lib/partnersData";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { computeDistributionTimeline } from "@/lib/distributionTimeline";
 
 const ADMIN_PIN = "NALP-ADMIN-2026";
 
@@ -15,6 +16,8 @@ export default function PartnersPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [selectedPartnerId, setSelectedPartnerId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"partner" | "all">("partner");
+
+  const timeline = useMemo(() => computeDistributionTimeline({ years: 8 }), []);
 
   const handleLogin = () => {
     setError("");
@@ -106,7 +109,7 @@ export default function PartnersPage() {
   );
 
   const activePartner = displayPartner;
-    
+
   const sellStepsText = data ? `يحق لك بيع حصتك لأي مستثمر خارجي أو لشريك آخر في أي وقت خلال مدة المشروع.
 خطوات البيع:
 ① تواصل مع إدارة الشركة لإشعار البيع
@@ -245,6 +248,18 @@ export default function PartnersPage() {
                 </div>
               </Card>
             </div>
+
+            <Card className="border-r-4 border-r-emerald-500">
+              <h2 className="text-lg font-bold text-slate-800 mb-3">متى تستلم أرباحك؟</h2>
+              <p className="text-sm text-slate-600 mb-3">
+                تُوزَّع الأرباح على الشركاء بعد خصم التالي بالترتيب: (١) مصاريف التشغيل OPEX، (٢) مصاريف مجلس الإدارة (حد أقصى 10٪)، (٣) سداد الديون التأسيسية. الباقي — صافي الموزَّع — يُقسَّم على الشركاء بحسب حصة كلٍّ منهم ويُدفع كل 3 أشهر.
+              </p>
+              <ul className="text-sm text-slate-700 space-y-1 list-disc list-inside">
+                <li><strong>أول توزيع للشركاء:</strong> السنة {timeline.firstProfitYear} — بمبلغ تقديري {formatNumber(timeline.firstProfitAmount)} ريال (للمشروع كاملاً).</li>
+                <li><strong>استقرار التوزيع:</strong> من السنة {timeline.stabilizationYear} فصاعداً (بعد سداد الديون بالكامل).</li>
+                <li><strong>حصتك أنت:</strong> {activePartner.sharePercent}٪ من صافي الموزَّع كل ربع سنة.</li>
+              </ul>
+            </Card>
 
             <Card>
               <h2 className="text-lg font-bold text-slate-800 mb-4">تطور قيمة حصتك من الأرض</h2>
