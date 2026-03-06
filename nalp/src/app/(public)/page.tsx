@@ -20,16 +20,16 @@ const keyNumbers = [
 export default function HomePage() {
   return (
     <div className="relative">
-      <section className="bg-gradient-to-br from-indigo-600 to-indigo-800 px-4 py-24 text-white sm:py-32">
-        <div className="mx-auto max-w-7xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+      <section className="bg-gradient-to-br from-indigo-600 to-indigo-800 px-4 py-10 text-white sm:py-12">
+        <div className="mx-auto max-w-4xl text-center">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
             مجمع النابية للسيارات والخدمات اللوجستية (NALP)
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-indigo-100">
+          <p className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-indigo-100">
             مشروع تطوير متعدد الاستخدامات يجمع بين إسكان العمالة وخدمات
             السيارات والمزادات والتخزين—بموقع استراتيجي على محور الجبيل–الظهران.
           </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
+          <div className="mt-4 flex flex-wrap justify-center gap-4">
             <Link href="/asset-zones">
               <Button variant="secondary" className="!bg-white !text-indigo-600 hover:!bg-indigo-50">
                 استكشف المناطق
@@ -44,7 +44,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-slate-900 px-4 py-12">
+      <section className="bg-slate-900 px-4 py-10">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-2xl font-bold text-white">
             مركز النابية — عرض مرئي للمشروع
@@ -52,12 +52,11 @@ export default function HomePage() {
           <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-200">
             مقطع تعريفي يوضّح فكرة مشروع NALP ومركز النابية للخدمات اللوجستية على أرض الواقع.
           </p>
-          <div className="mt-6 mx-auto max-w-3xl rounded-2xl overflow-hidden shadow-2xl border border-slate-700 bg-black">
-            <video
-              className="w-full h-auto"
-              src="/مركز النابية.mp4"
-              controls
-            />
+          <div className="mt-6 mx-auto max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-slate-700 bg-black aspect-video">
+            <video className="w-full h-full" controls preload="metadata" playsInline>
+              <source src="/مركز النابية.mp4" type="video/mp4" />
+              متصفحك لا يدعم تشغيل الفيديو.
+            </video>
           </div>
         </div>
       </section>
