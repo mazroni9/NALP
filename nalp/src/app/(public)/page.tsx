@@ -61,17 +61,6 @@ export default function HomePage() {
               allow="autoplay; fullscreen; picture-in-picture"
             />
           </div>
-          <p className="mt-2 text-xs text-slate-400">
-            إن لم يظهر الفيديو،
-            <a
-              href="https://vimeo.com/1171118477?share=copy&fl=sv&fe=ci"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-indigo-300 hover:underline ml-1"
-            >
-              افتح رابط Vimeo مباشرة
-            </a>
-          </p>
         </div>
       </section>
 
