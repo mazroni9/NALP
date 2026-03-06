@@ -44,6 +44,24 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="bg-slate-900 px-4 py-12">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-2xl font-bold text-white">
+            مركز النابية — عرض مرئي للمشروع
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-200">
+            مقطع تعريفي يوضّح فكرة مشروع NALP ومركز النابية للخدمات اللوجستية على أرض الواقع.
+          </p>
+          <div className="mt-6 mx-auto max-w-3xl rounded-2xl overflow-hidden shadow-2xl border border-slate-700 bg-black">
+            <video
+              className="w-full h-auto"
+              src="/مركز النابية.mp4"
+              controls
+            />
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 py-16">
         <h2 className="text-center text-2xl font-bold text-slate-800">
           أرقام رئيسية

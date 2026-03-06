@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import { formatNumber, formatSAR } from "@/lib/formatNumber";
 import Link from "next/link";
+import Image from "next/image";
 import { ZONE_CONFIGS, ZONE_DIMENSIONS } from "@/lib/nalpLandSketch";
 import { ZoneSketch } from "@/components/asset-zones/ZoneSketch";
 import { RoomLayoutSketch } from "@/components/asset-zones/RoomLayoutSketch";
@@ -42,6 +43,16 @@ export default function ZoneCPage() {
         <Card>
           <h2 className="text-lg font-semibold">الوصف</h2>
           <p className="mt-2 text-slate-600">{zone.description}</p>
+          <div className="mt-4 rounded-lg overflow-hidden border border-slate-200">
+            <Image
+              src="/zone-c-housing.jpg"
+              alt="مباني سكن الموظفين المقترحة بنمط وحدات C-BOX"
+              width={1200}
+              height={675}
+              className="w-full h-auto object-cover"
+              priority
+            />
+          </div>
         </Card>
         <Card>
           <h2 className="text-lg font-semibold">تخطيط الغرف لكل مبنى</h2>
