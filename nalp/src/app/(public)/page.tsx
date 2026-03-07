@@ -54,7 +54,7 @@ export default function HomePage() {
           </p>
           <div className="mt-6 mx-auto max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-slate-700 bg-black aspect-video">
             <iframe
-              src="https://player.vimeo.com/video/1171118477"
+              src="https://player.vimeo.com/video/1171379941"
               title="مركز النابية — عرض مرئي للمشروع"
               className="w-full h-full"
               allowFullScreen
