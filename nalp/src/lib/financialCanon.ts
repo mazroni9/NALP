@@ -1,9 +1,16 @@
 /**
  * financialCanon.ts — المصدر الوحيد للحقيقة المالية (Single Source of Truth)
- * تستورد منه صفحات financials / investors / scenarios
+ * تستورد منه صفحات financials / investors / scenarios.
+ * ثوابت المشروع (CAP_RATE, PARTNERSHIP_YEARS, REQUIRED_CAPITAL) تُستمد من سجل الافتراضات المركزي.
  */
 
-export const CAP_RATE = 0.09; // 9%
+import { getDefaultAssumptionsBundle } from "@/lib/finance/assumptions";
+
+const _defaultBundle = getDefaultAssumptionsBundle();
+
+export const CAP_RATE = _defaultBundle.project.capRate; // 9%
+/** سنوات الشراكة المرجعية (عرض/تقارير). للحسابات يُستخدم معامل years في المحرك. */
+export const PARTNERSHIP_YEARS = _defaultBundle.project.partnershipYears;
 
 // ─── LAND ─────────────────────────────────────────────────────────────────
 export const LAND = {
@@ -144,14 +151,9 @@ const zoneD: ZoneOperational = {
   risk: ZONE_D_RAW.risk,
 };
 
-// ─── REQUIRED CAPITAL (مبالغ ثابتة إدارياً، غير مستمدة من capex/zoneValuation) ─
+// ─── REQUIRED CAPITAL (من سجل الافتراضات المركزي) ─
 export type ZoneId = "A" | "B" | "C" | "D";
-export const REQUIRED_CAPITAL: Record<ZoneId, number> = {
-  A: 1_500_000,
-  B: 500_000,
-  C: 5_500_000,
-  D: 2_500_000,
-};
+export const REQUIRED_CAPITAL: Record<ZoneId, number> = _defaultBundle.project.requiredCapital;
 
 // ─── WATERFALL B/C/D (3-layer: Return of Capital → Preferred Return → Residual) ─
 export const WATERFALL_PREFERRED_RETURN_RATE_DECIMAL = 0.1; // 10%
@@ -225,5 +227,5 @@ export const PROJECT_TOTALS = {
     Math.round(ownerTotalIncome8Years / 8) / CAP_RATE
   ),
   zonesCount: 4,
-  partnershipYears: 10,
+  partnershipYears: PARTNERSHIP_YEARS,
 };

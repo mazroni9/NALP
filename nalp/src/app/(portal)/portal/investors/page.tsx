@@ -299,12 +299,18 @@ export default function InvestorsPage() {
     <div className="container mx-auto p-6 space-y-6" dir="rtl">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-slate-800 font-sans">
-          بوابة المستثمر: تحليل المناطق
+          تحليل المناطق والعوائد
         </h1>
         <p className="text-slate-600">
-          اختر المنطقة لعرض تفاصيل التشغيل وحساب عوائدك الشخصية ونقطة التعادل.
+          اختر المنطقة لعرض التفاصيل ونقطة التعادل (تقدير من النموذج).
         </p>
       </div>
+
+      {(selectedZone === "C" || selectedZone === "D") && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <strong>تنبيه:</strong> افتراضات منطقة {selectedZone} تؤثر مادياً على العوائد. أرقام نقطة التعادل والربحية ناتجة عن النموذج وليست مضمونة — تحتاج تحققاً سوقياً. راجع توثيق مخاطر المنطقتين ج و د.
+        </div>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {(Object.keys(zoneData) as ZoneId[]).map((id) => (
@@ -453,7 +459,7 @@ export default function InvestorsPage() {
             <div className="pt-4 border-t border-slate-100">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm text-slate-600">
-                  {showForecastContent ? "نقطة التعادل المتوقعة:" : "نقطة التعادل:"}
+                  {showForecastContent ? "تقدير نقطة التعادل (من النموذج):" : "نقطة التعادل:"}
                 </span>
                 <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
                   {selectedZone === "A" && zoneAMode === "actual" && ledgerSummary

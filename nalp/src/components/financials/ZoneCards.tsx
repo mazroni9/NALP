@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { Card } from "@/components/ui/Card";
 import { formatNumber, formatSAR } from "@/lib/formatNumber";
+import { computeProjectTotalsFromEngine } from "@/lib/calculators/projectTotalsEngine";
 import { ZONE_A, ZONE_B, ZONE_C, ZONE_D } from "@/lib/projectData";
 
 function formatValue(value: number | string, suffix?: string): string {
@@ -11,58 +13,66 @@ function formatValue(value: number | string, suffix?: string): string {
   return value;
 }
 
-const ZONES = [
-  {
-    id: "zone-a",
-    name: ZONE_A.name,
-    items: [
-      { label: "إيراد 8 سنوات (قبل المصاريف)", value: ZONE_A.revenue8Years },
-      { label: "OPEX مفترض", value: `${ZONE_A.opexPercent}%` },
-      { label: "دخل ملاك الأرض (8 سنوات)", value: ZONE_A.ownerIncome8Years },
-    ],
-    risk: ZONE_A.risk,
-    riskClass: "bg-amber-100 text-amber-700",
-  },
-  {
-    id: "zone-b",
-    name: ZONE_B.name,
-    items: [
-      { label: "إيراد سنوي", value: ZONE_B.annualRevenue },
-      { label: "OPEX تقديري", value: ZONE_B.opexFixed, suffix: "/yr" as const },
-      { label: "دخل ملاك الأرض (8 سنوات)", value: ZONE_B.ownerIncome8Years },
-    ],
-    risk: ZONE_B.risk,
-    riskClass: "bg-emerald-100 text-emerald-700",
-  },
-  {
-    id: "zone-c",
-    name: ZONE_C.name,
-    items: [
-      { label: "إيراد سنوي", value: ZONE_C.annualRevenue },
-      { label: "OPEX", value: `${ZONE_C.opexPercent}%` },
-      { label: "CAPEX تقديري", value: ZONE_C.capex },
-      { label: "دخل ملاك الأرض (8 سنوات)", value: ZONE_C.ownerIncome8Years, note: "تقريبي" },
-    ],
-    risk: ZONE_C.risk,
-    riskClass: "bg-emerald-100 text-emerald-700",
-  },
-  {
-    id: "zone-d",
-    name: ZONE_D.name,
-    items: [
-      { label: "نموذج الإيراد", value: ZONE_D.model },
-      { label: "تكلفة الإنشاء على المستثمر", value: ZONE_D.constructionCost },
-      { label: "إيراد سنوي", value: ZONE_D.annualRevenue },
-      { label: "OPEX", value: `${ZONE_D.opexPercent}%` },
-      { label: "دخل مالك الأرض 8 سنوات", value: ZONE_D.ownerIncome8Years },
-    ],
-    risk: ZONE_D.risk,
-    riskClass: "bg-amber-100 text-amber-700",
-    note: "المصاريف الإدارية محدودة بـ 10% من الإيراد ولا تُدرج ضمن OPEX حماية لحصة مالك الأرض.",
-  },
-];
-
 export function ZoneCards() {
+  const totals = useMemo(() => computeProjectTotalsFromEngine({ years: 8 }), []);
+  const perZone = totals.perZone ?? {
+    A: { ownerIncome8Years: 0, avgAnnual: 0 },
+    B: { ownerIncome8Years: 0, avgAnnual: 0 },
+    C: { ownerIncome8Years: 0, avgAnnual: 0 },
+    D: { ownerIncome8Years: 0, avgAnnual: 0 },
+  };
+
+  const ZONES = [
+    {
+      id: "zone-a",
+      name: ZONE_A.name,
+      items: [
+        { label: "إيراد 8 سنوات (قبل المصاريف)", value: ZONE_A.revenue8Years },
+        { label: "OPEX مفترض", value: `${ZONE_A.opexPercent}%` },
+        { label: "دخل ملاك الأرض (8 سنوات)", value: perZone.A.ownerIncome8Years },
+      ],
+      risk: ZONE_A.risk,
+      riskClass: "bg-amber-100 text-amber-700",
+    },
+    {
+      id: "zone-b",
+      name: ZONE_B.name,
+      items: [
+        { label: "إيراد سنوي", value: ZONE_B.annualRevenue },
+        { label: "OPEX تقديري", value: ZONE_B.opexFixed, suffix: "/yr" as const },
+        { label: "دخل ملاك الأرض (8 سنوات)", value: perZone.B.ownerIncome8Years },
+      ],
+      risk: ZONE_B.risk,
+      riskClass: "bg-emerald-100 text-emerald-700",
+    },
+    {
+      id: "zone-c",
+      name: ZONE_C.name,
+      items: [
+        { label: "إيراد سنوي", value: ZONE_C.annualRevenue },
+        { label: "OPEX", value: `${ZONE_C.opexPercent}%` },
+        { label: "CAPEX تقديري", value: ZONE_C.capex },
+        { label: "دخل ملاك الأرض (8 سنوات)", value: perZone.C.ownerIncome8Years, note: "تقريبي" },
+      ],
+      risk: ZONE_C.risk,
+      riskClass: "bg-emerald-100 text-emerald-700",
+    },
+    {
+      id: "zone-d",
+      name: ZONE_D.name,
+      items: [
+        { label: "نموذج الإيراد", value: ZONE_D.model },
+        { label: "تكلفة الإنشاء على المستثمر", value: ZONE_D.constructionCost },
+        { label: "إيراد سنوي", value: ZONE_D.annualRevenue },
+        { label: "OPEX", value: `${ZONE_D.opexPercent}%` },
+        { label: "دخل مالك الأرض 8 سنوات", value: perZone.D.ownerIncome8Years },
+      ],
+      risk: ZONE_D.risk,
+      riskClass: "bg-amber-100 text-amber-700",
+      note: "المصاريف الإدارية محدودة بـ 10% من الإيراد ولا تُدرج ضمن OPEX حماية لحصة مالك الأرض.",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {ZONES.map((z) => (

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/portal/dashboard", label: "لوحة المستثمر" },
+  { href: "/portal/investor-materials", label: "مواد المستثمر" },
   { href: "/portal/investors", label: "حصة المستثمر" },
   { href: "/portal/data-room", label: "غرفة البيانات" },
   { href: "/portal/scenarios", label: "السيناريوهات" },

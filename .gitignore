@@ -9,12 +9,17 @@
 .env.*
 !.env.example
 
-# IDE / OS
+# IDE / OS / Local history
 .idea/
 .DS_Store
 Thumbs.db
+.history/
 
 # Logs
 *.log
 
 .vercel
+
+# Large files (exceed GitHub 100MB limit)
+docs.zip
+public/*.mp4

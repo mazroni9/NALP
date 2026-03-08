@@ -10,32 +10,32 @@ export function SnapshotCards() {
 
   const cards = [
     {
-      label: "إجمالي دخل 8 سنوات (Owner Total 8Y)",
+      label: "دخل الملاك — 8 سنوات",
       value: formatSAR(totals.ownerTotalIncome8Years),
       suffix: "",
-      note: "تقديري وفق افتراضات التشغيل",
-      tooltip: "هذه أرقام تقديرية قابلة للتحديث",
+      note: "تقدير من النموذج",
+      tooltip: "تقديري وفق افتراضات التشغيل",
     },
     {
       label: "متوسط الدخل السنوي",
       value: formatSAR(totals.avgAnnualIncome),
       suffix: "",
-      note: "تقديري وفق افتراضات التشغيل",
-      tooltip: "هذه أرقام تقديرية قابلة للتحديث",
+      note: "تقدير من النموذج",
+      tooltip: "تقديري وفق افتراضات التشغيل",
     },
     {
-      label: "التقييم المتوقع (Valuation at Exit)",
+      label: "التقييم عند الخروج (تقدير)",
       value: formatSAR(totals.valuationAtExit),
       suffix: "",
-      note: "تقديري وفق افتراضات التشغيل",
-      tooltip: "هذه أرقام تقديرية قابلة للتحديث",
+      note: "تقدير من النموذج",
+      tooltip: "تقديري وفق افتراضات التشغيل",
     },
     {
       label: "عدد المناطق",
       value: formatNumber(totals.zonesCount, { maximumFractionDigits: 0 }),
       suffix: "Zones",
-      note: "تقديري وفق افتراضات التشغيل",
-      tooltip: "هذه أرقام تقديرية قابلة للتحديث",
+      note: "ثابت",
+      tooltip: "عدد المناطق الاستثمارية",
     },
   ];
 

@@ -238,11 +238,11 @@ export default function PartnersPage() {
                 <h2 className="text-lg font-bold border-b border-indigo-500 pb-3">ملخص العوائد</h2>
                 <div className="mt-4 space-y-4">
                   <div>
-                    <p className="text-indigo-100 text-xs">الدخل السنوي المتوقع</p>
+                    <p className="text-indigo-100 text-xs">الدخل السنوي (تقدير من النموذج)</p>
                     <p className="text-3xl font-black">{formatNumber(data.annualIncome)} <span className="text-sm font-normal">ريال</span></p>
                   </div>
                   <div className="pt-2 border-t border-indigo-500">
-                    <p className="text-indigo-100 text-xs">إجمالي دخل 8 سنوات</p>
+                    <p className="text-indigo-100 text-xs">إجمالي دخل 8 سنوات (تقدير من النموذج)</p>
                     <p className="text-xl font-bold">{formatNumber(data.totalIncome8Y)} ريال</p>
                   </div>
                 </div>
@@ -304,7 +304,7 @@ export default function PartnersPage() {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-xl font-black mb-1">إجمالي الثروة (السنة 8)</h3>
-                    <p className="text-indigo-200 text-xs font-medium">الأرباح التراكمية + قيمة حصة الأرض</p>
+                    <p className="text-indigo-200 text-xs font-medium">الأرباح التراكمية + قيمة حصة الأرض — تقدير من النموذج</p>
                   </div>
                   <div className="bg-indigo-500/20 p-2 rounded-lg">📈</div>
                 </div>

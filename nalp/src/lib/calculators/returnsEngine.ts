@@ -2,6 +2,7 @@
  * returnsEngine.ts — محرك حسابات العوائد المركزي
  * Zones A/B/C: نموذج مشاركة أرباح 50% عند تمويل 100%
  * Zone D: Waterfall — قبل التعادل 90% للمستثمر، بعده 50%
+ * Optional resolved inputs allow scenario layer (downside/base/upside) without duplicating engine.
  */
 
 import {
@@ -13,6 +14,7 @@ import {
   WATERFALL_RESIDUAL_SPLIT,
   type ZoneId,
 } from "@/lib/financialCanon";
+import type { ResolvedEngineInputs } from "@/lib/finance/engineInputs";
 import { calcZoneAWaterfall } from "@/lib/calculators/zoneAWaterfall";
 import { computeWaterfall3Layer } from "@/lib/calculators/waterfall";
 
@@ -125,12 +127,26 @@ export interface BuildProjectionResult {
 export function buildProjection(
   zoneId: ZoneId,
   investmentAmount: number,
-  years = 10
+  years = 10,
+  resolved?: ResolvedEngineInputs
 ): BuildProjectionResult {
   const sanitized = Math.max(0, investmentAmount);
+
+  const requiredCapital = resolved?.requiredCapital ?? REQUIRED_CAPITAL;
+  const preferredReturnRate = resolved?.waterfall.preferredReturnRateDecimal ?? WATERFALL_PREFERRED_RETURN_RATE_DECIMAL;
+  const residualSplit = resolved?.waterfall.residualSplit ?? { ...WATERFALL_RESIDUAL_SPLIT };
+
   const z = ZONE_OPERATIONAL[zoneId];
-  const companyRevenue = z.annualRevenue;
-  const companyNet = z.netAnnual;
+  let companyRevenue: number;
+  let companyNet: number;
+  if (resolved && (zoneId === "B" || zoneId === "C" || zoneId === "D")) {
+    const zone = zoneId === "B" ? resolved.zoneB : zoneId === "C" ? resolved.zoneC : resolved.zoneD;
+    companyRevenue = zone.annualRevenue;
+    companyNet = zone.netAnnual;
+  } else {
+    companyRevenue = z.annualRevenue;
+    companyNet = z.netAnnual;
+  }
   const companyOpex = companyRevenue - companyNet;
 
   let cumulativeInvestorProfit = 0;
@@ -144,8 +160,8 @@ export function buildProjection(
       const wf = computeWaterfall3Layer({
         profitAfterOpex: companyNet,
         investmentAmount: sanitized,
-        preferredReturnRateDecimal: WATERFALL_PREFERRED_RETURN_RATE_DECIMAL,
-        residualSplit: { ...WATERFALL_RESIDUAL_SPLIT },
+        preferredReturnRateDecimal: preferredReturnRate,
+        residualSplit: { ...residualSplit },
         cumulativeCapitalReturned,
       });
 
@@ -178,33 +194,53 @@ export function buildProjection(
       });
     }
 
+    const zoneDBreakevenMonths = resolved && zoneId === "D" ? resolved.zoneD.breakevenMonths : ZONE_D.breakevenMonths;
     return {
       projections,
       breakEvenYear,
-      breakEvenMonthsLabel: zoneId === "D" ? `بعد ${ZONE_D.breakevenMonths} شهر تقريبًا` : undefined,
+      breakEvenMonthsLabel: zoneId === "D" ? `بعد ${zoneDBreakevenMonths} شهر تقريبًا` : undefined,
     };
   }
 
   if (zoneId === "A") {
-    const reqA = REQUIRED_CAPITAL["A"];
+    const reqA = requiredCapital["A"];
     const fr = reqA > 0 ? Math.min(sanitized / reqA, 1) : 0;
     const investorShareOfOperator = 0.5 * fr;
+
+    const modelA = resolved?.zoneA ?? {
+      carsPerDay: ZONE_A_YEARLY_MODEL.carsPerDay,
+      avgCommissionPerCar: ZONE_A_YEARLY_MODEL.avgCommissionPerCar,
+      daysPerYear: ZONE_A_YEARLY_MODEL.daysPerYear,
+      opexCapPercent: ZONE_A_YEARLY_MODEL.opexCapPercent,
+      landOwnerCutPerCarPreBreakeven: ZONE_A_YEARLY_MODEL.landOwnerCutPerCarPreBreakeven,
+      landOwnerPostBreakevenSharePercent: ZONE_A_YEARLY_MODEL.landOwnerPostBreakevenSharePercent,
+    };
+    const zoneAModelOverride = resolved?.zoneA
+      ? {
+          opexCapPercent: resolved.zoneA.opexCapPercent,
+          landOwnerCutPerCarPreBreakeven: resolved.zoneA.landOwnerCutPerCarPreBreakeven,
+          landOwnerPostBreakevenSharePercent: resolved.zoneA.landOwnerPostBreakevenSharePercent,
+        }
+      : undefined;
 
     for (let y = 1; y <= years; y++) {
       const idx = y - 1;
       const carsPerDay =
-        ZONE_A_YEARLY_MODEL.carsPerDay[Math.min(idx, ZONE_A_YEARLY_MODEL.carsPerDay.length - 1)];
+        modelA.carsPerDay[Math.min(idx, modelA.carsPerDay.length - 1)];
       const avgCommissionPerCar =
-        ZONE_A_YEARLY_MODEL.avgCommissionPerCar[Math.min(idx, ZONE_A_YEARLY_MODEL.avgCommissionPerCar.length - 1)];
+        modelA.avgCommissionPerCar[Math.min(idx, modelA.avgCommissionPerCar.length - 1)];
 
       const isPre = cumulativeInvestorProfit < sanitized;
 
-      const wf = calcZoneAWaterfall({
-        carsPerDay,
-        avgCommissionPerCar,
-        daysPerYear: ZONE_A_YEARLY_MODEL.daysPerYear,
-        isPreBreakeven: isPre,
-      });
+      const wf = calcZoneAWaterfall(
+        {
+          carsPerDay,
+          avgCommissionPerCar,
+          daysPerYear: modelA.daysPerYear,
+          isPreBreakeven: isPre,
+        },
+        zoneAModelOverride
+      );
 
       const investorProfit = wf.operatorProfit * investorShareOfOperator;
       const operatorNetAfterInvestor = wf.operatorProfit - investorProfit;

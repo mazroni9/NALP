@@ -13,6 +13,12 @@ export interface ZoneAWaterfallInput {
   isPreBreakeven: boolean;
 }
 
+export interface ZoneAModelOverride {
+  opexCapPercent: number;
+  landOwnerCutPerCarPreBreakeven: number;
+  landOwnerPostBreakevenSharePercent: number;
+}
+
 export interface ZoneAWaterfallOutput {
   grossRevenue: number;
   landCut100: number;
@@ -23,10 +29,13 @@ export interface ZoneAWaterfallOutput {
   operatorProfit: number;
 }
 
-export function calcZoneAWaterfall(input: ZoneAWaterfallInput): ZoneAWaterfallOutput {
-  const opexCap = ZONE_A_YEARLY_MODEL.opexCapPercent / 100;
-  const landCutPerCar = ZONE_A_YEARLY_MODEL.landOwnerCutPerCarPreBreakeven;
-  const landOwnerPostShare = ZONE_A_YEARLY_MODEL.landOwnerPostBreakevenSharePercent / 100;
+export function calcZoneAWaterfall(
+  input: ZoneAWaterfallInput,
+  modelOverride?: ZoneAModelOverride
+): ZoneAWaterfallOutput {
+  const opexCap = (modelOverride?.opexCapPercent ?? ZONE_A_YEARLY_MODEL.opexCapPercent) / 100;
+  const landCutPerCar = modelOverride?.landOwnerCutPerCarPreBreakeven ?? ZONE_A_YEARLY_MODEL.landOwnerCutPerCarPreBreakeven;
+  const landOwnerPostShare = (modelOverride?.landOwnerPostBreakevenSharePercent ?? ZONE_A_YEARLY_MODEL.landOwnerPostBreakevenSharePercent) / 100;
 
   const { carsPerDay, avgCommissionPerCar, daysPerYear, isPreBreakeven } = input;
 

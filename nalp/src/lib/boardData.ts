@@ -23,6 +23,7 @@ export type VotingRule = {
 
 export const BOARD_STRUCTURE = {
   maxAdminCostPercent: 10,
+  /** @deprecated Legacy — للعرض استخدم computeProjectTotalsFromEngine().avgAnnualIncome */
   annualIncome: 6_750_303,
   maxAdminBudget: 675_030,
 

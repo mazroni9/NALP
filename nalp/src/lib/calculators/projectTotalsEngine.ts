@@ -1,9 +1,12 @@
 /**
  * projectTotalsEngine.ts — إخراج Totals (حصة ملاك الأرض فقط) من المحرك
  * بدل ZONE_*_RAW، مع إبقاء RAW كـ brochure/legacy.
+ * Optional assumptions bundle wires to central assumptions (scenarios: downside/base/upside).
  */
 
-import { CAP_RATE, REQUIRED_CAPITAL, type ZoneId } from "@/lib/financialCanon";
+import { CAP_RATE, PARTNERSHIP_YEARS, REQUIRED_CAPITAL, type ZoneId } from "@/lib/financialCanon";
+import type { AssumptionsBundle } from "@/lib/finance/assumptions";
+import { resolveAssumptionsToEngineInputs } from "@/lib/finance/engineInputs";
 import { buildProjection } from "@/lib/calculators/returnsEngine";
 
 export type ProjectTotalsMode = "operationalBaseline" | "noInvestor";
@@ -31,13 +34,23 @@ export interface ProjectTotalsEngineResult {
  * mode:
  * - "operationalBaseline" (الافتراضي): يفترض تمويل رأس المال المطلوب بالكامل (REQUIRED_CAPITAL)
  * - "noInvestor": يحسب القدرة التشغيلية بدون مستثمر (investmentAmount = 0)
+ *
+ * assumptions: when provided, engine uses central assumptions (e.g. from getScenarioAssumptions).
  */
 export function computeProjectTotalsFromEngine(options?: {
   years?: number; // default 8
   mode?: ProjectTotalsMode;
+  assumptions?: AssumptionsBundle;
 }): ProjectTotalsEngineResult {
   const years = options?.years ?? 8;
   const mode = options?.mode ?? PROJECT_TOTALS_DEFAULT_MODE;
+  const assumptions = options?.assumptions;
+  const resolved = assumptions ? resolveAssumptionsToEngineInputs(assumptions) : undefined;
+
+  const requiredCapital = resolved?.requiredCapital ?? REQUIRED_CAPITAL;
+  const capRate = resolved?.capRate ?? CAP_RATE;
+  const partnershipYears = assumptions?.project.partnershipYears ?? PARTNERSHIP_YEARS;
+
   const zones: ZoneId[] = ["A", "B", "C", "D"];
 
   const perZone: Record<ZoneId, { ownerIncome8Years: number; avgAnnual: number }> = {
@@ -49,9 +62,9 @@ export function computeProjectTotalsFromEngine(options?: {
 
   for (const z of zones) {
     const investmentAmount =
-      mode === "operationalBaseline" ? REQUIRED_CAPITAL[z] : 0;
+      mode === "operationalBaseline" ? requiredCapital[z] : 0;
 
-    const { projections } = buildProjection(z, investmentAmount, years);
+    const { projections } = buildProjection(z, investmentAmount, years, resolved);
     const slice = projections.slice(0, years);
 
     if (z === "A") {
@@ -80,16 +93,16 @@ export function computeProjectTotalsFromEngine(options?: {
     perZone.D.ownerIncome8Years;
 
   const avgAnnualIncome = Math.round(ownerTotalIncome8Years / years);
-  const valuationAtExit = Math.round(avgAnnualIncome / CAP_RATE);
+  const valuationAtExit = Math.round(avgAnnualIncome / capRate);
 
   return {
     ownerTotalIncome8Years: Math.round(ownerTotalIncome8Years),
     avgAnnualIncome,
     valuationAtExit,
-    capRate: Math.round(CAP_RATE * 100),
-    capRateDecimal: CAP_RATE,
+    capRate: Math.round(capRate * 100),
+    capRateDecimal: capRate,
     zonesCount: 4,
-    partnershipYears: 10,
+    partnershipYears,
     perZone,
   };
 }
@@ -98,17 +111,19 @@ export function computeProjectTotalsFromEngine(options?: {
  * دخل ملاك الأرض (إجمالي المشروع) لكل سنة — من المحرك فقط.
  */
 export function getProjectOwnerIncomeByYear(
-  options?: { years?: number; mode?: ProjectTotalsMode }
+  options?: { years?: number; mode?: ProjectTotalsMode; assumptions?: AssumptionsBundle }
 ): number[] {
   const years = options?.years ?? 8;
   const mode = options?.mode ?? PROJECT_TOTALS_DEFAULT_MODE;
+  const resolved = options?.assumptions ? resolveAssumptionsToEngineInputs(options.assumptions) : undefined;
+  const requiredCapital = resolved?.requiredCapital ?? REQUIRED_CAPITAL;
   const zones: ZoneId[] = ["A", "B", "C", "D"];
   const byYear: number[] = Array.from({ length: years }, () => 0);
 
   for (const z of zones) {
     const investmentAmount =
-      mode === "operationalBaseline" ? REQUIRED_CAPITAL[z] : 0;
-    const { projections } = buildProjection(z, investmentAmount, years);
+      mode === "operationalBaseline" ? requiredCapital[z] : 0;
+    const { projections } = buildProjection(z, investmentAmount, years, resolved);
     const slice = projections.slice(0, years);
     slice.forEach((r, i) => {
       const owner =

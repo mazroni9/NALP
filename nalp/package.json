@@ -8,7 +8,8 @@
     "generate:zone-c-report": "tsx scripts/generate-zone-c-report.ts",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:financial": "vitest run src/lib/finance src/lib/calculators/projectTotalsEngine.test.ts"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
