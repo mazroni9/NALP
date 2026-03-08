@@ -45,7 +45,7 @@ export default function ZoneCPage() {
           <p className="mt-2 text-slate-600">{zone.description}</p>
           <div className="mt-4 rounded-lg overflow-hidden border border-slate-200">
             <Image
-              src="/zone-c-housing.jpg"
+              src="/housing.jpeg"
               alt="مباني سكن الموظفين المقترحة بنمط وحدات C-BOX"
               width={1200}
               height={675}
